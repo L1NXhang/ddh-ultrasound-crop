@@ -64,6 +64,14 @@
     <span style="color:#fd4">黄</span> safe_box
   </div>
 
+  <h3>推荐工作流</h3>
+  <div class="kv">
+    1. 按 <kbd>S</kbd> 进 safe 模式（裁剪线自动隐藏），<b>只盯解剖结构</b>，把"绝不能裁掉"的
+       结构全圈进去（宁大勿小，但别把整个窗口都圈）；<br>
+    2. 按 <kbd>C</kbd> 回裁剪模式，画上下两条线（必须完全包住 safe_box）；<br>
+    3. 按 <kbd>1</kbd>/<kbd>0</kbd> 打 quality，<kbd>Enter</kbd> 保存。
+  </div>
+
   <h3>本批统计</h3>
   <div class="kv" id="stats"></div>
 </div>
@@ -112,7 +120,10 @@ async function next(){
   S = await api('/api/predict/' + encodeURIComponent(q.next));
   if (S.error){ toast('预测失败：'+S.error); document.getElementById('info').textContent=S.error; return; }
   human.window = S.window ? [...S.window] : null;
-  human.crop = S.crop_box ? [S.crop_box[1], S.crop_box[3]] : (S.crop ? [...S.crop] : null);
+  const modelCrop = S.crop_box ? [S.crop_box[1], S.crop_box[3]] : null;
+  human.crop = (S.reference === 'none') ? null
+             : (S.reference === 'model') ? modelCrop
+             : (S.crop ? [...S.crop] : modelCrop);   // 默认：重标时用原标注
   human.safe_box = S.safe_box ? [...S.safe_box] : null;
   human.quality = S.quality;
   human.modified = false;
@@ -128,8 +139,10 @@ function showInfo(){
   document.getElementById('info').innerHTML =
     `<b>${S.id}</b><br>` +
     `窗口来源：<b>${S.window_source||'无'}</b>（${fmtBox(human.window)}）<br>` +
-    `模型裁剪：${fmtBox(S.crop_box?[S.crop_box[1],S.crop_box[3]]:null)}<br>` +
-    `当前裁剪：<b>${fmtBox(human.crop)}</b><br>` +
+    (mode==='safe'
+      ? `<span style="color:#fd4">safe 模式：裁剪线已隐藏（先只看解剖结构）</span><br>`
+      : `模型裁剪：${fmtBox(S.crop_box?[S.crop_box[1],S.crop_box[3]]:null)}<br>` +
+        `当前裁剪：<b>${fmtBox(human.crop)}</b><br>`) +
     `安全包络：${fmtBox(human.safe_box)}<br>` +
     `quality：<b>${human.quality===null?'未评':human.quality}</b>　` +
     `人工修改：<b>${human.modified?'是':'否'}</b><br>` +
@@ -160,7 +173,7 @@ function draw(){
     ctx.strokeStyle='#fd4'; ctx.setLineDash([6,4]); ctx.lineWidth=2;
     ctx.strokeRect(X(x0),Y(y0),X(x1-x0),Y(y1-y0)); ctx.setLineDash([]);
   }
-  if (human.crop){
+  if (human.crop && mode !== 'safe'){   // safe 模式下不画裁剪线：先看解剖，再定裁剪
     const [t,b]=human.crop;
     ctx.lineWidth=2;
     ctx.strokeStyle='#3f6'; ctx.beginPath(); ctx.moveTo(0,Y(t)); ctx.lineTo(cv.width,Y(t)); ctx.stroke();

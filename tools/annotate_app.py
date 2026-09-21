@@ -108,6 +108,7 @@ def predict(rid):
     out['safe_box'] = list(row['safe_box']) if row.get('safe_box') else None
     out['crop'] = list(row['crop']) if row.get('crop') else None
     out['quality'] = row.get('quality')
+    out['reference'] = STATE['reference']
     return out
 
 
@@ -242,8 +243,12 @@ def main():
     ap.add_argument('--device', default='cuda')
     ap.add_argument('--port', type=int, default=8765)
     ap.add_argument('--no-model', action='store_true', help='只手动标注，不跑模型')
+    ap.add_argument('--reference', choices=['original', 'model', 'none'], default='original',
+                    help='裁剪线的初始值来源：original=清单里的原标注（重标用），'
+                         'model=模型建议（新数据用），none=空白')
     args = ap.parse_args()
     STATE['root'] = Path(args.root)
+    STATE['reference'] = args.reference
     STATE['out'] = Path(args.out)
     build_queue(args)
     load_done()

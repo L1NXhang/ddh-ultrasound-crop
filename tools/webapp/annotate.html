@@ -124,6 +124,10 @@ async function next(){
   human.crop = (S.reference === 'none') ? null
              : (S.reference === 'model') ? modelCrop
              : (S.crop ? [...S.crop] : modelCrop);   // 默认：重标时用原标注
+  if (human.crop && S.top_offset){                  // 预置到新口径的位置
+    const w = human.window || S.window;
+    if (w) human.crop[0] = Math.max(w[1], human.crop[0] + S.top_offset);
+  }
   human.safe_box = S.safe_box ? [...S.safe_box] : null;
   human.quality = S.quality;
   human.modified = false;
@@ -131,6 +135,19 @@ async function next(){
   im.onload = () => { img = im; fit(); draw(); };
   im.src = '/api/image/' + encodeURIComponent(S.id);
   showInfo();
+}
+
+function topMarginInfo(){
+  if (!human.crop || !human.window) return '';
+  const m = human.crop[0] - human.window[1];
+  const tgt = S && S.top_target ? S.top_target.split(',').map(Number) : null;
+  let color = '#ccc', note = '';
+  if (tgt && tgt.length === 2){
+    const ok = m >= tgt[0] && m <= tgt[1];
+    color = ok ? '#3f6' : '#f96';
+    note = ok ? ' ✓在目标区间内' : ` ✗目标 ${tgt[0]}~${tgt[1]}`;
+  }
+  return `上边距（绿线距窗口顶边）：<b style="color:${color}">${Math.round(m)} px</b>${note}<br>`;
 }
 
 function cropCutsSafe(){
@@ -162,6 +179,7 @@ function showInfo(){
       : `模型裁剪：${fmtBox(S.crop_box?[S.crop_box[1],S.crop_box[3]]:null)}<br>` +
         `当前裁剪：<b>${fmtBox(human.crop)}</b><br>`) +
     `安全包络：${fmtBox(human.safe_box)}<br>` +
+    topMarginInfo() +
     `quality：<b>${human.quality===null?'未评':human.quality}</b>　` +
     `人工修改：<b>${human.modified?'是':'否'}</b><br>` +
     `审查标记：${flags}` +

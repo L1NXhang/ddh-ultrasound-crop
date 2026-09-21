@@ -111,6 +111,8 @@ def predict(rid):
     out['crop'] = list(row['crop']) if row.get('crop') else None
     out['quality'] = row.get('quality')
     out['reference'] = STATE['reference']
+    out['top_offset'] = STATE['top_offset']
+    out['top_target'] = STATE['top_target']
     return out
 
 
@@ -245,6 +247,12 @@ def main():
     ap.add_argument('--device', default='cuda')
     ap.add_argument('--port', type=int, default=8765)
     ap.add_argument('--no-model', action='store_true', help='只手动标注，不跑模型')
+    ap.add_argument('--crop-top-offset', type=int, default=0,
+                    help='预置裁剪上边界的偏移量（负=往上，含更多顶部）。'
+                         '例如新口径比旧口径多保留 72px 就传 -72')
+    ap.add_argument('--top-target', default='',
+                    help='上边界目标区间（距窗口顶边的像素），形如 140,200：'
+                         '界面会显示当前值并在区间内变绿，帮助保持口径一致')
     ap.add_argument('--redo', action='store_true',
                     help='重做模式：不跳过已完成的图，并把上次的标注预填回界面（只改要改的那一项）')
     ap.add_argument('--reference', choices=['original', 'model', 'none'], default='original',
@@ -256,6 +264,8 @@ def main():
         return x if x.is_absolute() else (ROOT / x)
     STATE['root'] = _p(args.root)
     STATE['reference'] = args.reference
+    STATE['top_offset'] = args.crop_top_offset
+    STATE['top_target'] = args.top_target
     STATE['out'] = _p(args.out)
     for k in ('window_checkpoint', 'crop_checkpoint', 'calibration'):
         if getattr(args, k):

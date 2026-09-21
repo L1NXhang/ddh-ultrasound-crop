@@ -133,6 +133,12 @@ async function next(){
   showInfo();
 }
 
+function badOrder(){
+  if (!human.window || !human.crop) return false;
+  const w = human.window, c = human.crop;
+  return c[0] < w[1] || c[1] > w[3] || c[1] - c[0] < 5;
+}
+
 function showInfo(){
   if(!S) return;
   const flags = (S.reasons||[]).map(r=>`<span class="badge warn">${r}</span>`).join('') || '<span class="badge ok">模型可直接用</span>';
@@ -146,7 +152,9 @@ function showInfo(){
     `安全包络：${fmtBox(human.safe_box)}<br>` +
     `quality：<b>${human.quality===null?'未评':human.quality}</b>　` +
     `人工修改：<b>${human.modified?'是':'否'}</b><br>` +
-    `审查标记：${flags}`;
+    `审查标记：${flags}` +
+    (badOrder() ? `<div style="color:#f66;font-weight:bold;margin-top:6px">⚠ 裁剪线超出了窗口框：`
+                  + `程序会在校验时报错，请把窗口框放大或调整裁剪线</div>` : '');
 }
 
 function fit(){
@@ -259,6 +267,7 @@ function roundCrop(){
 async function save(acceptOnly){
   if(!S) return;
   roundCrop();
+  if (badOrder()){ toast('裁剪线超出窗口框，先修正再保存'); return; }
   const modelCrop = S.crop_box ? [S.crop_box[1], S.crop_box[3]] : null;
   const same = JSON.stringify(human.crop)===JSON.stringify(modelCrop);
   const rec = {

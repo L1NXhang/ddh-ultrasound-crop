@@ -245,6 +245,8 @@ def main():
     ap.add_argument('--device', default='cuda')
     ap.add_argument('--port', type=int, default=8765)
     ap.add_argument('--no-model', action='store_true', help='只手动标注，不跑模型')
+    ap.add_argument('--redo', action='store_true',
+                    help='重做模式：不跳过已完成的图，并把上次的标注预填回界面（只改要改的那一项）')
     ap.add_argument('--reference', choices=['original', 'model', 'none'], default='original',
                     help='裁剪线的初始值来源：original=清单里的原标注（重标用），'
                          'model=模型建议（新数据用），none=空白')
@@ -259,7 +261,21 @@ def main():
         if getattr(args, k):
             setattr(args, k, str(_p(getattr(args, k))))
     build_queue(args)
+    if args.redo and STATE['out'].exists():
+        prev = {json.loads(x)['id']: json.loads(x)
+                for x in STATE['out'].read_text(encoding='utf-8').splitlines() if x.strip()}
+        n = 0
+        for r in STATE['rows']:
+            pv = prev.get(r['id'])
+            if pv:
+                for k in ('window', 'crop', 'safe_box', 'quality'):
+                    if pv.get(k) is not None:
+                        r[k] = pv[k]
+                n += 1
+        print(f'重做模式：{n} 条已预填上次的标注（改完直接 Enter 覆盖）')
     load_done()
+    if args.redo:
+        STATE['done'] = {}          # 全部重新进队列
     if not args.no_model:
         load_models(args)
     srv = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)

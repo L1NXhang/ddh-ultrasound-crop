@@ -133,6 +133,18 @@ async function next(){
   showInfo();
 }
 
+function cropCutsSafe(){
+  if (!human.crop || !human.safe_box) return false;
+  const c = human.crop, s = human.safe_box;
+  return c[0] > s[1] || c[1] < s[3];
+}
+
+function badSafe(){
+  if (!human.safe_box || !human.window) return false;
+  const s = human.safe_box, w = human.window;
+  return !(w[0] <= s[0] && s[2] <= w[2] && w[1] <= s[1] && s[3] <= w[3]);
+}
+
 function badOrder(){
   if (!human.window || !human.crop) return false;
   const w = human.window, c = human.crop;
@@ -154,7 +166,12 @@ function showInfo(){
     `人工修改：<b>${human.modified?'是':'否'}</b><br>` +
     `审查标记：${flags}` +
     (badOrder() ? `<div style="color:#f66;font-weight:bold;margin-top:6px">⚠ 裁剪线超出了窗口框：`
-                  + `程序会在校验时报错，请把窗口框放大或调整裁剪线</div>` : '');
+                  + `程序会在校验时报错，请把窗口框放大或调整裁剪线</div>` : '')
+    + (badSafe() ? `<div style="color:#f66;font-weight:bold;margin-top:6px">⚠ safe_box 超出窗口框：`
+                  + `请把它收进窗口内</div>` : '')
+    + (cropCutsSafe() ? `<div style="color:#f66;font-weight:bold;margin-top:6px">⚠ 裁剪线切进 safe_box：`
+                  + `按方案要求，裁剪必须<b>完全包含</b> safe_box（safe_box 是"绝不能丢"的范围，`
+                  + `裁剪是"我打算裁到哪"，后者必须更大）</div>` : '');
 }
 
 function fit(){
@@ -262,12 +279,15 @@ window.addEventListener('mouseup', ()=>{
 function roundCrop(){
   if (human.crop) human.crop = human.crop.map(Math.round);
   if (human.window) human.window = human.window.map(Math.round);
+  if (human.safe_box) human.safe_box = human.safe_box.map(Math.round);
 }
 
 async function save(acceptOnly){
   if(!S) return;
   roundCrop();
   if (badOrder()){ toast('裁剪线超出窗口框，先修正再保存'); return; }
+  if (badSafe()){ toast('safe_box 超出窗口框，先修正再保存'); return; }
+  if (cropCutsSafe()){ toast('裁剪线切进了 safe_box：裁剪必须完全包含 safe_box', 4000); return; }
   const modelCrop = S.crop_box ? [S.crop_box[1], S.crop_box[3]] : null;
   const same = JSON.stringify(human.crop)===JSON.stringify(modelCrop);
   const rec = {

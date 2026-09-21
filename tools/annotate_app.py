@@ -18,6 +18,7 @@
 import argparse
 import json
 import mimetypes
+import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -25,6 +26,7 @@ from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))          # 让 import ddh 在任意工作目录下都能工作
 IMAGE_EXT = ('.jpg', '.jpeg', '.png', '.bmp')
 
 STATE = {
@@ -60,7 +62,7 @@ def append_done(rec):
 
 
 def load_models(args):
-    import ddh
+    import ddh                     # sys.path 已在模块顶部插入项目根目录
     import torch
     device = args.device
     wm, wa = ddh.load_checkpoint(args.window_checkpoint, device)
@@ -247,9 +249,15 @@ def main():
                     help='裁剪线的初始值来源：original=清单里的原标注（重标用），'
                          'model=模型建议（新数据用），none=空白')
     args = ap.parse_args()
-    STATE['root'] = Path(args.root)
+    def _p(x):                      # 相对路径一律相对项目根，避免依赖当前工作目录
+        x = Path(x)
+        return x if x.is_absolute() else (ROOT / x)
+    STATE['root'] = _p(args.root)
     STATE['reference'] = args.reference
-    STATE['out'] = Path(args.out)
+    STATE['out'] = _p(args.out)
+    for k in ('window_checkpoint', 'crop_checkpoint', 'calibration'):
+        if getattr(args, k):
+            setattr(args, k, str(_p(getattr(args, k))))
     build_queue(args)
     load_done()
     if not args.no_model:

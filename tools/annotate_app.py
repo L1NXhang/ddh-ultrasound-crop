@@ -188,7 +188,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             t0 = STATE['session'].get(rid)
             rec = {k: row.get(k) for k in
-                   ('id', 'path', 'collect_group', 'graf_type', 'style_group', 'source_group')}
+                   ('id', 'path', 'collect_group', 'graf_type', 'style_group', 'source_group', 'split')}
             rec.update({
                 'window': body.get('window'),
                 'window_source': body.get('window_source'),        # model / manifest / human

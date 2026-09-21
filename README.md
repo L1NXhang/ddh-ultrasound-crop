@@ -91,6 +91,8 @@ python ddh.py evaluate --manifest data/reports/split.jsonl --root data --window-
 | [docs/成果清单.md](docs/成果清单.md) | 所有文件在哪、每步该做什么、报错对照表 |
 | [docs/训练报告.md](docs/训练报告.md) | 数据版本、划分、超参、逐轮日志、指标与局限 |
 | [docs/建模题目_超声成像窗口自动定位.md](docs/建模题目_超声成像窗口自动定位.md) | 窗口定位问题的形式化题目（含指标与基线） |
+| [docs/技术栈与原理.md](docs/技术栈与原理.md) | 每一步用什么技术、背后的原理、为什么不用别的方案 |
+| [docs/裁剪规则与DDH基础.md](docs/裁剪规则与DDH基础.md) | 新人上手：DDH 背景、四个标签怎么标、裁剪口径框架 |
 | [docs/原包README.md](docs/原包README.md) | 原交付包说明（逐字节保留） |
 | [FINAL_DESIGN.md](FINAL_DESIGN.md) | 原方案设计文档（多设备、无患者信息条件下的算法设计） |
 | [TEST_REPORT.md](TEST_REPORT.md) | 原包的代码验证记录 |

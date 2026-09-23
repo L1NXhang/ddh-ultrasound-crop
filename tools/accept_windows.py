@@ -80,7 +80,7 @@ def main():
         ok.append({'id': r['id'], 'path': r['path'], 'window': box,
                    'score': round(float(out['scores'][keep][0]), 4),
                    'belt': round(belt, 4), 'fill': round(fill, 3),
-                   'image_wh': r['image_wh'], 'source': 'model+自动验收'})
+                   'image_wh': r.get('image_wh') or list(im.size), 'source': 'model+自动验收'})
         if (i + 1) % 100 == 0:
             print(f'  …{i+1}/{len(rows)}，通过 {len(ok)}')
 

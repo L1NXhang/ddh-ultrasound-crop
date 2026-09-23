@@ -246,6 +246,9 @@ def main():
     ap.add_argument('--calibration', default='')
     ap.add_argument('--device', default='cuda')
     ap.add_argument('--port', type=int, default=8765)
+    ap.add_argument('--host', default='127.0.0.1',
+                    help='监听地址。局域网共享给别人用时传 0.0.0.0，'
+                         '别人用 http://<你的IP>:端口 打开即可（他们不需要装任何东西）')
     ap.add_argument('--no-model', action='store_true', help='只手动标注，不跑模型')
     ap.add_argument('--crop-top-offset', type=int, default=0,
                     help='预置裁剪上边界的偏移量（负=往上，含更多顶部）。'
@@ -288,10 +291,21 @@ def main():
         STATE['done'] = {}          # 全部重新进队列
     if not args.no_model:
         load_models(args)
-    srv = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
+    srv = ThreadingHTTPServer((args.host, args.port), Handler)
     print(f'队列 {len(STATE["rows"])} 张，已完成 {len(STATE["done"])} 张')
     print(f'输出 → {STATE["out"]}')
-    print(f'浏览器打开  http://127.0.0.1:{args.port}')
+    import socket
+    ips = ['127.0.0.1']
+    if args.host == '0.0.0.0':
+        try:
+            s_ = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s_.connect(('8.8.8.8', 80)); ips.append(s_.getsockname()[0]); s_.close()
+        except Exception:
+            pass
+    for ip in ips:
+        print(f'浏览器打开  http://{ip}:{args.port}')
+    if args.host == '0.0.0.0':
+        print('（局域网内的其他电脑用上面那个非 127 的地址打开即可，无需安装任何东西）')
     srv.serve_forever()
 
 

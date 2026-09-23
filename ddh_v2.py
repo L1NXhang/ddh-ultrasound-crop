@@ -238,7 +238,7 @@ def iou1(a,b):
     return inter/((a[:,1]-a[:,0])+(b[:,1]-b[:,0])-inter).clamp_min(1e-6)
 
 
-def loss_crop(out,batch,baseline=False,delta=0.02,w_in=2.0,w_out=0.25,safe_mode='derived'):
+def loss_crop(out,batch,baseline=False,delta=0.04,w_in=2.0,w_out=0.25,safe_mode='derived'):
     """delta 为容差（占窗口高度的比例，0.02 ≈ 12px @608px 窗口）。
 
     derived 模式：safe 边界 = 裁剪标注 ∓ delta，不依赖人工 safe_box：
@@ -588,7 +588,9 @@ def parser():
     a.add_argument('--device',default='cuda' if torch.cuda.is_available() else 'cpu')
     a.add_argument('--safe-mode',choices=['derived','labeled'],default='derived',
                    help='derived=由裁剪标注推导安全边界（不需要人工 safe_box）；labeled=沿用原实现')
-    a.add_argument('--delta',type=float,default=.02,help='容差，占窗口高度比例（0.02≈12px）')
+    a.add_argument('--delta',type=float,default=.04,
+                   help='容差，占窗口高度比例。默认 0.04≈24px：实测同一张图两个标注者的'
+                        '分歧就有 ±25~37px，容差小于它等于惩罚人工噪声；可用 --delta 0.02 收紧')
     a.add_argument('--w-in',type=float,default=2.,help='往内裁（裁到必保范围）的损失权重')
     a.add_argument('--w-out',type=float,default=.25,help='往外扩（多留）的损失权重')
     a.add_argument('--window-threshold',type=float,default=.8,help='步骤A选点时用的分数门限（与部署一致）')

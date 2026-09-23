@@ -16,6 +16,8 @@
 输出：data/annotations_human.jsonl（可直接被 build_manifest.py 合并）
 """
 import argparse
+import base64
+import hmac
 import json
 import mimetypes
 import sys
@@ -120,6 +122,26 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
 
+    def _authed(self):
+        """HTTP Basic 认证。未配置 --auth 时视为开放（仅限本机/局域网调试）。"""
+        want = STATE.get('auth')
+        if not want:
+            return True
+        got = self.headers.get('Authorization', '')
+        if got.startswith('Basic '):
+            try:
+                u, _, pw = base64.b64decode(got[6:]).decode('utf-8').partition(':')
+                return hmac.compare_digest(f'{u}:{pw}', want)
+            except Exception:
+                return False
+        return False
+
+    def _deny(self):
+        self.send_response(401)
+        self.send_header('WWW-Authenticate', 'Basic realm="DDH annotation"')
+        self.send_header('Content-Length', '0')
+        self.end_headers()
+
     def _json(self, obj, code=200):
         body = json.dumps(obj, ensure_ascii=False).encode('utf-8')
         self.send_response(code)
@@ -129,6 +151,8 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
+        if not self._authed():
+            self._deny(); return
         u = urlparse(self.path)
         if u.path in ('/', '/index.html'):
             html = (Path(__file__).parent / 'webapp' / 'annotate.html').read_bytes()
@@ -179,6 +203,8 @@ class Handler(BaseHTTPRequestHandler):
                     'avg_seconds': round(sum(secs) / len(secs), 1) if secs else None})
 
     def do_POST(self):
+        if not self._authed():
+            self._deny(); return
         u = urlparse(self.path)
         n = int(self.headers.get('Content-Length', 0))
         body = json.loads(self.rfile.read(n).decode('utf-8')) if n else {}
@@ -246,6 +272,8 @@ def main():
     ap.add_argument('--calibration', default='')
     ap.add_argument('--device', default='cuda')
     ap.add_argument('--port', type=int, default=8765)
+    ap.add_argument('--auth', default='',
+                    help='用户名:密码，开启 HTTP 基本认证。放公网必须设置！')
     ap.add_argument('--host', default='127.0.0.1',
                     help='监听地址。局域网共享给别人用时传 0.0.0.0，'
                          '别人用 http://<你的IP>:端口 打开即可（他们不需要装任何东西）')
@@ -267,6 +295,7 @@ def main():
         return x if x.is_absolute() else (ROOT / x)
     STATE['root'] = _p(args.root)
     STATE['reference'] = args.reference
+    STATE['auth'] = args.auth
     STATE['top_offset'] = args.crop_top_offset
     STATE['top_target'] = args.top_target
     STATE['out'] = _p(args.out)
@@ -305,7 +334,9 @@ def main():
     for ip in ips:
         print(f'浏览器打开  http://{ip}:{args.port}')
     if args.host == '0.0.0.0':
-        print('（局域网内的其他电脑用上面那个非 127 的地址打开即可，无需安装任何东西）')
+        print('（同一网络内的其他电脑用上面那个非 127 的地址打开即可，无需安装任何东西）')
+        if not args.auth:
+            print('⚠ 未设置 --auth，任何能访问该端口的人都能看到图片。放公网前务必加 --auth 用户名:密码')
     srv.serve_forever()
 
 

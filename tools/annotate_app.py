@@ -163,7 +163,8 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(html)
             return
         if u.path == '/api/queue':
-            rows = [r for r in STATE['rows'] if r['id'] not in STATE['done']]
+            rows = [r for r in STATE['rows']
+                    if not STATE.get('skip_done', True) or r['id'] not in STATE['done']]
             self._json({'total': len(STATE['rows']),
                         'done': len(STATE['rows']) - len(rows),        # 本队列已完成
                         'done_all': len(STATE['done']),                # 该标注者累计完成
@@ -318,8 +319,7 @@ def main():
                 n += 1
         print(f'重做模式：{n} 条已预填上次的标注（改完直接 Enter 覆盖）')
     load_done()
-    if args.redo:
-        STATE['done'] = {}          # 全部重新进队列
+    STATE['skip_done'] = not args.redo   # 重做模式：不跳过，但保留已有记录用于覆盖
     if not args.no_model:
         load_models(args)
     srv = ThreadingHTTPServer((args.host, args.port), Handler)

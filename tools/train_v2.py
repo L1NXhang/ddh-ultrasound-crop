@@ -48,6 +48,14 @@ def main():
     ap.add_argument('--patience-b', type=int, default=12)
     args = ap.parse_args()
 
+    print('=== 0/6 自动修正窗口（逐图边缘检测，不依赖模板）===')
+    src = 'data/train_ready_v2.jsonl' if (ROOT / 'data/train_ready_v2.jsonl').exists() else 'data/train_ready.jsonl'
+    base_file = src
+    if (ROOT / 'data/train_ready_v2.jsonl').exists():
+        print(f'  使用已修正的窗口清单 {src}')
+    else:
+        print(f'  未找到修正清单，先跑：python tools/auto_window.py --apply（当前用 {src}）')
+
     print('=== 1/6 检查标注文件 ===')
     present = [(f, len(load(f))) for f in LABEL_FILES if (ROOT / f).exists()]
     for f, n in present:
@@ -60,7 +68,7 @@ def main():
     print(f'  去重后共 {len(merged_ids)} 张有新口径裁剪标签')
 
     print('=== 2/6 口径一致性闸门 ===')
-    base = {r['id']: r for r in load('data/train_ready.jsonl')}
+    base = {r['id']: r for r in load(base_file)}
     per = {}
     for f, _ in present:
         recs = [r for r in load(f) if r.get('crop') and base.get(r['id'], {}).get('window')]

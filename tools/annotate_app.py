@@ -164,7 +164,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if u.path == '/api/queue':
             rows = [r for r in STATE['rows'] if r['id'] not in STATE['done']]
-            self._json({'total': len(STATE['rows']), 'done': len(STATE['done']),
+            self._json({'total': len(STATE['rows']),
+                        'done': len(STATE['rows']) - len(rows),        # 本队列已完成
+                        'done_all': len(STATE['done']),                # 该标注者累计完成
                         'remaining': len(rows), 'next': rows[0]['id'] if rows else None})
             return
         if u.path.startswith('/api/image/'):

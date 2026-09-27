@@ -24,7 +24,12 @@ def main():
     ap.add_argument('--base', default='data/annotations.todo.jsonl')
     ap.add_argument('--templates', default='data/window_templates.json')
     ap.add_argument('--prefill', default='data/window_prefill.jsonl')
-    ap.add_argument('--crops', default='data/crop_from_manual.jsonl')
+    ap.add_argument('--crops', default='data/crop_from_manual.jsonl',
+                    help='反推的 crop 标签（旧口径，已废弃；仅用于对比）')
+    ap.add_argument('--crop-from', default='',
+                    help='改从这些人工标注文件取 crop（新口径），逗号分隔，'
+                         '例如 data/annotations_human.jsonl,data/human_A.jsonl；'
+                         '同一 id 后面文件覆盖前面')
     ap.add_argument('--out', default='data/annotations.jsonl')
     ap.add_argument('--subset', default='',
                     help='只保留这些字段都非空的图，逗号分隔，例如 window,crop。'
@@ -51,8 +56,21 @@ def main():
         if r.get('window') is None:
             win_pending.append(r['id'])
 
-    # crop：反推成功且判为 ok 的
-    crops = {x['id']: x for x in load_jsonl(args.crops)} if Path(args.crops).exists() else {}
+    # crop：默认取反推标签（旧口径）；给了 --crop-from 就改取人工新标注
+    if args.crop_from:
+        crops = {}
+        for f in [x.strip() for x in args.crop_from.split(',') if x.strip()]:
+            for x in load_jsonl(f):
+                if x.get('crop'):
+                    crops[x['id']] = {'id': x['id'], 'status': 'ok', 'crop': x['crop']}
+        # 用人工标注的 window（若有）覆盖模板窗口
+        for f in [x.strip() for x in args.crop_from.split(',') if x.strip()]:
+            for x in load_jsonl(f):
+                r = byid.get(x['id'])
+                if r is not None and x.get('window'):
+                    r['window'] = list(x['window'])
+    else:
+        crops = {x['id']: x for x in load_jsonl(args.crops)} if Path(args.crops).exists() else {}
     crop_applied, crop_bad = 0, []
     for rid, x in crops.items():
         r = byid.get(rid)

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>DDH 裁剪标注工具（本地版）</title>
+<style>
+  :root { --bg:#111; --fg:#eee; --line:#333; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+         font-family:"Microsoft YaHei",system-ui,sans-serif; display:flex; height:100vh; overflow:hidden; }
+  #left { flex:0 0 330px; padding:12px; border-right:1px solid var(--line); overflow:auto; }
+  #right { flex:1; display:flex; flex-direction:column; position:relative; }
+  h3 { margin:14px 0 6px; font-size:13px; color:#9cf; }
+  .kv { font-size:12px; line-height:1.8; color:#bbb; }
+  .kv b { color:#eee; }
+  button { background:#243; color:#dfd; border:1px solid #4a5; padding:6px 10px;
+           margin:2px 2px 2px 0; border-radius:4px; cursor:pointer; font-size:12px; }
+  button:hover { background:#354; }
+  button.on { background:#4a7; color:#fff; }
+  button:disabled { opacity:.4; cursor:default; }
+  input[type=file] { width:100%; font-size:11px; color:#bbb; margin:4px 0; }
+  input[type=number] { width:70px; background:#222; color:#eee; border:1px solid #444; padding:3px; }
+  canvas { position:absolute; left:0; top:0; cursor:crosshair; }
+  #bar { padding:6px 10px; font-size:12px; color:#aaa; border-bottom:1px solid var(--line); }
+  #toast { position:fixed; right:16px; bottom:16px; background:#2a4; color:#fff;
+           padding:8px 14px; border-radius:6px; font-size:13px; opacity:0; transition:.25s; max-width:60%; }
+  .warnbox { color:#f96; font-weight:bold; margin-top:6px; }
+  .err { color:#f66; font-weight:bold; }
+  kbd { background:#222; border:1px solid #444; border-radius:3px; padding:0 4px; font-size:11px; }
+  #start { position:absolute; inset:0; background:rgba(10,10,10,.96); z-index:9;
+           display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
+  #start .box { width:520px; }
+  #start h1 { font-size:20px; margin:0 0 6px; }
+  #start p { font-size:13px; color:#aaa; line-height:1.9; }
+</style>
+</head>
+<body>
+<div id="left">
+  <h3>① 选择图片文件夹</h3>
+  <input type="file" id="imgPick" webkitdirectory directory multiple>
+  <div class="kv" id="imgInfo">未选择</div>
+
+  <h3>② 选择清单文件（可选）</h3>
+  <input type="file" id="manPick" accept=".jsonl,.json,.txt">
+  <div class="kv" id="manInfo">未选择（不影响标注，只是没有预置位置）</div>
+
+  <h3>③ 绿线预置偏移</h3>
+  <div class="kv">比原标注往上 <input type="number" id="offset" value="-87" step="5"> px
+    <button onclick="applyOffset()">应用到未标的</button></div>
+
+  <h3>进度</h3>
+  <div class="kv" id="progress">—</div>
+
+  <h3>当前图片</h3>
+  <div class="kv" id="info">—</div>
+
+  <h3>模式</h3>
+  <div>
+    <button id="mCrop" class="on" onclick="setMode('crop')">裁剪线</button>
+    <button id="mWindow" onclick="setMode('window')">窗口框</button>
+    <button id="mSafe" onclick="setMode('safe')">safe_box</button>
+  </div>
+
+  <h3>操作</h3>
+  <div class="kv">
+    <kbd>Enter</kbd> 保存并下一张　　　<kbd>A</kbd> 回到预置<br>
+    <kbd>1</kbd>/<kbd>0</kbd> quality　　　<kbd>K</kbd> 跳过<br>
+    <kbd>↑</kbd><kbd>↓</kbd> 当前线微调 1px（Shift 10px）<br>
+    拖动绿线/蓝线调整上下边界；<kbd>W</kbd>/<kbd>S</kbd> 切模式
+  </div>
+
+  <h3>保存</h3>
+  <div>
+    <button id="saveFileBtn" onclick="pickOutFile()">指定结果文件（推荐）</button>
+    <div class="kv" id="outInfo">未指定：按 Enter 时会把结果下载成文件</div>
+    <button onclick="downloadRows()">立即下载结果 jsonl</button>
+    <button onclick="clearAll()">清空本地缓存</button>
+  </div>
+
+  <h3>图例</h3>
+  <div class="kv">
+    <span style="color:#f55">红</span> 窗口框　
+    <span style="color:#3f6">绿</span> 上边界　
+    <span style="color:#4cf">蓝</span> 下边界　
+    <span style="color:#fd4">黄</span> safe_box
+  </div>
+</div>
+
+<div id="right">
+  <div id="bar">左边选好文件夹与清单后即可开始：绿线已按新口径预置，只需微调 → <kbd>Enter</kbd></div>
+  <div style="flex:1; position:relative; overflow:hidden; background:#000" id="wrap">
+    <canvas id="cv"></canvas>
+  </div>
+</div>
+
+<div id="start"><div class="box">
+  <h1>DDH 裁剪标注工具（本地版）</h1>
+  <p>
+    数据全部在这台电脑里处理，<b>不联网、不上传、无需安装任何东西</b>。<br>
+    ① 左侧选择<b>图片文件夹</b>（压缩包请先解压）<br>
+    ② 再选择<b>清单文件</b>（.jsonl，用来预置绿线位置；没有也能标）<br>
+    ③ 每张只需看一眼绿线，不对就拖，然后按 <kbd>Enter</kbd>
+  </p>
+  <button onclick="document.getElementById('start').style.display='none'"
+          style="font-size:15px; padding:10px 22px">开始使用</button>
+</div></div>
+<div id="toast"></div>
+
+<script>
+/* ================= 状态 ================= */
+const DB_NAME = 'ddh_annotate';
+let rows = [];            // 清单行（用于预置）
+let files = [];           // 图片 File 列表
+let queue = [];           // 待标的 File
+let doneRec = {};         // id -> 记录（内存 + IndexedDB）
+let cur = null, img = null, objUrl = null;
+let scale = 1, ox = 0, oy = 0, mode = 'crop', active = null;
+let outHandle = null;
+let session = {};
+
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+
+/* ================= 本地存储（IndexedDB） ================= */
+function idb() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(DB_NAME, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('rec', { keyPath: 'id' });
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+}
+async function idbAll() {
+  try { const db = await idb();
+    return await new Promise(res => { const t = db.transaction('rec').objectStore('rec').getAll();
+      t.onsuccess = () => res(t.result || []); t.onerror = () => res([]); });
+  } catch (e) { return []; }
+}
+async function idbPut(rec) {
+  try { const db = await idb();
+    const t = db.transaction('rec', 'readwrite'); t.objectStore('rec').put(rec);
+  } catch (e) {}
+}
+async function idbClear() {
+  try { const db = await idb(); db.transaction('rec', 'readwrite').objectStore('rec').clear(); } catch (e) {}
+}
+
+/* ================= 工具函数 ================= */
+function toast(m, ms = 1600) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.style.opacity = 1; clearTimeout(t._h);
+  t._h = setTimeout(() => t.style.opacity = 0, ms);
+}
+function stem(name) { return name.replace(/\.[^.]+$/, ''); }
+function fmtBox(b) { return b ? `[${b.join(', ')}]` : '—'; }
+function setText(id, html) { document.getElementById(id).innerHTML = html; }
+
+/* ================= 载入清单与图片 ================= */
+document.getElementById('imgPick').onchange = e => {
+  files = [...e.target.files].filter(f => /\.(jpe?g|png|bmp)$/i.test(f.name));
+  files.sort((a, b) => a.name.localeCompare(b.name));
+  setText('imgInfo', `已选 <b>${files.length}</b> 张图片`);
+  buildQueue();
+};
+document.getElementById('manPick').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const txt = await f.text();
+  rows = txt.split(/\r?\n/).filter(s => s.trim()).map(s => { try { return JSON.parse(s); } catch (x) { return null; } })
+              .filter(Boolean);
+  setText('manInfo', `已载入 <b>${rows.length}</b> 行清单`);
+  buildQueue();
+};
+
+function rowFor(file) {
+  const s = stem(file.name);
+  return rows.find(r => r.id === s) || rows.find(r => r.id === s.split('_')[0]) || null;
+}
+
+async function buildQueue() {
+  if (!files.length) return;
+  const recs = await idbAll();
+  doneRec = {}; recs.forEach(r => doneRec[r.id] = r);
+  queue = files.filter(f => !doneRec[stem(f.name)]);
+  setText('progress', `共 <b>${files.length}</b> 张，已完成 <b>${Object.keys(doneRec).length}</b>，待标 <b>${queue.length}</b>`);
+  if (queue.length) loadCurrent(); else setText('info', '<b>全部完成 🎉</b> 别忘了点「立即下载结果 jsonl」');
+}
+
+/* ================= 选一张并预置 ================= */
+function loadCurrent() {
+  const f = queue[0];
+  if (!f) { setText('info', '没有待标的图片了'); return; }
+  const r = rowFor(f), off = parseInt(document.getElementById('offset').value || '0', 10);
+  const id = stem(f.name);
+  const rec = doneRec[id];
+  cur = { file: f, id: id, row: r };
+  human = {
+    window: r && r.window ? [...r.window] : null,
+    crop: rec && rec.crop ? [...rec.crop]
+        : (r && r.crop ? [r.crop[0] + off, r.crop[1]] : null),
+    safe_box: rec && rec.safe_box ? [...rec.safe_box] : null,
+    quality: rec && rec.quality !== undefined ? rec.quality : null,
+    modified: rec ? !!rec.human_modified : false
+  };
+  if (objUrl) URL.revokeObjectURL(objUrl);
+  objUrl = URL.createObjectURL(f);
+  const im = new Image();
+  im.onload = () => { img = im; fit(); draw(); showInfo(); session[id] = Date.now(); };
+  im.onerror = () => { toast('这张图读不了，已跳过'); skip(); };
+  im.src = objUrl;
+}
+let human = { window: null, crop: null, safe_box: null, quality: null, modified: false };
+
+/* ================= 渲染 ================= */
+function wrap() { return document.getElementById('wrap'); }
+function fit() {
+  const w = wrap().clientWidth - 8, h = wrap().clientHeight - 8;
+  scale = Math.min(w / img.width, h / img.height);
+  cv.width = Math.round(img.width * scale); cv.height = Math.round(img.height * scale);
+  cv.style.left = Math.round((w - cv.width) / 2) + 'px';
+  cv.style.top = Math.round((h - cv.height) / 2) + 'px';
+}
+function draw() {
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  if (!img) return;
+  ctx.drawImage(img, 0, 0, cv.width, cv.height);
+  const S = v => v * scale;
+  if (human.window) {
+    const [x0, y0, x1, y1] = human.window;
+    ctx.strokeStyle = '#f55'; ctx.lineWidth = 2; ctx.strokeRect(S(x0), S(y0), S(x1 - x0), S(y1 - y0));
+  }
+  if (human.safe_box) {
+    const [x0, y0, x1, y1] = human.safe_box;
+    ctx.strokeStyle = '#fd4'; ctx.setLineDash([6, 4]); ctx.lineWidth = 2;
+    ctx.strokeRect(S(x0), S(y0), S(x1 - x0), S(y1 - y0)); ctx.setLineDash([]);
+  }
+  if (human.crop && mode !== 'safe') {
+    const [t, b] = human.crop;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#3f6'; ctx.beginPath(); ctx.moveTo(0, S(t)); ctx.lineTo(cv.width, S(t)); ctx.stroke();
+    ctx.strokeStyle = '#4cf'; ctx.beginPath(); ctx.moveTo(0, S(b)); ctx.lineTo(cv.width, S(b)); ctx.stroke();
+    ctx.fillStyle = 'rgba(60,255,120,.07)'; ctx.fillRect(0, S(t), cv.width, S(b) - S(t));
+  }
+}
+function badOrder() {
+  if (!human.window || !human.crop) return false;
+  const w = human.window, c = human.crop;
+  return c[0] < w[1] || c[1] > w[3] || c[1] - c[0] < 5;
+}
+function showInfo() {
+  if (!cur) return;
+  const m = (human.crop && human.window) ? Math.round(human.crop[0] - human.window[1]) : null;
+  const lo = 130, hi = 170;
+  const col = m === null ? '#ccc' : (m >= lo && m <= hi ? '#3f6' : '#f96');
+  setText('info',
+    `<b>${cur.id}</b><br>` +
+    (m !== null ? `上边距（绿线距窗口顶）：<b style="color:${col}">${m} px</b>` +
+      (m >= lo && m <= hi ? ' ✓' : ` ✗ 目标 ${lo}–${hi}`) + '<br>' : '') +
+    `窗口：${fmtBox(human.window)}<br>当前裁剪：<b>${fmtBox(human.crop)}</b><br>` +
+    `safe_box：${fmtBox(human.safe_box)}　quality：<b>${human.quality === null ? '未评' : human.quality}</b><br>` +
+    `人工修改：<b>${human.modified ? '是' : '否'}</b>` +
+    (badOrder() ? '<div class="warnbox">⚠ 裁剪线跑到窗口框外了，请调整</div>' : ''));
+}
+
+/* ================= 交互 ================= */
+function setMode(m) {
+  mode = m;
+  for (const [id, mm] of [['mCrop', 'crop'], ['mWindow', 'window'], ['mSafe', 'safe']])
+    document.getElementById(id).classList.toggle('on', mm === m);
+  draw();
+}
+function pos(e) { const r = cv.getBoundingClientRect();
+  return { x: (e.clientX - r.left) / scale, y: (e.clientY - r.top) / scale }; }
+function near(v, t) { return Math.abs(v - t) * scale <= 8; }
+
+cv.addEventListener('mousedown', e => {
+  if (!img) return;
+  const p = pos(e); active = null;
+  if (mode === 'crop' && human.crop) {
+    if (near(p.y, human.crop[0])) active = 'top';
+    else if (near(p.y, human.crop[1])) active = 'bottom';
+  } else if (mode === 'window' && human.window) {
+    const [x0, y0, x1, y1] = human.window;
+    if (near(p.y, y0)) active = 'wy0'; else if (near(p.y, y1)) active = 'wy1';
+    else if (near(p.x, x0)) active = 'wx0'; else if (near(p.x, x1)) active = 'wx1';
+    else { human.window = [p.x, p.y, p.x, p.y]; active = 'wnew'; }
+  } else if (mode === 'safe') {
+    if (human.safe_box) {
+      const [x0, y0, x1, y1] = human.safe_box;
+      if (near(p.y, y0)) active = 'sy0'; else if (near(p.y, y1)) active = 'sy1';
+      else if (near(p.x, x0)) active = 'sx0'; else if (near(p.x, x1)) active = 'sx1';
+      else { human.safe_box = [p.x, p.y, p.x, p.y]; active = 'snew'; }
+    } else { human.safe_box = [p.x, p.y, p.x, p.y]; active = 'snew'; }
+  }
+  if (active) { human.modified = true; draw(); showInfo(); }
+});
+cv.addEventListener('mousemove', e => {
+  if (!active) return;
+  const p = pos(e);
+  if (active === 'top' || active === 'bottom') {
+    const w = human.window || [0, 0, img.width, img.height];
+    const v = Math.max(w[1], Math.min(w[3], p.y));
+    if (active === 'top') human.crop[0] = Math.min(v, human.crop[1] - 5);
+    else human.crop[1] = Math.max(v, human.crop[0] + 5);
+  } else if (active[0] === 'w' && human.window) {
+    const w = human.window;
+    if (active === 'wy0') w[1] = Math.min(p.y, w[3] - 16);
+    if (active === 'wy1') w[3] = Math.max(p.y, w[1] + 16);
+    if (active === 'wx0') w[0] = Math.min(p.x, w[2] - 16);
+    if (active === 'wx1') w[2] = Math.max(p.x, w[0] + 16);
+    if (active === 'wnew') { w[2] = p.x; w[3] = p.y; }
+  } else if (active[0] === 's' && human.safe_box) {
+    const s = human.safe_box;
+    if (active === 'sy0') s[1] = Math.min(p.y, s[3] - 8);
+    if (active === 'sy1') s[3] = Math.max(p.y, s[1] + 8);
+    if (active === 'sx0') s[0] = Math.min(p.x, s[2] - 8);
+    if (active === 'sx1') s[2] = Math.max(p.x, s[0] + 8);
+    if (active === 'snew') { s[2] = p.x; s[3] = p.y; }
+  }
+  draw(); showInfo();
+});
+window.addEventListener('mouseup', () => {
+  if (active && (active === 'wnew' || active === 'snew')) {
+    const k = active === 'wnew' ? 'window' : 'safe_box';
+    let b = human[k];
+    b = [Math.min(b[0], b[2]), Math.min(b[1], b[3]), Math.max(b[0], b[2]), Math.max(b[1], b[3])].map(Math.round);
+    human[k] = b;
+  }
+  if (active) human.modified = true;
+  active = null; draw(); showInfo();
+});
+
+/* ================= 保存 ================= */
+function roundAll() {
+  for (const k of ['window', 'crop', 'safe_box'])
+    if (human[k]) human[k] = human[k].map(Math.round);
+}
+async function save(skipSave) {
+  if (!cur) return;
+  roundAll();
+  const rec = {
+    id: cur.id, path: cur.file.name,
+    window: human.window, crop: human.crop, safe_box: human.safe_box, quality: human.quality,
+    human_modified: human.modified,
+    seconds: session[cur.id] ? Math.round((Date.now() - session[cur.id]) / 100) / 10 : null,
+    annotated_at: new Date().toLocaleString('zh-CN'), tool: 'local-html/1',
+    collect_group: (cur.row && cur.row.collect_group) || '', split: (cur.row && cur.row.split) || ''
+  };
+  doneRec[rec.id] = rec;
+  await idbPut(rec);
+  await appendToFile(rec);
+  queue.shift();
+  setText('progress', `共 <b>${files.length}</b> 张，已完成 <b>${Object.keys(doneRec).length}</b>，待标 <b>${queue.length}</b>`);
+  loadCurrent();
+}
+function skip() { if (queue.length) { queue.push(queue.shift()); loadCurrent(); } }
+
+async function pickOutFile() {
+  if (!window.showSaveFilePicker) { toast('这个浏览器不支持直接写入，请用「立即下载结果」'); return; }
+  try {
+    outHandle = await window.showSaveFilePicker({
+      suggestedName: '标注结果.jsonl',
+      types: [{ description: 'JSONL', accept: { 'text/plain': ['.jsonl'] } }]
+    });
+    setText('outInfo', '已指定：每按一次 Enter 就追加写入这个文件 ✓');
+  } catch (e) { toast('未指定文件（可以随时再点）'); }
+}
+async function appendToFile(rec) {
+  if (!outHandle) return;
+  try {
+    const w = await outHandle.createWritable({ keepExistingData: true });
+    const size = (await outHandle.getFile()).size;
+    await w.seek(size);
+    await w.write(JSON.stringify(rec) + '\n');
+    await w.close();
+  } catch (e) { toast('写入文件失败，已存到浏览器缓存'); outHandle = null; }
+}
+function downloadRows() {
+  const all = Object.values(doneRec);
+  if (!all.length) { toast('还没有已保存的记录'); return; }
+  const blob = new Blob([all.map(r => JSON.stringify(r)).join('\n') + '\n'], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = '标注结果.jsonl'; a.click();
+  toast(`已下载 ${all.length} 条`);
+}
+async function clearAll() {
+  if (!confirm('清空本机缓存的所有标注？（已写入的文件不受影响）')) return;
+  await idbClear(); doneRec = {}; buildQueue();
+}
+
+/* ================= 键盘 ================= */
+document.addEventListener('keydown', async e => {
+  if (!cur) return;
+  const step = e.shiftKey ? 10 : 1;
+  if (e.key === 'Enter') { e.preventDefault(); if (badOrder()) { toast('裁剪线超出窗口框，先修正'); return; } save(); }
+  else if (e.key === 'a' || e.key === 'A') {
+    const r = cur.row, off = parseInt(document.getElementById('offset').value || '0', 10);
+    if (r && r.crop) { human.crop = [r.crop[0] + off, r.crop[1]]; human.modified = true; draw(); showInfo(); }
+  }
+  else if (e.key === '1') { human.quality = 1; human.modified = true; showInfo(); }
+  else if (e.key === '0') { human.quality = 0; human.modified = true; showInfo(); }
+  else if (e.key === 'k' || e.key === 'K') { skip(); }
+  else if (e.key === 'w' || e.key === 'W') { setMode('window'); }
+  else if (e.key === 's' || e.key === 'S') { setMode('safe'); }
+  else if (e.key === 'c' || e.key === 'C') { setMode('crop'); }
+  else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    e.preventDefault(); if (!human.crop) return;
+    const d = (e.key === 'ArrowUp' ? -1 : 1) * step;
+    const w = human.window || [0, 0, img.width, img.height];
+    if (active === 'bottom') human.crop[1] = Math.max(human.crop[0] + 5, Math.min(w[3], human.crop[1] + d));
+    else human.crop[0] = Math.max(w[1], Math.min(human.crop[1] - 5, human.crop[0] + d));
+    human.modified = true; draw(); showInfo();
+  }
+});
+function applyOffset() {
+  const off = parseInt(document.getElementById('offset').value || '0', 10);
+  if (!cur || !cur.row || !cur.row.crop) { toast('当前图没有清单里的裁剪信息'); return; }
+  human.crop = [cur.row.crop[0] + off, cur.row.crop[1]];
+  human.modified = true; draw(); showInfo(); toast(`已按 ${off}px 预置`);
+}
+window.addEventListener('resize', () => { if (img) { fit(); draw(); } });
+window.addEventListener('beforeunload', e => { if (queue.length) { e.preventDefault(); e.returnValue = ''; } });
+</script>
+</body>
+</html>

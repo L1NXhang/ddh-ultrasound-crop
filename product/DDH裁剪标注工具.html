@@ -58,6 +58,7 @@
   <div>
     <button id="mCrop" class="on" onclick="setMode('crop')">裁剪线</button>
     <button id="mWindow" onclick="setMode('window')">窗口框</button>
+    <div class="kv" style="font-size:11px;color:#8a8">窗口：拖左右任一边，另一边自动对称（只调宽度）</div>
     <button id="mSafe" onclick="setMode('safe')">safe_box</button>
   </div>
 
@@ -300,11 +301,12 @@ cv.addEventListener('mousemove', e => {
     if (active === 'top') human.crop[0] = Math.min(v, human.crop[1] - 5);
     else human.crop[1] = Math.max(v, human.crop[0] + 5);
   } else if (active[0] === 'w' && human.window) {
-    const w = human.window;
+    // 实测：窗口水平中心恒等于图像中心 → 拖一边，另一边自动镜像，只改宽度
+    const w = human.window, cx = img.width / 2;
     if (active === 'wy0') w[1] = Math.min(p.y, w[3] - 16);
     if (active === 'wy1') w[3] = Math.max(p.y, w[1] + 16);
-    if (active === 'wx0') w[0] = Math.min(p.x, w[2] - 16);
-    if (active === 'wx1') w[2] = Math.max(p.x, w[0] + 16);
+    if (active === 'wx0') { w[0] = Math.min(p.x, cx - 16); w[2] = 2 * cx - w[0]; }
+    if (active === 'wx1') { w[2] = Math.max(p.x, cx + 16); w[0] = 2 * cx - w[2]; }
     if (active === 'wnew') { w[2] = p.x; w[3] = p.y; }
   } else if (active[0] === 's' && human.safe_box) {
     const s = human.safe_box;

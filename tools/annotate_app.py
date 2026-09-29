@@ -42,6 +42,7 @@ STATE = {
     'lock': threading.Lock(),
     't_start': time.time(),
     'session': {},       # id -> 开始时间
+    'session_done': set(),  # 本次运行内已保存的 id（用于队列前进）
 }
 
 
@@ -163,8 +164,16 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(html)
             return
         if u.path == '/api/queue':
-            rows = [r for r in STATE['rows']
-                    if not STATE.get('skip_done', True) or r['id'] not in STATE['done']]
+            def _skip(rid):
+                if rid in STATE['session_done']:
+                    return True                      # 本次已标 → 前进
+                rec = STATE['done'].get(rid)
+                if rec is None:
+                    return False
+                if STATE.get('skip_done', True):
+                    return True                      # 普通模式：已保存的都跳过
+                return rec.get('quality') is not None  # 重做模式：只跳过已评 quality 的
+            rows = [r for r in STATE['rows'] if not _skip(r['id'])]
             self._json({'total': len(STATE['rows']),
                         'done': len(STATE['rows']) - len(rows),        # 本队列已完成
                         'done_all': len(STATE['done']),                # 该标注者累计完成
@@ -235,6 +244,7 @@ class Handler(BaseHTTPRequestHandler):
                 'tool': 'annotate_app/1',
             })
             append_done(rec)
+            STATE['session_done'].add(rid)
             self._json({'ok': True, 'done': len(STATE['done'])})
             return
         if u.path == '/api/skip':

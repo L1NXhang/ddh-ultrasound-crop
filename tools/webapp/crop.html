@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>DDH 批量裁剪工具</title>
+<style>
+  body { margin:0; background:#111; color:#eee; font-family:"Microsoft YaHei",system-ui,sans-serif;
+         display:flex; height:100vh; overflow:hidden; }
+  #left { flex:0 0 330px; padding:14px; border-right:1px solid #333; overflow:auto; }
+  #right { flex:1; position:relative; background:#000; overflow:hidden; }
+  h3 { margin:16px 0 6px; font-size:13px; color:#9cf; }
+  .kv { font-size:12.5px; line-height:1.9; color:#bbb; }
+  .kv b { color:#eee; }
+  button { background:#243; color:#dfd; border:1px solid #4a5; padding:7px 12px; margin:2px 2px 2px 0;
+           border-radius:4px; cursor:pointer; font-size:12.5px; }
+  button:hover { background:#354; }
+  button.on { background:#4a7; color:#fff; }
+  canvas { position:absolute; left:0; top:0; cursor:crosshair; }
+  #toast { position:fixed; right:16px; bottom:16px; background:#2a4; color:#fff; padding:9px 15px;
+           border-radius:6px; font-size:13px; opacity:0; transition:.25s; max-width:60%; }
+  .warn { color:#f96; font-weight:bold; }
+  .err { color:#f66; font-weight:bold; }
+  kbd { background:#222; border:1px solid #444; border-radius:3px; padding:0 4px; font-size:11px; }
+  #done { position:absolute; inset:0; background:rgba(10,10,10,.95); display:none;
+          flex-direction:column; justify-content:center; align-items:center; text-align:center; z-index:9; }
+</style>
+</head>
+<body>
+<div id="left">
+  <h3>进度</h3>
+  <div class="kv" id="progress">加载中…</div>
+
+  <h3>当前文件</h3>
+  <div class="kv" id="info">—</div>
+
+  <h3>操作</h3>
+  <div class="kv">
+    <kbd>Enter</kbd> 保存并下一张（最常用）<br>
+    拖动<b style="color:#3f6">绿线</b>/<b style="color:#4cf">蓝线</b> 调整上下边界<br>
+    <kbd>↑</kbd><kbd>↓</kbd> 微调 1px（Shift 10px）<br>
+    <kbd>W</kbd> 切到窗口框模式（红框不对时才用）<br>
+    <kbd>C</kbd> 回到裁剪线模式　<kbd>K</kbd> 跳过<br>
+    <kbd>A</kbd> 恢复到模型预测
+  </div>
+
+  <h3>图例</h3>
+  <div class="kv">
+    <span style="color:#f55">红</span> 成像窗口　
+    <span style="color:#3f6">绿</span> 裁剪上边界　
+    <span style="color:#4cf">蓝</span> 裁剪下边界
+  </div>
+
+  <h3>输出（每次 Enter 都会写盘）</h3>
+  <div class="kv" id="out">—</div>
+
+  <h3>本次统计</h3>
+  <div class="kv" id="stats">—</div>
+</div>
+<div id="right"><canvas id="cv"></canvas></div>
+<div id="done"><div>
+  <h1 style="font-size:22px">全部完成 🎉</h1>
+  <div class="kv" id="doneInfo" style="font-size:14px"></div>
+</div></div>
+<div id="toast"></div>
+
+<script>
+let S = null, img = null, url = null;
+let scale = 1, mode = 'crop', active = null;
+let human = { window: null, crop: null, modified: false, model_crop: null };
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+
+function toast(m, ms = 1600) {
+  const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = 1;
+  clearTimeout(t._h); t._h = setTimeout(() => t.style.opacity = 0, ms);
+}
+function setText(id, h) { document.getElementById(id).innerHTML = h; }
+
+async function api(p, body) {
+  const r = await fetch(p, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(body) } : undefined);
+  return await r.json();
+}
+
+async function next() {
+  const q = await api('/api/queue');
+  setText('progress', `共 <b>${q.total}</b> 张，已完成 <b>${q.done}</b>，剩余 <b>${q.remaining}</b>`);
+  await refreshStats();
+  if (!q.next) { document.getElementById('done').style.display = 'flex';
+                 setText('doneInfo', `共处理 ${q.total} 张。结果在输出目录的 cropped/ 与 annotated/ 子文件夹里。`); return; }
+  document.getElementById('done').style.display = 'none';
+  setText('info', '模型推理中…');
+  S = await api('/api/predict/' + encodeURIComponent(q.next));
+  if (S.error) { setText('info', '<span class="err">预测失败：' + S.error + '</span>'); return; }
+  human.window = S.window ? [...S.window] : null;
+  human.crop = S.crop ? [...S.crop] : null;
+  human.model_crop = S.crop ? [...S.crop] : null;
+  human.modified = false;
+  if (url) URL.revokeObjectURL(url);
+  const im = new Image();
+  im.onload = () => { img = im; fit(); draw(); showInfo(); };
+  im.src = '/api/image/' + encodeURIComponent(S.id) + '?t=' + Date.now();
+}
+async function refreshStats() {
+  const st = await api('/api/stats');
+  setText('stats', `已处理 <b>${st.done}</b>／${st.total}` +
+    (st.modified ? `　人工微调 <b>${st.modified}</b>（${(st.modified_rate*100).toFixed(0)}%）` : ''));
+}
+
+function fit() {
+  const w = document.getElementById('right').clientWidth - 8;
+  const h = document.getElementById('right').clientHeight - 8;
+  scale = Math.min(w / img.width, h / img.height);
+  cv.width = Math.round(img.width * scale); cv.height = Math.round(img.height * scale);
+  cv.style.left = Math.round((w - cv.width) / 2) + 'px';
+  cv.style.top = Math.round((h - cv.height) / 2) + 'px';
+}
+function draw() {
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  if (!img) return;
+  ctx.drawImage(img, 0, 0, cv.width, cv.height);
+  if (human.window) {
+    const [x0, y0, x1, y1] = human.window;
+    ctx.strokeStyle = '#f55'; ctx.lineWidth = 2;
+    ctx.strokeRect(x0*scale, y0*scale, (x1-x0)*scale, (y1-y0)*scale);
+  }
+  if (human.crop) {
+    const [t, b] = human.crop;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#3f6'; ctx.beginPath(); ctx.moveTo(0, t*scale); ctx.lineTo(cv.width, t*scale); ctx.stroke();
+    ctx.strokeStyle = '#4cf'; ctx.beginPath(); ctx.moveTo(0, b*scale); ctx.lineTo(cv.width, b*scale); ctx.stroke();
+    ctx.fillStyle = 'rgba(60,255,120,.07)'; ctx.fillRect(0, t*scale, cv.width, (b-t)*scale);
+  }
+}
+function showInfo() {
+  if (!S) return;
+  const w = human.window, c = human.crop;
+  let html = `<b>${S.file}</b><br>`;
+  if (w) html += `窗口：[${w.join(', ')}]<br>`;
+  if (c) html += `裁剪：[${c.join(', ')}]　高度 <b>${c[1]-c[0]}</b> px<br>`;
+  if (S.window_confidence !== undefined) html += `窗口置信度 ${S.window_confidence}`;
+  if (S.window_flags && S.window_flags.length)
+    html += `<div class="warn">⚠ 算法提示：${S.window_flags.join('、')}（建议用 W 检查红框）</div>`;
+  if (c && w && (c[0] < w[1] || c[1] > w[3]))
+    html += `<div class="err">⚠ 裁剪线超出窗口，请调整</div>`;
+  if (human.modified) html += `<div class="warn">已人工修改</div>`;
+  setText('info', html);
+}
+function pos(e) { const r = cv.getBoundingClientRect();
+  return { x: (e.clientX - r.left) / scale, y: (e.clientY - r.top) / scale }; }
+function near(v, t) { return Math.abs(v - t) * scale <= 9; }
+
+cv.addEventListener('mousedown', e => {
+  if (!img) return;
+  const p = pos(e); active = null;
+  if (mode === 'crop' && human.crop) {
+    if (near(p.y, human.crop[0])) active = 'top';
+    else if (near(p.y, human.crop[1])) active = 'bottom';
+  } else if (mode === 'window' && human.window) {
+    const [x0, y0, x1, y1] = human.window;
+    if (near(p.y, y0)) active = 'wy0'; else if (near(p.y, y1)) active = 'wy1';
+    else if (near(p.x, x0)) active = 'wx0'; else if (near(p.x, x1)) active = 'wx1';
+  }
+  if (active) { human.modified = true; draw(); showInfo(); }
+});
+cv.addEventListener('mousemove', e => {
+  if (!active) return;
+  const p = pos(e);
+  if (active === 'top' || active === 'bottom') {
+    const w = human.window || [0, 0, img.width, img.height];
+    const v = Math.max(w[1], Math.min(w[3], p.y));
+    if (active === 'top') human.crop[0] = Math.min(v, human.crop[1] - 5);
+    else human.crop[1] = Math.max(v, human.crop[0] + 5);
+  } else if (human.window) {
+    const w = human.window;
+    if (active === 'wy0') w[1] = Math.min(p.y, w[3] - 16);
+    if (active === 'wy1') w[3] = Math.max(p.y, w[1] + 16);
+    if (active === 'wx0') w[0] = Math.min(p.x, w[2] - 16);
+    if (active === 'wx1') w[2] = Math.max(p.x, w[0] + 16);
+  }
+  draw(); showInfo();
+});
+window.addEventListener('mouseup', () => { active = null; });
+
+async function save() {
+  if (!S) return;
+  if (human.window) human.window = human.window.map(Math.round);
+  if (human.crop) human.crop = human.crop.map(Math.round);
+  const r = await api('/api/save', { id: S.id, window: human.window, crop: human.crop,
+      modified: human.modified, model_crop: human.model_crop, flags: S.window_flags });
+  if (r.error) { toast('保存失败：' + r.error, 3000); return; }
+  toast(human.modified ? '已保存（含人工微调）' : '已保存');
+  next();
+}
+
+document.addEventListener('keydown', e => {
+  if (!S) return;
+  const step = e.shiftKey ? 10 : 1;
+  if (e.key === 'Enter') { e.preventDefault(); save(); }
+  else if (e.key === 'a' || e.key === 'A') {
+    if (human.model_crop) { human.crop = [...human.model_crop]; human.modified = true; draw(); showInfo(); }
+  }
+  else if (e.key === 'w' || e.key === 'W') { mode = 'window'; }
+  else if (e.key === 'c' || e.key === 'C') { mode = 'crop'; }
+  else if (e.key === 'k' || e.key === 'K') { api('/api/skip', { id: S.id }).then(next); }
+  else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    e.preventDefault(); if (!human.crop) return;
+    const d = (e.key === 'ArrowUp' ? -1 : 1) * step;
+    const w = human.window || [0, 0, img.width, img.height];
+    if (active === 'bottom') human.crop[1] = Math.max(human.crop[0] + 5, Math.min(w[3], human.crop[1] + d));
+    else human.crop[0] = Math.max(w[1], Math.min(human.crop[1] - 5, human.crop[0] + d));
+    human.modified = true; draw(); showInfo();
+  }
+});
+window.addEventListener('resize', () => { if (img) { fit(); draw(); } });
+next();
+</script>
+</body>
+</html>

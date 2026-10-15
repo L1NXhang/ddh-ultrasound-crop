@@ -1,6 +1,19 @@
 # 数据与训练产物一律不进仓库（医疗影像 + 患者编号，禁止上传）
 data/
 runs/
+runs_v2/
+release/
+dist/
+build/
+*.zip
+*.7z
+*.bin
+*.exe
+*.dll
+*.pdb
+*.pem
+.env
+.env.*
 pilot/
 smoke_output/
 bench_out/
@@ -25,3 +38,5 @@ __pycache__/
 .DS_Store
 Thumbs.db
 desktop.ini
+output/playwright/
+desktop/runtime/

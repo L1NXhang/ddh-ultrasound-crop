@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DDH · 边缘信息复核</title>
+<style>
+:root{color-scheme:dark;--bg:#0b101a;--panel:#111a29;--ink:#e9f1fc;--muted:#9aadc4;--line:#24334b;--blue:#60cfff;--green:#59e4b2;--amber:#ffc36b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 "Microsoft YaHei",system-ui,sans-serif;height:100vh;display:grid;grid-template-columns:350px 1fr}
+aside{padding:24px 20px;overflow:auto;background:linear-gradient(155deg,#18263a,#101725 55%);border-right:1px solid var(--line)}
+.brand{font-size:23px;font-weight:700;letter-spacing:.4px}.tag{display:inline-block;padding:3px 9px;border:1px solid #365471;border-radius:20px;font-size:11px;color:#acddff;margin:8px 0 16px}
+.card{background:#ffffff05;border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}.label{font-size:12px;color:var(--muted);margin:7px 0}.small{font-size:12px;color:var(--muted)}
+button,select,textarea,input{font:inherit}button{cursor:pointer;color:var(--ink);border:1px solid #35465f;background:#24344b;padding:8px 12px;border-radius:9px;transition:background .18s,transform .18s}button:hover{background:#304867;transform:translateY(-1px)}button:disabled{opacity:.4;cursor:default;transform:none}
+.modes{display:flex;gap:6px}.modes button{flex:1;padding:7px}.modes .on{border-color:var(--blue);background:#174563}.primary{background:#1c6051;border-color:#367f6e;width:100%;font-weight:600;margin-top:10px}.primary:hover{background:#257661}
+input[type=file]{width:100%;font-size:12px}select,textarea{width:100%;background:#0e1725;border:1px solid #35465f;color:var(--ink);border-radius:8px;padding:8px}textarea{resize:vertical;min-height:64px}.radios label{display:block;margin:5px 0;cursor:pointer}
+main{position:relative;min-width:0;display:grid;grid-template-rows:auto 1fr auto;background:radial-gradient(ellipse at 50% 20%,#172536,#080d15 75%)}
+header{padding:17px 24px;border-bottom:1px solid var(--line);display:flex;gap:20px;align-items:center;justify-content:space-between;background:#0d1522bb;backdrop-filter:blur(14px)}
+#stage{position:relative;overflow:hidden;min-height:0}canvas{position:absolute;cursor:crosshair;touch-action:none;border-radius:4px;box-shadow:0 15px 70px #0008}#empty{position:absolute;inset:0;display:grid;place-content:center;text-align:center;padding:30px;color:var(--muted)}
+footer{padding:12px 24px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}#status{white-space:pre-wrap}#toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:#22394f;border:1px solid #54718b;padding:12px 20px;border-radius:12px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:70%;z-index:10}
+.bar{height:5px;background:#26374c;border-radius:9px;margin-top:9px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green));width:0;transition:width .25s}kbd{color:#c5d8ec;background:#26354b;border-radius:4px;padding:1px 5px}.warn{color:var(--amber)}
+</style>
+<aside>
+ <div class="brand">DDH <span style="font-weight:400;color:#a9bdd4">边缘复核</span></div>
+ <div class="tag">本机离线 · 独立试标</div>
+ <div class="small" id="taskName"></div>
+ <div class="card"><div class="label">① 选择压缩包内的 images 文件夹</div><input id="files" type="file" webkitdirectory multiple><div id="fileStatus" class="small">无需启动服务，图片不会上传。</div></div>
+ <div class="card"><div class="label">② 选择模式，在图上拖出矩形</div><div class="modes"><button id="windowMode" class="on" data-mode="window">W 窗口</button><button id="overlayMode" data-mode="overlay">E 覆盖物</button><button id="cleanMode" data-mode="clean">C 裁剪</button></div><div class="small" style="margin-top:9px">蓝框：完整成像窗口<br>黄框：文字、图标或标尺<br>绿框：建议的最终裁剪范围</div><div class="label">覆盖物类型</div><select id="kind"><option value="device_text">设备信息 / 文字</option><option value="body_marker">体位示意图 / 婴儿形图标</option><option value="scale">标尺 / 灰度条</option><option value="other">其他覆盖物</option></select><button id="undo" style="margin-top:9px">撤销最后一个覆盖物</button><button id="copyWindow" style="margin-top:9px">沿用完整窗口</button></div>
+ <div class="card"><div class="label">③ 成像区内是否有覆盖信息？</div><div class="radios"><label><input type="radio" name="overlayStatus" value="present">有，已经框出</label><label><input type="radio" name="overlayStatus" value="absent">没有</label><label><input type="radio" name="overlayStatus" value="uncertain">拿不准</label></div><label class="small"><input id="uncertain" type="checkbox">需要负责人复核</label><textarea id="note" placeholder="拿不准的地方，写一句原因。"></textarea><div class="small">最终裁剪框只是建议；解剖结构保留由负责人和老师确认。</div></div>
+ <button id="save" class="primary">保存并下一张 · Enter</button><div style="display:flex;gap:8px;margin-top:9px"><button id="previous">上一张</button><button id="download" style="flex:1">导出结果 JSONL</button></div><div id="cache" class="small" style="margin-top:9px">每 10 张导出一次备份，交回导出的 JSONL。</div>
+</aside>
+<main><header><div><b id="progress">等待选择图片</b><div class="bar"><i id="bar"></i></div></div><div class="small" id="position">先框完整窗口，再框覆盖信息。</div></header><div id="stage"><div id="empty"><b style="font-size:22px;color:#d9e9fa">从一张原图开始</b><p>选择 images 文件夹后即可复核。<br>不预填算法框，请按自己的判断独立标注。</p></div><canvas id="canvas"></canvas></div><footer id="status">坐标均为原图像素；重新拖框可替换窗口或裁剪建议。</footer></main><div id="toast"></div>
+<script id="taskData" type="application/json">__TASK_JSON__</script>
+<script>
+'use strict';
+const task=JSON.parse(document.getElementById('taskData').textContent);
+const $=id=>document.getElementById(id),cv=$('canvas'),ctx=cv.getContext('2d');
+const cacheKey='ddh-cleanup-v1:'+task.task_id;
+let files=new Map(),index=0,image=null,scale=1,mode='window',draft=null,anchor=null,drag=null,url=null,loading=false,done={};
+function toast(text){$('toast').textContent=text;$('toast').style.opacity=1;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').style.opacity=0,3200)}
+function fresh(){return {window:null,overlays:[],clean_box:null,overlay_status:'',needs_review:false,note:''}}
+function validBox(b,w,h){return Array.isArray(b)&&b.length===4&&b.every(Number.isInteger)&&0<=b[0]&&b[0]<b[2]&&b[2]<=w&&0<=b[1]&&b[1]<b[3]&&b[3]<=h}
+function contains(a,b){return a[0]<=b[0]&&a[1]<=b[1]&&a[2]>=b[2]&&a[3]>=b[3]}
+function intersects(a,b){return Math.max(a[0],b[0])<Math.min(a[2],b[2])&&Math.max(a[1],b[1])<Math.min(a[3],b[3])}
+function setMode(value){mode=value;for(const [id,m] of [['windowMode','window'],['overlayMode','overlay'],['cleanMode','clean']])$(id).classList.toggle('on',value===m)}
+function syncControls(){document.querySelectorAll('[name=overlayStatus]').forEach(x=>x.checked=x.value===draft.overlay_status);$('uncertain').checked=draft.needs_review;$('note').value=draft.note}
+function readControls(){draft={...draft,overlay_status:document.querySelector('[name=overlayStatus]:checked')?.value||'',needs_review:$('uncertain').checked,note:$('note').value.trim()}}
+function progress(){const count=Object.keys(done).length;$('progress').textContent=`已保存 ${count} / ${task.rows.length}`;$('bar').style.width=(100*count/task.rows.length)+'%';$('position').textContent=`${task.member} · 第 ${index+1} / ${task.rows.length} 张`}
+function fit(){if(!image)return;const stage=$('stage');scale=Math.min((stage.clientWidth-36)/image.width,(stage.clientHeight-36)/image.height);cv.width=Math.round(image.width*scale);cv.height=Math.round(image.height*scale);cv.style.left=(stage.clientWidth-cv.width)/2+'px';cv.style.top=(stage.clientHeight-cv.height)/2+'px';draw()}
+function rectangle(box,color,title){if(!box)return;ctx.strokeStyle=color;ctx.lineWidth=2;ctx.strokeRect(box[0]*scale,box[1]*scale,(box[2]-box[0])*scale,(box[3]-box[1])*scale);ctx.fillStyle=color;ctx.font='12px system-ui';ctx.fillText(title,box[0]*scale+4,Math.max(14,box[1]*scale+14))}
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);if(!image)return;ctx.drawImage(image,0,0,cv.width,cv.height);rectangle(draft.window,'#60cfff','window');for(const [i,o] of draft.overlays.entries())rectangle(o.box,'#ffc36b','overlay '+(i+1));rectangle(draft.clean_box,'#59e4b2','crop');if(drag)rectangle(drag,'#ffffff','drawing');$('status').textContent=`窗口 ${JSON.stringify(draft.window)}　覆盖物 ${draft.overlays.length} 块　裁剪建议 ${JSON.stringify(draft.clean_box)}`}
+function openCurrent(){
+ loading=true;image=null;anchor=null;drag=null;const row=task.rows[index],file=files.get(row.filename);
+ if(!file){loading=false;toast('缺少图片 '+row.filename+'，请重新选择包内 images 文件夹');return}
+ draft=done[row.id]?JSON.parse(JSON.stringify(done[row.id])):fresh();syncControls();progress();setMode('window');
+ if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(file);const next=new Image();
+ next.onload=()=>{image=next;loading=false;$('empty').style.display='none';fit()};next.onerror=()=>{loading=false;toast('图片解码失败，请检查解压是否完整')};next.src=url;
+}
+function point(event){const rect=cv.getBoundingClientRect();return [Math.round(Math.max(0,Math.min(image.width,(event.clientX-rect.left)/scale))),Math.round(Math.max(0,Math.min(image.height,(event.clientY-rect.top)/scale)))]}
+cv.addEventListener('pointerdown',event=>{if(!image||loading)return;cv.setPointerCapture(event.pointerId);anchor=point(event);drag=null});
+cv.addEventListener('pointermove',event=>{if(!anchor||!image)return;const p=point(event);drag=[Math.min(anchor[0],p[0]),Math.min(anchor[1],p[1]),Math.max(anchor[0],p[0]),Math.max(anchor[1],p[1])];draw()});
+cv.addEventListener('pointerup',()=>{if(!anchor)return;anchor=null;if(drag&&validBox(drag,image.width,image.height)){if(mode==='window')draft={...draft,window:[...drag],clean_box:null};if(mode==='clean')draft={...draft,clean_box:[...drag]};if(mode==='overlay'){draft={...draft,overlays:[...draft.overlays,{kind:$('kind').value,box:[...drag]}],overlay_status:'present'};syncControls()}}drag=null;draw()});
+function validate(){
+ if(!image||loading)throw Error('请先加载图片');readControls();
+ if(!['present','absent','uncertain'].includes(draft.overlay_status))throw Error('请选择有、无或不确定覆盖信息');
+ if(draft.overlay_status==='uncertain')draft.needs_review=true;
+ if(draft.needs_review&&!draft.note)throw Error('需要复核时，请写一句原因');
+ if(!draft.window&&!draft.needs_review)throw Error('请按 W 框出完整成像窗口');
+ if(draft.window&&!validBox(draft.window,image.width,image.height))throw Error('窗口坐标无效');
+ if(draft.overlay_status==='present'&&!draft.overlays.length&&!draft.needs_review)throw Error('请按 E 框出覆盖信息');
+ if(draft.overlay_status==='absent'&&draft.overlays.length)throw Error('已有覆盖物框，请核对有无选项');
+ for(const overlay of draft.overlays)if(!validBox(overlay.box,image.width,image.height))throw Error('覆盖物坐标无效');
+ if(!draft.clean_box&&!draft.needs_review)throw Error('请按 C 框出裁剪建议，或沿用完整窗口');
+ if(draft.clean_box&&(!draft.window||!validBox(draft.clean_box,image.width,image.height)||!contains(draft.window,draft.clean_box)))throw Error('裁剪建议必须位于完整窗口内');
+ if(draft.clean_box&&draft.overlays.some(o=>intersects(draft.clean_box,o.box))&&!draft.needs_review)throw Error('裁剪建议仍包含覆盖物，请调整或勾选需要复核');
+}
+function save(){
+ try{validate();const row=task.rows[index];const record={...row,...draft,task_id:task.task_id,reviewer:task.member,schema:'ddh_edge_cleanup_review/v1',window_source:'human_drawn',anatomy_verified:false,approved_for_training:false,coordinate_space:'original_pixels',original_size:[image.width,image.height],reviewed_at:new Date().toISOString()};done={...done,[row.id]:record};
+ try{localStorage.setItem(cacheKey,JSON.stringify(done))}catch(error){$('cache').textContent='本机缓存失败，请立即导出结果：'+error.message}
+ if(index<task.rows.length-1){index++;openCurrent()}else{progress();toast('本批浏览完成，请导出结果 JSONL 交回')}if(Object.keys(done).length%10===0)toast('已保存 '+Object.keys(done).length+' 张，建议导出一次备份');
+ }catch(error){toast(error.message)}
+}
+function download(){const rows=task.rows.filter(r=>done[r.id]).map(r=>done[r.id]);if(!rows.length){toast('还没有保存的记录');return}const blob=new Blob([rows.map(r=>JSON.stringify(r)).join('\n')+'\n'],{type:'application/x-ndjson;charset=utf-8'});const link=document.createElement('a'),href=URL.createObjectURL(blob);link.href=href;link.download='结果_'+task.task_id+'.jsonl';link.click();setTimeout(()=>URL.revokeObjectURL(href),1000);$('cache').textContent='已导出 '+rows.length+' 条，请保留该文件并交回负责人。'}
+$('files').addEventListener('change',event=>{files=new Map([...event.target.files].map(file=>[file.name,file]));const missing=task.rows.filter(row=>!files.has(row.filename));$('fileStatus').textContent=missing.length?'缺少 '+missing.length+' 张任务图片':'40 张任务图片已就绪';if(missing.length){toast('请选择本任务包里的 images 文件夹');return}index=Math.max(0,task.rows.findIndex(row=>!done[row.id]));openCurrent()});
+document.querySelectorAll('[data-mode]').forEach(button=>button.onclick=()=>setMode(button.dataset.mode));
+$('undo').onclick=()=>{if(!draft)return;draft={...draft,overlays:draft.overlays.slice(0,-1)};draw()};
+$('copyWindow').onclick=()=>{if(!draft?.window){toast('请先画完整窗口');return}draft={...draft,clean_box:[...draft.window]};draw()};
+$('save').onclick=save;$('download').onclick=download;$('previous').onclick=()=>{if(!image||loading||index===0)return;index--;openCurrent()};
+document.addEventListener('keydown',event=>{if(/INPUT|TEXTAREA|SELECT/.test(event.target.tagName)||!image||loading)return;if(event.key==='Enter'){event.preventDefault();save()}else if(event.key.toLowerCase()==='w')setMode('window');else if(event.key.toLowerCase()==='e')setMode('overlay');else if(event.key.toLowerCase()==='c')setMode('clean')});
+window.addEventListener('resize',fit);$('taskName').textContent=task.member+' · 40 张 · 独立完成';
+try{const stored=JSON.parse(localStorage.getItem(cacheKey)||'{}');const allowed=new Set(task.rows.map(r=>r.id));done=Object.fromEntries(Object.entries(stored).filter(([id,r])=>allowed.has(id)&&r.task_id===task.task_id))}catch(error){$('cache').textContent='无法恢复本机缓存，请保留并交回导出的结果文件。'}
+</script>
+</html>

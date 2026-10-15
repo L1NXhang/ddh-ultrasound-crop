@@ -40,8 +40,10 @@
     <kbd>↑</kbd><kbd>↓</kbd> 微调 1px（Shift 10px）<br>
     <kbd>W</kbd> 切到窗口框模式（红框不对时才用）<br>
     <kbd>C</kbd> 回到裁剪线模式　<kbd>K</kbd> 跳过<br>
-    <kbd>A</kbd> 恢复到模型预测
+    <kbd>A</kbd> 恢复到最近一次模型预测<br>
+    <kbd>R</kbd> 按当前窗口重新预测上下裁剪线
   </div>
+  <button id="repredict" onclick="repredict()">按当前窗口重新预测</button>
 
   <h3>图例</h3>
   <div class="kv">
@@ -67,6 +69,7 @@
 let S = null, img = null, url = null;
 let scale = 1, mode = 'crop', active = null;
 let human = { window: null, crop: null, modified: false, model_crop: null };
+let predictionWindow = null, busy = false, loading = false;
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 
 function toast(m, ms = 1600) {
@@ -74,6 +77,14 @@ function toast(m, ms = 1600) {
   clearTimeout(t._h); t._h = setTimeout(() => t.style.opacity = 0, ms);
 }
 function setText(id, h) { document.getElementById(id).innerHTML = h; }
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function sameCoordinates(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+function stalePrediction() { return !sameCoordinates(human.window, predictionWindow); }
+function updateModified() {
+  human.modified = !sameCoordinates(human.window, S.window) || !sameCoordinates(human.crop, S.crop);
+}
 
 async function api(p, body) {
   const r = await fetch(p, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -82,26 +93,31 @@ async function api(p, body) {
 }
 
 async function next() {
+  loading = true; img = null; S = null;
   const q = await api('/api/queue');
   setText('progress', `共 <b>${q.total}</b> 张，已完成 <b>${q.done}</b>，剩余 <b>${q.remaining}</b>`);
   await refreshStats();
-  if (!q.next) { document.getElementById('done').style.display = 'flex';
+  if (!q.next) { loading = false; document.getElementById('done').style.display = 'flex';
                  setText('doneInfo', `共处理 ${q.total} 张。结果在输出目录的 cropped/ 与 annotated/ 子文件夹里。`); return; }
   document.getElementById('done').style.display = 'none';
   setText('info', '模型推理中…');
   S = await api('/api/predict/' + encodeURIComponent(q.next));
-  if (S.error) { setText('info', '<span class="err">预测失败：' + S.error + '</span>'); return; }
+  if (S.error) { loading = false; setText('info', '<span class="err">预测失败：' + escapeHtml(S.error) + '</span>'); S = null; return; }
   human.window = S.window ? [...S.window] : null;
   human.crop = S.crop ? [...S.crop] : null;
   human.model_crop = S.crop ? [...S.crop] : null;
   human.modified = false;
+  predictionWindow = S.window ? [...S.window] : null;
   if (url) URL.revokeObjectURL(url);
   const im = new Image();
-  im.onload = () => { img = im; fit(); draw(); showInfo(); };
+  im.onload = () => { img = im; loading = false; fit(); draw(); showInfo(); };
+  im.onerror = () => { loading = false; setText('info', '<span class="err">图片加载失败，请刷新重试</span>'); };
   im.src = '/api/image/' + encodeURIComponent(S.id) + '?t=' + Date.now();
 }
 async function refreshStats() {
   const st = await api('/api/stats');
+  setText('out', escapeHtml(st.out || '—') +
+    (st.dry_run ? '<div class="warn">预览模式：不会保存裁剪结果</div>' : ''));
   setText('stats', `已处理 <b>${st.done}</b>／${st.total}` +
     (st.modified ? `　人工微调 <b>${st.modified}</b>（${(st.modified_rate*100).toFixed(0)}%）` : ''));
 }
@@ -134,12 +150,13 @@ function draw() {
 function showInfo() {
   if (!S) return;
   const w = human.window, c = human.crop;
-  let html = `<b>${S.file}</b><br>`;
+  let html = `<b>${escapeHtml(S.file)}</b><br>`;
   if (w) html += `窗口：[${w.join(', ')}]<br>`;
   if (c) html += `裁剪：[${c.join(', ')}]　高度 <b>${c[1]-c[0]}</b> px<br>`;
-  if (S.window_confidence !== undefined) html += `窗口置信度 ${S.window_confidence}`;
+  if (S.window_confidence !== undefined) html += `窗口状态：${S.window_flags?.length ? '需检查' : '未发现规则告警'}`;
   if (S.window_flags && S.window_flags.length)
-    html += `<div class="warn">⚠ 算法提示：${S.window_flags.join('、')}（建议用 W 检查红框）</div>`;
+    html += `<div class="warn">⚠ 算法提示：${escapeHtml(S.window_flags.join('、'))}（建议用 W 检查红框）</div>`;
+  if (stalePrediction()) html += '<div class="warn">窗口已修改，请按 R 重新预测裁剪线后再保存</div>';
   if (c && w && (c[0] < w[1] || c[1] > w[3]))
     html += `<div class="err">⚠ 裁剪线超出窗口，请调整</div>`;
   if (human.modified) html += `<div class="warn">已人工修改</div>`;
@@ -150,7 +167,7 @@ function pos(e) { const r = cv.getBoundingClientRect();
 function near(v, t) { return Math.abs(v - t) * scale <= 9; }
 
 cv.addEventListener('mousedown', e => {
-  if (!img) return;
+  if (!img || busy || loading) return;
   const p = pos(e); active = null;
   if (mode === 'crop' && human.crop) {
     if (near(p.y, human.crop[0])) active = 'top';
@@ -160,10 +177,10 @@ cv.addEventListener('mousedown', e => {
     if (near(p.y, y0)) active = 'wy0'; else if (near(p.y, y1)) active = 'wy1';
     else if (near(p.x, x0)) active = 'wx0'; else if (near(p.x, x1)) active = 'wx1';
   }
-  if (active) { human.modified = true; draw(); showInfo(); }
+  if (active) { draw(); showInfo(); }
 });
 cv.addEventListener('mousemove', e => {
-  if (!active) return;
+  if (!active || busy || loading) return;
   const p = pos(e);
   if (active === 'top' || active === 'bottom') {
     const w = human.window || [0, 0, img.width, img.height];
@@ -172,33 +189,57 @@ cv.addEventListener('mousemove', e => {
     else human.crop[1] = Math.max(v, human.crop[0] + 5);
   } else if (human.window) {
     const w = human.window;
-    if (active === 'wy0') w[1] = Math.min(p.y, w[3] - 16);
-    if (active === 'wy1') w[3] = Math.max(p.y, w[1] + 16);
-    if (active === 'wx0') w[0] = Math.min(p.x, w[2] - 16);
-    if (active === 'wx1') w[2] = Math.max(p.x, w[0] + 16);
+    if (active === 'wy0') w[1] = Math.max(0, Math.min(p.y, w[3] - 16));
+    if (active === 'wy1') w[3] = Math.min(img.height, Math.max(p.y, w[1] + 16));
+    if (active === 'wx0') w[0] = Math.max(0, Math.min(p.x, w[2] - 16));
+    if (active === 'wx1') w[2] = Math.min(img.width, Math.max(p.x, w[0] + 16));
   }
+  if (human.window) human.window = human.window.map(Math.round);
+  if (human.crop) human.crop = human.crop.map(Math.round);
+  updateModified();
   draw(); showInfo();
 });
 window.addEventListener('mouseup', () => { active = null; });
 
 async function save() {
-  if (!S) return;
+  if (!S || busy || loading) return;
+  if (stalePrediction()) { toast('窗口已修改，请先按 R 重新预测'); return; }
   if (human.window) human.window = human.window.map(Math.round);
   if (human.crop) human.crop = human.crop.map(Math.round);
-  const r = await api('/api/save', { id: S.id, window: human.window, crop: human.crop,
+  busy = true;
+  try {
+    const r = await api('/api/save', { id: S.id, window: human.window, crop: human.crop,
       modified: human.modified, model_crop: human.model_crop, flags: S.window_flags });
-  if (r.error) { toast('保存失败：' + r.error, 3000); return; }
-  toast(human.modified ? '已保存（含人工微调）' : '已保存');
-  next();
+    if (r.error) { toast('保存失败：' + r.error, 3000); return; }
+    toast(human.modified ? '已保存（含人工微调）' : '已保存');
+    await next();
+  } catch (error) { toast('保存失败：' + error.message, 3000); }
+  finally { busy = false; }
+}
+
+async function repredict() {
+  if (!S || !human.window || busy || loading) return;
+  busy = true;
+  const button = document.getElementById('repredict'); button.disabled = true;
+  try {
+    const window = human.window.map(Math.round);
+    const result = await api('/api/repredict', { id: S.id, window });
+    if (result.error) throw new Error(result.error);
+    human.window = window; human.crop = [...result.crop]; human.model_crop = [...result.crop];
+    predictionWindow = [...window]; mode = 'crop'; updateModified(); draw(); showInfo();
+    toast('已按当前窗口重新预测，可继续微调裁剪线');
+  } catch (error) { toast('重新预测失败：' + error.message, 3000); }
+  finally { busy = false; button.disabled = false; }
 }
 
 document.addEventListener('keydown', e => {
-  if (!S) return;
+  if (!S || busy || loading) return;
   const step = e.shiftKey ? 10 : 1;
   if (e.key === 'Enter') { e.preventDefault(); save(); }
   else if (e.key === 'a' || e.key === 'A') {
-    if (human.model_crop) { human.crop = [...human.model_crop]; human.modified = true; draw(); showInfo(); }
+    if (human.model_crop) { human.crop = [...human.model_crop]; updateModified(); draw(); showInfo(); }
   }
+  else if (e.key === 'r' || e.key === 'R') { repredict(); }
   else if (e.key === 'w' || e.key === 'W') { mode = 'window'; }
   else if (e.key === 'c' || e.key === 'C') { mode = 'crop'; }
   else if (e.key === 'k' || e.key === 'K') { api('/api/skip', { id: S.id }).then(next); }
@@ -208,11 +249,26 @@ document.addEventListener('keydown', e => {
     const w = human.window || [0, 0, img.width, img.height];
     if (active === 'bottom') human.crop[1] = Math.max(human.crop[0] + 5, Math.min(w[3], human.crop[1] + d));
     else human.crop[0] = Math.max(w[1], Math.min(human.crop[1] - 5, human.crop[0] + d));
-    human.modified = true; draw(); showInfo();
+    updateModified(); draw(); showInfo();
   }
 });
 window.addEventListener('resize', () => { if (img) { fit(); draw(); } });
-next();
+async function start() {
+  if (location.protocol === 'file:') {
+    setText('progress', '<span class="warn">需要启动本机服务</span>');
+    setText('info', '请先双击工作区中的 <b>启动裁剪工具.bat</b>，等待模型加载。<br>' +
+      '<a href="http://127.0.0.1:8770/" style="color:#9cf">打开本机裁剪工具</a>');
+    document.getElementById('repredict').disabled = true;
+    return;
+  }
+  try { await next(); }
+  catch (error) {
+    loading = false;
+    setText('progress', '<span class="err">无法连接本机服务</span>');
+    setText('info', '请重新运行 <b>启动裁剪工具.bat</b>，再刷新本页。<br>' + escapeHtml(error.message));
+  }
+}
+start();
 </script>
 </body>
 </html>

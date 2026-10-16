@@ -5,15 +5,17 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from studio_project import file_hash
+from crop_policy import DEFAULT_MARGIN, FINAL_CROP_POLICY, validate_margin
 
 
 class ModelRunner:
-    def __init__(self, checkpoint, device='auto', margin=.02):
+    def __init__(self, checkpoint, device='auto', margin=DEFAULT_MARGIN):
         self.checkpoint, self.requested_device = Path(checkpoint), device
-        self.margin = margin
+        self.margin = validate_margin(margin)
         self.device = '尚未加载'
         self.metadata = {'checkpoint': str(self.checkpoint), 'model_sha256': file_hash(self.checkpoint),
-                         'window_algorithm': 'detect_window/corridor', 'margin': margin}
+                         'window_algorithm': 'detect_window/corridor', 'margin': self.margin,
+                         'crop_policy': FINAL_CROP_POLICY}
         self.lock = threading.Lock()
         self.tool = None
 

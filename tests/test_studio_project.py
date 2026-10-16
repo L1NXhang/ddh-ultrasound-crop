@@ -72,6 +72,20 @@ class ProjectTests(unittest.TestCase):
         self.assertNotIn(self.row['id'], resumed.records)
         self.assertEqual((resumed.output/'reviewed_training_candidates.jsonl').read_text(), '')
 
+    def test_final_labels_survive_old_margin_metadata_and_reopening(self):
+        clean = [22, 30, 150, 170]
+        prediction = {'window': [10, 10, 190, 190], 'crop_box': [10, 26, 190, 174]}
+        record = self.project.save(self.row['id'], [10, 10, 190, 190], clean, prediction, True,
+                                   model={'margin': .02})
+        for _ in range(3):
+            reopened = CropProject(self.source, self.work)
+            self.assertEqual(reopened.records[self.row['id']]['clean_box'], clean)
+            rows = [json.loads(line) for line in (reopened.output/'reviewed_training_candidates.jsonl').read_text(encoding='utf-8').splitlines()]
+            self.assertEqual(rows[0]['crop'], [30, 170])
+            self.assertEqual(rows[0]['clean_box'], clean)
+            self.assertEqual(rows[0]['label_semantics'], 'final_crop_box')
+            self.assertFalse(rows[0]['approved_for_training'])
+
     def test_zip_is_optional_and_contains_current_outputs_only(self):
         self.save(False)
         self.assertEqual(list(self.work.rglob('*.zip')), [])

@@ -132,7 +132,7 @@ def main():
             '--window-checkpoint', 'runs/window.pt', '--crop-checkpoint', ckpt,
             '--output', out, '--device', 'cuda', '--split', 'test'])
         s = json.loads((ROOT / out).read_text(encoding='utf-8'))['summary']
-        print(f'  {tag}: 上边界误差中位 {s["top_error_px"]:.1f} px，'
+        print(f'  {tag}: 上边界平均绝对误差 {s["top_error_px"]:.1f} px，'
               f'容差合格率 {s["tolerance_pass"]:.3f}，纵向 IoU {s["vertical_iou"]:.3f}')
 
     print('\n完成。产物：data/train_v2.jsonl、data/reports_v2/、runs_v2/')

@@ -71,7 +71,7 @@ class PredictorTests(unittest.TestCase):
                 third = runner.predict(Path(temp)/'image.png')
             self.assertEqual(runner.device, 'cuda')
             tool.load_models.assert_called_once()
-            self.assertEqual(tool.STATE['margin'], .02)
+            self.assertEqual(tool.STATE['margin'], 0.)
             self.assertEqual(first['crop_box'], [10, 30, 190, 170])
             self.assertEqual(second['crop_box'], [5, 30, 195, 170])
             self.assertIsNone(third['crop_box'])

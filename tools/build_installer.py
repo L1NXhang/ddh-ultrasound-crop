@@ -56,7 +56,7 @@ if __name__ == '__main__':
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--compiler', type=Path, required=True)
     parser.add_argument('--variant', choices=['cpu', 'auto'], default='cpu')
-    parser.add_argument('--version', default='0.5.0')
+    parser.add_argument('--version', default='0.5.1')
     parser.add_argument('--split', action='store_true')
     args = parser.parse_args()
     build(args.source, args.out, args.compiler, args.variant, args.version, args.split)

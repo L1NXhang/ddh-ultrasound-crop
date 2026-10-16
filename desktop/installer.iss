@@ -5,7 +5,7 @@
   #error InstallerOutput is required
 #endif
 #ifndef AppVersion
-  #define AppVersion "0.5.0"
+  #define AppVersion "0.5.1"
 #endif
 #ifndef Variant
   #define Variant "CPU"

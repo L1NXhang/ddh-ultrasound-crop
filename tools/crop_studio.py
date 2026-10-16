@@ -19,6 +19,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT/'tools'))
 from studio_predictor import ModelRunner
 from studio_service import StudioService
+from crop_policy import DEFAULT_MARGIN
 
 ASSETS = {'/': ('studio.html', 'text/html; charset=utf-8'),
           '/desktop.js': ('desktop.js', 'text/javascript; charset=utf-8'),
@@ -231,6 +232,7 @@ def main():
     parser.add_argument('--port', type=int, default=8770)
     parser.add_argument('--device', choices=['auto', 'cpu', 'cuda'], default='auto')
     parser.add_argument('--checkpoint', default=str(ROOT/'runs_v2/crop.pt'))
+    parser.add_argument('--margin', type=float, default=DEFAULT_MARGIN, help='可选额外外扩比例，默认0')
     parser.add_argument('--open-browser', action='store_true')
     parser.add_argument('--desktop', action='store_true')
     parser.add_argument('--session-file')
@@ -239,7 +241,7 @@ def main():
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
     from studio_session import RecentProjects
-    service = StudioService(ModelRunner(args.checkpoint, args.device),
+    service = StudioService(ModelRunner(args.checkpoint, args.device, margin=args.margin),
                             RecentProjects(args.state_dir/'recent_projects.json'))
     if args.folder:
         service.configure(args.folder, args.work_dir)

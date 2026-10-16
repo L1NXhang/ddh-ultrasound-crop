@@ -80,7 +80,10 @@ def exercise(page, url, root, device='cpu'):
     page.locator('#startProject').click()
     page.wait_for_function('image !== null && !busy', timeout=60000)
     assert page.locator('#device').inner_text() == ('GPU' if device == 'cuda' else 'CPU')
-    assert get_json(url+'api/status')['device'] == device
+    inference = get_json(url+'api/status')
+    assert inference['device'] == device
+    assert inference['model']['margin'] == 0
+    assert inference['model']['crop_policy'] == 'final_bounds/v1'
     page.evaluate('''() => { cleanBox=[cleanBox[0]+5,cleanBox[1],cleanBox[2]-5,cleanBox[3]]; changedGeometry();draw();updateInfo(); }''')
     page.locator('#previewCrop').click()
     page.screenshot(path=str(ROOT/'output/playwright/portable_preview.png'))
@@ -91,6 +94,7 @@ def exercise(page, url, root, device='cpu'):
     output = Path(status['output'])
     candidates = (output/'reviewed_training_candidates.jsonl').read_text(encoding='utf-8').splitlines()
     assert len(candidates) == 1 and not json.loads(candidates[0])['approved_for_training']
+    assert json.loads(candidates[0])['label_semantics'] == 'final_crop_box'
     page.locator('#archiveSide').click()
     page.locator('#finishZip').click()
     page.wait_for_selector('#zipDownload:not(.hidden)')

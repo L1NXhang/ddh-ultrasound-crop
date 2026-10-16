@@ -126,7 +126,8 @@ class CropProject:
                 'window': row['window'], 'crop': [row['clean_box'][1], row['clean_box'][3]],
                 'clean_box': row['clean_box'], 'source_sha256': row['source_sha256'],
                 'human_modified': row['modified'], 'human_reviewed': True, 'approved_for_training': False,
-                'annotation_source': 'crop_studio/human', 'quality': None, 'safe_box': None,
+                'annotation_source': 'crop_studio/human', 'label_semantics': 'final_crop_box',
+                'quality': None, 'safe_box': None,
                 'style_group': '', 'source_group': '', 'leak_group': '', 'split': '',
                 'model': row.get('model', {}), 'review_record': row['record_id'],
                 'reviewer': row.get('reviewer')}

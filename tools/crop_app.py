@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / 'tools'))
 from crop_geometry import validate_window, validate_crop, modification_details
+from crop_policy import DEFAULT_MARGIN, apply_margin, validate_margin
 
 IMAGE_EXT = ('.jpg', '.jpeg', '.png', '.bmp')
 
@@ -90,8 +91,7 @@ def predict_crop(path, window):
     x, roi = ddh.letterbox(im.crop(tuple(window)), ba['size'])
     with STATE['model_lock'], torch.no_grad():
         o = ddh.mc_crop(bm, x[None].to(dev), roi[None].to(dev), 4)
-    b = [max(0.0, float(o['bounds'][0][0]) - STATE.get('margin', 0.0)),
-         min(1.0, float(o['bounds'][0][1]) + STATE.get('margin', 0.0))]
+    b = apply_margin([float(v) for v in o['bounds'][0]], STATE.get('margin', DEFAULT_MARGIN))
     c = ddh.raw_crop(window, b)
     return {'crop': [c[1], c[3]], 'std': [float(v) for v in o['std'][0]]}
 
@@ -264,17 +264,22 @@ def build_queue(folder):
     STATE['rows'] = rows
 
 
-def main():
+def parser():
     ap = argparse.ArgumentParser()
     ap.add_argument('--folder', required=True, help='待裁剪的图片文件夹（会递归子目录）')
     ap.add_argument('--out', default='', help='输出目录（默认 <folder>_cropped）')
     ap.add_argument('--crop-checkpoint', default='runs_v2/crop.pt')
     ap.add_argument('--device', default='cuda')
-    ap.add_argument('--margin', type=float, default=0.02, help='额外安全边距（占窗口高度）')
+    ap.add_argument('--margin', type=float, default=DEFAULT_MARGIN, help='可选额外外扩比例，占窗口高度；默认0，直接输出最终裁剪线')
     ap.add_argument('--port', type=int, default=8770)
     ap.add_argument('--dry-run', action='store_true', help='只看不写文件')
     ap.add_argument('--open-browser', action='store_true', help='服务就绪后自动打开浏览器')
-    args = ap.parse_args()
+    return ap
+
+
+def main():
+    args = parser().parse_args()
+    validate_margin(args.margin)
     folder = Path(args.folder)
     if not folder.is_dir():
         raise SystemExit(f'找不到文件夹: {folder}')

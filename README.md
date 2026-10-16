@@ -6,15 +6,16 @@ Windows 桌面工具，用于超声图像的批量裁剪与人工审核。模型
 
 **普通用户请下载安装包，不要下载 GitHub 的 Code → Download ZIP 来当作软件安装。**
 
-- [Windows CPU 安装包，推荐](https://github.com/L1NXhang/ddh-ultrasound-crop/releases/download/v0.5.0/DDH_Crop_Setup_0.5.0_CPU_x64.exe)：单个文件，下载后双击安装，包含 Python 推理环境、模型与 WebView2，无需独立显卡。
+- [Windows CPU 安装包，推荐](https://github.com/L1NXhang/ddh-ultrasound-crop/releases/download/v0.5.1/DDH_Crop_Setup_0.5.1_CPU_x64.exe)：单个文件，下载后双击安装，包含 Python 推理环境、模型与 WebView2，无需独立显卡。
 - [全部下载与 GPU 版本](https://github.com/L1NXhang/ddh-ultrasound-crop/releases/latest)：GPU 自动版同样是单个完整安装 EXE，兼容 NVIDIA CUDA 时使用 GPU，否则使用 CPU。
-- [CPU 便携 ZIP](https://github.com/L1NXhang/ddh-ultrasound-crop/releases/download/v0.5.0/DDH_Crop_Portable_0.5.0_CPU_x64.zip)：完整解压后运行其中的 DDH裁剪工具.exe，保留整个目录结构。
 
 支持 Windows 10/11 64 位，系统需具备 .NET Framework 4.8。安装到当前用户目录，无需管理员权限，可从 Windows 应用设置卸载。程序尚未配置代码签名证书，安装文件可能显示未知发布者；请核对本仓库发布地址和附带的 SHA256 清单。
 
 应用目录中的小 EXE 是启动入口，不能单独复制给其他电脑。CPU 安装 EXE 则包含完整运行文件，可以单独分发。本次 CPU 和 GPU 安装包均为单个完整 EXE。
 
 ## 开始裁剪
+
+v0.5.1默认直接预测最终裁剪线，去掉了额外2%外扩。请关闭旧版后安装新版；旧的人工确认结果和草稿保留。参见[最终裁剪边界策略](docs/最终裁剪边界策略_20261016.md)。
 
 1. 打开软件，选择图片文件夹和结果保存位置，两个目录分开选择。
 2. 选择逐张审核或批量裁剪。首次预测需加载模型。

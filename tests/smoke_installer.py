@@ -146,12 +146,14 @@ def run(installer, label, expected_device, hide_gpu=False):
                         '/LOG='+str(root/'uninstall.log')], check=True, timeout=120)
         wait_for(lambda: not installed_registration(label) and not exe.exists(), 20)
         assert marker.is_file() and (output/'results.jsonl').is_file()
-        report = {'installer': installer.name, 'sha256': record['sha256'], 'installed': True,
+        report = {'installer': installer.name, 'version': manifest['version'],
+                  'default_margin': 0., 'label_semantics': 'final_crop_box',
+                  'sha256': record['sha256'], 'installed': True,
                   'all_payload_hashes_match': True, 'python_removed_from_path': True,
                   'inference_device': expected_device, 'cuda_hidden': hide_gpu, 'manual_review': True,
                   'collaboration_review': True, 'draft_preserved': True, 'optional_zip': True,
                   'uninstalled': True, 'user_data_preserved': True, 'synthetic_only': True}
-        directory = ROOT/'data/publication'
+        directory = ROOT/'data/publication'/manifest['version']
         directory.mkdir(parents=True, exist_ok=True)
         (directory/('installer_'+label+'_'+expected_device+'.json')).write_text(json.dumps(report, indent=2), encoding='utf-8')
         print(json.dumps(report), flush=True)

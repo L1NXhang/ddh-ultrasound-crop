@@ -37,6 +37,7 @@ from torchvision.models.detection import (fasterrcnn_mobilenet_v3_large_fpn,
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.ops import roi_align, box_iou
 from torchvision.transforms.functional import to_tensor
+from crop_policy import DEFAULT_MARGIN, FINAL_CROP_POLICY, apply_margin
 
 
 def seed_all(seed):
@@ -366,6 +367,7 @@ def training(args):
             torch.save({'state':model.state_dict(),'stage':args.stage,'size':args.size,'baseline':args.baseline,
                 'quality_trained':is_b and not args.baseline and {r.get('quality') for r in tr}>={0,1},
                 'safe_trained':is_b and not args.baseline and any(r.get('safe_box') and r.get('quality')!=0 for r in tr),
+                'crop_policy':FINAL_CROP_POLICY,'inference_margin':DEFAULT_MARGIN,
                 'seed':args.seed,'epoch':epoch+1,'manifest_sha256':hashlib.sha256(Path(args.manifest).read_bytes()).hexdigest()},args.output)
         else:bad+=1
         if bad>=args.patience:break
@@ -491,7 +493,7 @@ def calibrate(args):
         if gate(p,r.get('style_group'),cal,meta):continue
         eligible+=1
         if r.get('safe_box') is None or r.get('quality') is None:unknown+=1;continue
-        bounds=[max(0,p['bounds'][0]-args.margin),min(1,p['bounds'][1]+args.margin)]
+        bounds=apply_margin(p['bounds'],args.margin)
         fail=(r['quality']!=1) or not contains(raw_crop(p['box'],bounds),r['safe_box'])
         group_errors[r['leak_group']].append(fail)
     n=len(group_errors);k=sum(any(v) for v in group_errors.values());upper=cp_upper(k,n)
@@ -525,7 +527,7 @@ def evaluate(args):
         if r.get('human_modified') in (0,1) and r.get('human_modified') is not None:
             item['human_modified']=bool(r['human_modified'])
         if p['box'] is not None:
-            margin=cal.get('margin',0);bounds=[max(0,p['bounds'][0]-margin),min(1,p['bounds'][1]+margin)]
+            margin=cal.get('margin',DEFAULT_MARGIN);bounds=apply_margin(p['bounds'],margin)
             crop=raw_crop(p['box'],bounds);item['crop']=crop
             if r.get('crop') and r.get('quality')!=0:
                 t,b=r['crop'];h=r['window'][3]-r['window'][1];et=abs(crop[1]-t);eb=abs(crop[3]-b)
@@ -557,7 +559,8 @@ def evaluate(args):
     for key in ('style','graf','quality'):
         groups[key]={v:summary([r for r in results if r[key]==v]) for v in sorted({r[key] for r in results})}
     write_json(args.output,{'protocol':'NOT patient-independent; similarity-group exploratory evaluation',
-        'oracle_window':args.oracle_window,'summary':summary(results),'subgroups':groups,'rows':results})
+        'oracle_window':args.oracle_window,'crop_policy':FINAL_CROP_POLICY,
+        'inference_margin':cal.get('margin',DEFAULT_MARGIN),'summary':summary(results),'subgroups':groups,'rows':results})
     print(json.dumps(summary(results),indent=2))
 
 
@@ -566,9 +569,10 @@ def predict(args):
     row={'id':Path(args.image).name,'path':args.image}
     p=pipeline(row,'.',wm,bm,meta,args.device,samples=cal.get('mc_samples',args.samples))
     reasons=gate(p,args.style,cal,meta);result={k:v for k,v in p.items() if k!='embedding'}
-    result.update(review_required=True,eligible_for_quick_confirmation=not reasons,reasons=reasons)
+    result.update(review_required=True,eligible_for_quick_confirmation=not reasons,reasons=reasons,
+                  crop_policy=FINAL_CROP_POLICY,inference_margin=cal.get('margin',DEFAULT_MARGIN))
     if p['box'] is not None:
-        margin=cal.get('margin',0);bounds=[max(0,p['bounds'][0]-margin),min(1,p['bounds'][1]+margin)]
+        margin=cal.get('margin',DEFAULT_MARGIN);bounds=apply_margin(p['bounds'],margin)
         result['crop_box']=raw_crop(p['box'],bounds)
         if args.preview:
             if Path(args.preview).resolve()==Path(args.image).resolve():raise ValueError('Never overwrite original')
@@ -599,7 +603,7 @@ def parser():
         a.add_argument('--device',default='cuda' if torch.cuda.is_available() else 'cpu');a.add_argument('--seed',type=int,default=42);a.add_argument('--samples',type=int,default=16);a.add_argument('--output',required=True)
         if name!='predict':a.add_argument('--manifest',required=True);a.add_argument('--root',default='.')
         if name=='calibrate':
-            a.add_argument('--margin',type=float,default=.02);a.add_argument('--min-groups',type=int,default=30);a.add_argument('--max-risk',type=float,default=.05)
+            a.add_argument('--margin',type=float,default=DEFAULT_MARGIN,help='可选额外外扩比例，默认0，监督及输出最终裁剪边界');a.add_argument('--min-groups',type=int,default=30);a.add_argument('--max-risk',type=float,default=.05)
         else:a.add_argument('--calibration',default='')
         if name=='evaluate':
             a.add_argument('--split',default='test',choices=['val','calib','test']);a.add_argument('--oracle-window',action='store_true');a.add_argument('--tolerance',type=float,default=.02)

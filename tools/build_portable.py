@@ -13,9 +13,9 @@ from studio_project import file_hash
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'data/portable_build'
-VERSION = '0.5.0'
+VERSION = '0.5.1'
 NAME = f'DDH_Crop_{VERSION}_Windows_x64_CPU'
-AUTO_VERSION = '0.5.0'
+AUTO_VERSION = '0.5.1'
 WEB_ASSETS = ('studio.html', 'studio.css', 'studio.js', 'studio_session.js', 'desktop.js', 'review_client.js', 'collaboration.js')
 PREFIXES = ('ddh_multidevice_v2/backend/', 'ddh_multidevice_v2/desktop/runtime/',
             'ddh_multidevice_v2/desktop/WebView2Runtime/', 'ddh_multidevice_v2/THIRD_PARTY_LICENSES/')
@@ -34,6 +34,7 @@ README = '''DDH 图像裁剪工具 · Windows 便携 CPU 版 v{version}
 7. 未确认调整保存为草稿。确认后导出 PNG 与 JSON；完成后可自选是否保存 ZIP。
 8. 点击右上角“协作审核”可给组员设置账号和密码；组员通过浏览器审核，记录直接存回主机。
    局域网使用 IP 和端口；外网需另行配置加密组网或 HTTPS 代理。软件不会自动修改防火墙。
+9. v0.5.1默认直接使用模型最终裁剪线，不再额外外扩2%；旧的已确认结果和草稿保留。
 
 本包不含项目图片、样例病例或本机审核数据。内含现有模型、CPU 推理环境和固定版 WebView2，
 不需要安装 Python，不需要独立显卡，裁剪过程中不需要联网。

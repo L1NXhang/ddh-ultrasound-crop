@@ -38,5 +38,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 desktop.ini
-output/playwright/
+# output/ 整目录为本地验收截图与自动化日志（含医学图像），不入仓库
+output/
 desktop/runtime/

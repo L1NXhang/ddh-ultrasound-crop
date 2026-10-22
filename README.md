@@ -63,7 +63,20 @@ python -m unittest discover -s tests -p "test_*.py"
 python tools/audit_publication.py --include-untracked
 ```
 
-完整打包命令、安装器构建及发布流程见[构建与发布](docs/构建与发布.md)。软件模型代码位于 ddh.py，当前产品入口为 tools/crop_studio.py，桌面外壳位于 desktop/，前端位于 tools/webapp/。
+完整打包命令、安装器构建及发布流程见[构建与发布](docs/构建与发布.md)。当前产品入口为 tools/crop_studio.py，桌面外壳位于 desktop/，前端位于 tools/webapp/。
+
+### 代码地图
+
+模型代码有三处，职责不同，改动时请注意区分：
+
+| 文件 | 用途 | 谁在用 |
+|---|---|---|
+| `tools/studio_predictor.py` | **产品实际的推理路径**（含 CropNet 定义） | 桌面版、裁剪工作台 |
+| `ddh_v2.py` | 新口径训练核心（非对称容差损失、选点） | `tools/train_v2.py`、`tools/experiments/` |
+| `ddh.py` | 早期研究基线与坐标换算（`raw_crop`/`letterbox`） | 评估脚本、`test_core.py` |
+
+> ⚠️ 三者都定义了 `CropNet`。**产品推理只走 `studio_predictor.py`**，`ddh.py` 不被产品加载。
+> 修改模型结构时必须三处同步，否则权重会与训练不一致。
 
 ## 文档
 

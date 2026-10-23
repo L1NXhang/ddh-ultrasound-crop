@@ -1,0 +1,80 @@
+﻿### 10.1109/TIP.2012.2214050
+T: No-Reference Image Quality Assessment in the Spatial Domain
+ABS: <no abstract in crossref>
+
+### 10.1109/LSP.2012.2227726
+T: Making a “Completely Blind” Image Quality Analyzer
+ABS: <no abstract in crossref>
+
+### 10.1109/TIP.2011.2147325
+T: Blind Image Quality Assessment: From Natural Scene Statistics to Perceptual Quality
+ABS: <no abstract in crossref>
+
+### 10.1109/QOMEX.2009.5246972
+T: A no-reference perceptual image sharpness metric based on a cumulative probability of blur detection
+ABS: <no abstract in crossref>
+
+### 10.1109/TIP.2011.2131660
+T: A No-Reference Image Blur Metric Based on the Cumulative Probability of Blur Detection (CPBD)
+ABS: <no abstract in crossref>
+
+### 10.1109/TIP.2008.2011760
+T: A No-Reference Objective Image Sharpness Metric Based on the Notion of Just Noticeable Blur (JNB)
+ABS: <no abstract in crossref>
+
+### 10.1109/ICIP.2007.4379342
+T: A No-Reference Objective Image Sharpness Metric Based on Just-Noticeable Blur and Probability Summation
+ABS: <no abstract in crossref>
+
+### 10.1109/TIP.2013.2251643
+T: Image Sharpness Assessment Based on Local Phase Coherence
+ABS: <no abstract in crossref>
+
+### 10.1109/ICASSP.2010.5496297
+T: No-reference image sharpness assessment based on local phase coherence measurement
+ABS: <no abstract in crossref>
+
+### 10.1109/BMSB.2013.6621727
+T: No-reference image blur assessment based on gradient profile sharpness
+ABS: <no abstract in crossref>
+
+### 10.1109/TIP.2015.2414877
+T: Single Image Superresolution Based on Gradient Profile Sharpness
+ABS: <no abstract in crossref>
+
+### 10.1117/12.702790
+T: The blur effect: perception and estimation with a new no-reference perceptual blur metric
+ABS: <no abstract in crossref>
+
+### 10.1109/CVPR.2015.7298665
+T: Just noticeable defocus blur detection and estimation
+ABS: <no abstract in crossref>
+
+### 10.1109/TCYB.2017.2671898
+T: FUIQA: Fetal Ultrasound Image Quality Assessment With Deep Convolutional Networks
+ABS: <no abstract in crossref>
+
+### 10.1016/j.media.2019.101548
+T: Multi-task learning for quality assessment of fetal head ultrasound images
+ABS: <no abstract in crossref>
+
+### 10.1155/2021/9938367
+T: CNN‐Based Medical Ultrasound Image Quality Assessment
+ABS: The quality of ultrasound image is a key information in medical related application. It is also an important index in evaluating the performance of ultrasonic imaging equipment and image processing algorithms. Yet, there is still no recognized quantitative standard about medical image quality assessment (IQA) due to the fact that IQA is traditionally regarded as a subjective issue, especially in case of the ultrasound medical images. As such, the medical ultrasound IQA on basis of convolutional neural network (CNN) is quantitatively studied in this paper. Firstly, a dataset with 1063 ultrasound images is established through degenerating a certain number of original high‐quality images. Subsequently, some operations are performed for the dataset including scoring and abnormal value screening. Then, 478 ultrasonic images are selected as the training and testing examples. The label of each example is obtained by averaging the scores of different doctors. Afterwards, a deep CNN network and a residuals network are taken to establish the IQA models. Meanwhile, the transfer learning strategy is introduced here to accelerate the training and improve the robustness of the model considering the fact that the ultrasound image samples are not abundant. At last, some tests are taken to evaluate the IQA models. They show that the CNN‐based IQA is feasible and effective.
+
+### 10.1117/1.JMI.4.2.024001
+T: Automatic image quality assessment and measurement of fetal head in two-dimensional ultrasound image
+ABS: Owing to the inconsistent image quality existing in routine obstetric ultrasound (US) scans that leads to a large intraobserver and interobserver variability, the aim of this study is to develop a quality-assured, fully automated US fetal head measurement system. A texton-based fetal head segmentation is used as a prerequisite step to obtain the head region. Textons are calculated using a filter bank designed specific for US fetal head structure. Both shape- and anatomic-based features calculated from the segmented head region are then fed into a random forest classifier to determine the quality of the image (e.g., whether the image is acquired from a correct imaging plane), from which fetal head measurements [biparietal diameter (BPD), occipital–frontal diameter (OFD), and head circumference (HC)] are derived. The experimental results show a good performance of our method for US quality assessment and fetal head measurements. The overall precision for automatic image quality assessment is 95.24% with 87.5% sensitivity and 100% specificity, while segmentation performance shows 99.27% (±0.26) of accuracy, 97.07% (±2.3) of sensitivity, 2.23 mm (±0.74) of the maximum symmetric contour distance, and 0.84 mm (±0.28) of the average symmetric contour distance. The statistical analysis results using paired t-test and Bland–Altman plots analysis indicate that the 95% limits of agreement for inter observer variability between the automated measurements and the senior expert measurements are 2.7 mm of BPD, 5.8 mm of OFD, and 10.4 mm of HC, whereas the mean differences are −0.038±1.38 mm, −0.20±2.98 mm, and −0.72±5.36 mm, respectively. These narrow 95% limits of agreements indicate a good level of consistency between the automated and the senior expert’s measurements.
+
+### 10.1109/ICCV48922.2021.00510
+T: MUSIQ: Multi-scale Image Quality Transformer
+ABS: <no abstract in crossref>
+
+### 10.1109/tcsvt.2018.2886771
+T: Blind Image Quality Assessment Using a Deep Bilinear Convolutional Neural Network
+ABS: <no abstract in crossref>
+
+### 10.1016/j.proeng.2013.09.086
+T: Image Sharpness Measure for Blurred Images in Frequency Domain
+ABS: <no abstract in crossref>
+

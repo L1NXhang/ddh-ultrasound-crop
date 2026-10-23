@@ -1,0 +1,395 @@
+[
+ {
+  "doi": "10.3389/fped.2026.1939157",
+  "title": "Multihipposenet: multi-task deep learning for automated DDH assessment in infant hip ultrasound",
+  "type": "article",
+  "year": 2026,
+  "cited": 0,
+  "abstract": "Introduction Developmental dysplasia of the hip (DDH) is a common skeletal condition in infants and young children. For infants under six months, diagnosis relies on Graf ultrasonography to measure the α and β angles, which assess hip-joint development. However, this method requires experienced sonographers with expertise in complex anatomy. Methods In this study, we propose an end-to-end multi-task learning network that improves DDH assessment by jointly exploiting complementary anatomical information. First, we use ResNet-50 with a feature pyramid network (FPN) and a contextual semantic fusion module to extract multi-scale features from hip anatomy. Second, we employ a multi-expert gated channel transformation (ME-GCT) unit that explicitly models the relationships between tasks and channels to balance collaboration and conflict across tasks. Finally, a multi-task graph adaptive learning mechanism (MT-GALM) mines the hidden dynamic dependencies between adjacent channels across tasks. Two datasets comprising 1,355 annotated hip ultrasound images from 566 infants were constructed for this work. Results Across the patient-level cross-validation test folds, 97.97% and 96.81% of the estimated α and β angles fall within 5 degrees of the expert reference. Discussion Because validation was restricted to Graf type I and type II hips, these results should be interpreted as evidence of technical feasibility rather than of established clinical utility; evaluation on type III and type IV hips is required before clinical deployment.",
+  "pdfs": [
+   "https://www.frontiersin.org/journals/pediatrics/articles/10.3389/fped.2026.1939157/pdf"
+  ],
+  "landings": [
+   "https://doaj.org/article/6af3aa823e334c16a5fce46defbc3ebb",
+   "https://doi.org/10.3389/fped.2026.1939157"
+  ],
+  "licenses": [
+   "cc-by"
+  ],
+  "oa_status": "gold"
+ },
+ {
+  "doi": "10.21923/jesd.1064904",
+  "title": "DETECTION OF STANDARD PLANE FROM ULTRASOUND SCANS BY DEEP LEARNING METHODS FOR THE DIAGNOSIS OF DEVELOPMENTAL HIP DYSPLASIA",
+  "type": "article",
+  "year": 2022,
+  "cited": 0,
+  "abstract": "The term developmental dysplasia of the hip (DDH) describes a range of hip abnormalities affecting newborns where the femoral head and acetabulum are in improper alignment or grow abnormally, or both. The ultrasonographic evaluation technique rely on the capability of the ultrasonographer to pick up the accurate frame used for exact calculations. In our study we developed a new computer aided system that determines the exact frame from real time 2D ultrasound images and calculates the accuracy rate for each result. The deep learning architectures recently used in literature were utilized for these processes. In addition, transfer learning was carried out to increase the performance of the system using pretrained networks (SqueezeNet, VGG16, VGG19, ResNet50 and ResNet101). One of the best methods of object detection, You Only Look Once (YOLO) model, was used with pre-trained networks to determine DDH location. As a result of the study, the performance of the deep neural network model proposed with the help of these pre-trained networks was evaluated. When the obtained results were compared with expert opinions, frames (standard planes) in 605 of 676 (89.05%) test images were correctly detected. The accuracy rates for the used pre-trained networks were obtained as SqueezeNet 0.79, VGG16 0.95, VGG19 0.96, ResNet50 0.88 and ResNet101 0.93.",
+  "pdfs": [
+   "https://dergipark.org.tr/en/download/article-file/2220149",
+   "https://dergipark.org.tr/tr/pub/jesd/issue/72809/1064904"
+  ],
+  "landings": [
+   "https://dergipark.org.tr/tr/pub/jesd/issue/72809/1064904",
+   "https://doi.org/10.21923/jesd.1064904"
+  ],
+  "licenses": [],
+  "oa_status": "diamond"
+ },
+ {
+  "doi": "10.3390/app12084072",
+  "title": "Can AI Automatically Assess Scan Quality of Hip Ultrasound?",
+  "type": "article",
+  "year": 2022,
+  "cited": 6,
+  "abstract": "Ultrasound images can reliably detect Developmental Dysplasia of the Hip (DDH) during early infancy. Accuracy of diagnosis depends on the scan quality, which is subjectively assessed by the sonographer during ultrasound examination. Such assessment is prone to errors and often results in poor-quality scans not being reported, risking misdiagnosis. In this paper, we propose an Artificial Intelligence (AI) technique for automatically determining scan quality. We trained a Convolutional Neural Network (CNN) to categorize 3D Ultrasound (3DUS) hip scans as ‘adequate’ or ‘inadequate’ for diagnosis. We evaluated the performance of this AI technique on two datasets—Dataset 1 (DS1) consisting of 2187 3DUS images in which each image was assessed by one reader for scan quality on a scale of 1 (lowest quality) to 5 (optimal quality) and Dataset 2 (DS2) consisting of 107 3DUS images evaluated semi-quantitatively by four readers using a 10-point scoring system. As a binary classifier (adequate/inadequate), the AI technique gave highly accurate predictions on both datasets (DS1 accuracy = 96% and DS2 accuracy = 91%) and showed high agreement with expert readings in terms of Intraclass Correlation Coefficient (ICC) and Cohen’s kappa coefficient (K). Using our AI-based approach as a screening tool during ultrasound scanning or postprocessing would ensure high scan quality and lead to more reliable ultrasound hip examination in infants.",
+  "pdfs": [
+   "https://www.mdpi.com/2076-3417/12/8/4072/pdf?version=1650278370"
+  ],
+  "landings": [
+   "https://doaj.org/article/cc5de2b0e3fd4fa18711c127b615207b",
+   "https://doi.org/10.3390/app12084072"
+  ],
+  "licenses": [
+   "cc-by"
+  ],
+  "oa_status": "gold"
+ },
+ {
+  "doi": "10.29007/w172",
+  "title": "Shadow Peak: Accurate Real-time Bone Segmentation for Ultrasound and Developmental Dysplasia of the Hip",
+  "type": "conference-paper",
+  "year": 2019,
+  "cited": 6,
+  "abstract": "Confidence-weighted structured phase symmetry (CSPS) is a state-of-the-art bone seg- mentation technique for ultrasound (US), which has been recently proposed for automatic diagnosis for developmental dysplasia of the hip (DDH). However, CSPS relies on complex image phase feature analysis which is computationally expensive, and in our preliminary tests we have found it to be sometimes inaccurate. We evaluate a simpler alternative segmentation technique which we previously published, called Shadow Peak (SP), which uses intensity analysis to perform fast and accurate US bone segmentation. On average, SP segmentation ran 15 times faster for 2D US images, when tested on 15 hip images of pediatric patients. Furthermore, SP improves the segmentation F-score to 94%, compared to 72% when using CSPS segmentation.",
+  "pdfs": [
+   "https://easychair.org/publications/open/kK6h"
+  ],
+  "landings": [
+   "https://doi.org/10.29007/w172"
+  ],
+  "licenses": [],
+  "oa_status": "bronze"
+ },
+ {
+  "doi": "10.1109/ISBI.2017.7950680",
+  "title": "Toward automatic diagnosis of hip dysplasia from 2D ultrasound",
+  "type": "conference-paper",
+  "year": 2017,
+  "cited": 31,
+  "abstract": "Developmental dysplasia of the hip (DDH) is a congenital deformity occurring in ∼3% of infants. If diagnosed early most cases of DDH can be effectively treated using a Pavlik harness. However, current diagnosis of DDH using 2D ultrasound is and can have high inter-operator variability. In this paper we propose a method to automatically segment the acetabulum bone and derive geometric indices of hip dysplasia from this model. In the proposed method, using multi-scale superpixels, we incorporate global and local image features into a Deep Learning framework to obtain a probability map of the bone to be segmented and then use this map in probabilistic graph search to guide the segmentation. Clinically relevant geometric measures of hip dysplasia, including a new index of acetabular rounding, are then automatically calculated from the segmented acetabulum contour. We tested this method on 2D ultrasound of 50 infant hips and the contours generated matched closely with manual segmentations at root mean square error 1.8±0.7 mm and Hausdorff distance 2.1±0.9 mm. In this pilot data, the measured indices of dysplasia give an area under the curve of 86.2% for classifying normal vs dysplastic hips. The proposed approach could be used clinically for accurate and automatic diagnosis of hip dysplasia in infants.",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1109/isbi.2017.7950680"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/TIP.2012.2214050",
+  "title": "No-Reference Image Quality Assessment in the Spatial Domain",
+  "type": "article",
+  "year": 2012,
+  "cited": 6036,
+  "abstract": "We propose a natural scene statistic-based distortion-generic blind/no-reference (NR) image quality assessment (IQA) model that operates in the spatial domain. The new model, dubbed blind/referenceless image spatial quality evaluator (BRISQUE) does not compute distortion-specific features, such as ringing, blur, or blocking, but instead uses scene statistics of locally normalized luminance coefficients to quantify possible losses of \"naturalness\" in the image due to the presence of distortions, thereby leading to a holistic measure of quality. The underlying features used derive from the empirical distribution of locally normalized luminances and products of locally normalized luminances under a spatial natural scene statistic model. No transformation to another coordinate frame (DCT, wavelet, etc.) is required, distinguishing it from prior NR IQA approaches. Despite its simplicity, we are able to show that BRISQUE is statistically better than the full-reference peak signal-to-noise ratio and the structural similarity index, and is highly competitive with respect to all present-day distortion-generic NR IQA algorithms. BRISQUE has very low computational complexity, making it well suited for real time applications. BRISQUE features may be used for distortion-identification as well. To illustrate a new practical application of BRISQUE, we describe how a nonblind image denoising algorithm can be augmented with BRISQUE in order to perform blind image denoising. Results show that BRISQUE augmentation leads to performance improvements over state-of-the-art methods. A software release of BRISQUE is available online: http://live.ece.utexas.edu/research/quality/BRISQUE_release.zip for public use and evaluation.",
+  "pdfs": [],
+  "landings": [
+   "http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.299.348",
+   "https://doi.org/10.1109/tip.2012.2214050",
+   "https://pubmed.ncbi.nlm.nih.gov/22910118"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/LSP.2012.2227726",
+  "title": "Making a “Completely Blind” Image Quality Analyzer",
+  "type": "article",
+  "year": 2012,
+  "cited": 6730,
+  "abstract": "An important aim of research on the blind image quality assessment (IQA) problem is to devise perceptual models that can predict the quality of distorted images with as little prior knowledge of the images or their distortions as possible. Current state-of-the-art “general purpose” no reference (NR) IQA algorithms require knowledge about anticipated distortions in the form of training examples and corresponding human opinion scores. However we have recently derived a blind IQA model that only makes use of measurable deviations from statistical regularities observed in natural images, without training on human-rated distorted images, and, indeed without any exposure to distorted images. Thus, it is “completely blind.” The new IQA model, which we call the Natural Image Quality Evaluator (NIQE) is based on the construction of a “quality aware” collection of statistical features based on a simple and successful space domain natural scene statistic (NSS) model. These features are derived from a corpus of natural, undistorted images. Experimental results show that the new index delivers performance comparable to top performing NR IQA models that require training on large databases of human opinions of distorted images. A software release is available at http://live.ece.utexas.edu/research/quality/niqe_release.zip.",
+  "pdfs": [],
+  "landings": [
+   "http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.299.1429",
+   "http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.707.615",
+   "https://doi.org/10.1109/lsp.2012.2227726"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/TIP.2011.2147325",
+  "title": "Blind Image Quality Assessment: From Natural Scene Statistics to Perceptual Quality",
+  "type": "article",
+  "year": 2011,
+  "cited": 1761,
+  "abstract": "Our approach to blind image quality assessment (IQA) is based on the hypothesis that natural scenes possess certain statistical properties which are altered in the presence of distortion, rendering them un-natural; and that by characterizing this un-naturalness using scene statistics, one can identify the distortion afflicting the image and perform no-reference (NR) IQA. Based on this theory, we propose an (NR)/blind algorithm-the Distortion Identification-based Image Verity and INtegrity Evaluation (DIIVINE) index-that assesses the quality of a distorted image without need for a reference image. DIIVINE is based on a 2-stage framework involving distortion identification followed by distortion-specific quality assessment. DIIVINE is capable of assessing the quality of a distorted image across multiple distortion categories, as against most NR IQA algorithms that are distortion-specific in nature. DIIVINE is based on natural scene statistics which govern the behavior of natural images. In this paper, we detail the principles underlying DIIVINE, the statistical features extracted and their relevance to perception and thoroughly evaluate the algorithm on the popular LIVE IQA database. Further, we compare the performance of DIIVINE against leading full-reference (FR) IQA algorithms and demonstrate that DIIVINE is statistically superior to the often used measure of peak signal-to-noise ratio (PSNR) and statistically equivalent to the popular structural similarity index (SSIM). A software release of DIIVINE has been made available online: \"http://live.ece.utexas.edu/research/quality/DIIVINE_release.zip\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">http://live.ece.utexas.edu/research/quality/DIIVINE_release.zip for public use and evaluation.",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1109/tip.2011.2147325",
+   "https://pubmed.ncbi.nlm.nih.gov/21521667"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/QOMEX.2009.5246972",
+  "title": "A no-reference perceptual image sharpness metric based on a cumulative probability of blur detection",
+  "type": "conference-paper",
+  "year": 2009,
+  "cited": 207,
+  "abstract": "In this paper, a no-reference objective sharpness metric based on a cumulative probability of blur detection is proposed. The metric is evaluated by taking into account the human visual system (HVS) response to blur distortions. The perceptual significance of the metric is validated through subjective experiments. It is shown that the proposed metric results in a very good correlation with subjective scores especially for images with varying foreground and background perceived blur qualities. This is accomplished with a significantly lower computational complexity as compared to existing methods that take into account the visual attention information.",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1109/qomex.2009.5246972"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/TIP.2011.2131660",
+  "title": "A No-Reference Image Blur Metric Based on the Cumulative Probability of Blur Detection (CPBD)",
+  "type": "article",
+  "year": 2011,
+  "cited": 590,
+  "abstract": "This paper presents a no-reference image blur metric that is based on the study of human blur perception for varying contrast values. The metric utilizes a probabilistic model to estimate the probability of detecting blur at each edge in the image, and then the information is pooled by computing the cumulative probability of blur detection (CPBD). The performance of the metric is demonstrated by comparing it with existing no-reference sharpness/blurriness metrics for various publicly available image databases.",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1109/tip.2011.2131660",
+   "https://pubmed.ncbi.nlm.nih.gov/21447451"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/TIP.2008.2011760",
+  "title": "A No-Reference Objective Image Sharpness Metric Based on the Notion of Just Noticeable Blur (JNB)",
+  "type": "article",
+  "year": 2009,
+  "cited": 759,
+  "abstract": "This work presents a perceptual-based no-reference objective image sharpness/blurriness metric by integrating the concept of just noticeable blur into a probability summation model. Unlike existing objective no-reference image sharpness/blurriness metrics, the proposed metric is able to predict the relative amount of blurriness in images with different content. Results are provided to illustrate the performance of the proposed perceptual-based sharpness metric. These results show that the proposed sharpness metric correlates well with the perceived sharpness being able to predict with high accuracy the relative amount of blurriness in images with different content.",
+  "pdfs": [],
+  "landings": [
+   "http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.544.2813",
+   "https://doi.org/10.1109/tip.2008.2011760",
+   "https://pubmed.ncbi.nlm.nih.gov/19278916"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/ICIP.2007.4379342",
+  "title": "A No-Reference Objective Image Sharpness Metric Based on Just-Noticeable Blur and Probability Summation",
+  "type": "conference-paper",
+  "year": 2007,
+  "cited": 54,
+  "abstract": "This work presents a perceptual-based no-reference objective image sharpness/blurriness metric by integrating the concept of just noticeable blur (JNB) into a probability summation model. Unlike existing objective no-reference image sharpness/blurriness metrics, the proposed metric is able to predict the relative amount of blurriness in images with different content. Results are provided to illustrate the performance of the proposed perceptual-based sharpness metric. These results show that the proposed sharpness metric correlates well with the perceived sharpness.",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1109/icip.2007.4379342"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/TIP.2013.2251643",
+  "title": "Image Sharpness Assessment Based on Local Phase Coherence",
+  "type": "article",
+  "year": 2013,
+  "cited": 290,
+  "abstract": "Sharpness is an important determinant in visual assessment of image quality. The human visual system is able to effortlessly detect blur and evaluate sharpness of visual images, but the underlying mechanism is not fully understood. Existing blur/sharpness evaluation algorithms are mostly based on edge width, local gradient, or energy reduction of global/local high frequency content. Here we understand the subject from a different perspective, where sharpness is identified as strong local phase coherence (LPC) near distinctive image features evaluated in the complex wavelet transform domain. Previous LPC computation is restricted to be applied to complex coefficients spread in three consecutive dyadic scales in the scale-space. Here we propose a flexible framework that allows for LPC computation in arbitrary fractional scales. We then develop a new sharpness assessment algorithm without referencing the original image. We use four subject-rated publicly available image databases to test the proposed algorithm, which demonstrates competitive performance when compared with state-of-the-art algorithms.",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1109/tip.2013.2251643",
+   "https://pubmed.ncbi.nlm.nih.gov/23481852"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/ICASSP.2010.5496297",
+  "title": "No-reference image sharpness assessment based on local phase coherence measurement",
+  "type": "conference-paper",
+  "year": 2010,
+  "cited": 111,
+  "abstract": "Sharpness is one of the most determining factors in the perceptual assessment of image quality. Objective image sharpness measures may play important roles in the design and optimization of visual perception-based auto-focus systems and image enhancement, restoration and compression algorithms. Here we propose a new sharpness measure where sharpness is identified as strong local phase coherence evaluated in the complex wavelet transform domain. Our test using the LIVE blur database shows that the proposed algorithm correlates well with subjective quality evaluations. An additional advantage of our approach is that other image distortions such as compression, median filtering and noise contamination that may affect perceptual sharpness can also be detected.",
+  "pdfs": [],
+  "landings": [
+   "http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.706.1124",
+   "http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.709.3800",
+   "https://doi.org/10.1109/icassp.2010.5496297"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/BMSB.2013.6621727",
+  "title": "No-reference image blur assessment based on gradient profile sharpness",
+  "type": "conference-paper",
+  "year": 2013,
+  "cited": 16,
+  "abstract": "The increasing number of digital images and videos has boosted the need of no-reference objective image and video quality assessment (QA). In this paper, we focus on proposing a perceptual-based no-reference image blur assessment using the feature of gradient profile sharpness (GPS). We first build a triangle model to represent the gradient profiles of edge pixels, and propose GPS based on the triangle model. Then a metric for blur assessment is extracted from the distribution histogram of GPS. Experimental results show that the proposed blur metric correlates well with the perceived blurriness, and it can achieve competitive performance with the state-of-the-art no-reference metrics on public image dataset.",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1109/bmsb.2013.6621727"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/TIP.2015.2414877",
+  "title": "Single Image Superresolution Based on Gradient Profile Sharpness",
+  "type": "article",
+  "year": 2015,
+  "cited": 159,
+  "abstract": "Single image superresolution is a classic and active image processing problem, which aims to generate a high-resolution (HR) image from a low-resolution input image. Due to the severely under-determined nature of this problem, an effective image prior is necessary to make the problem solvable, and to improve the quality of generated images. In this paper, a novel image superresolution algorithm is proposed based on gradient profile sharpness (GPS). GPS is an edge sharpness metric, which is extracted from two gradient description models, i.e., a triangle model and a Gaussian mixture model for the description of different kinds of gradient profiles. Then, the transformation relationship of GPSs in different image resolutions is studied statistically, and the parameter of the relationship is estimated automatically. Based on the estimated GPS transformation relationship, two gradient profile transformation models are proposed for two profile description models, which can keep profile shape and profile gradient magnitude sum consistent during profile transformation. Finally, the target gradient field of HR image is generated from the transformed gradient profiles, which is added as the image prior in HR image reconstruction model. Extensive experiments are conducted to evaluate the proposed algorithm in subjective visual effect, objective quality, and computation time. The experimental results demonstrate that the proposed approach can generate superior HR images with better visual quality, lower reconstruction error, and acceptable computation efficiency as compared with state-of-the-art works.",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1109/tip.2015.2414877",
+   "https://pubmed.ncbi.nlm.nih.gov/25807567"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1117/12.702790",
+  "title": "The blur effect: perception and estimation with a new no-reference perceptual blur metric",
+  "type": "conference-paper",
+  "year": 2007,
+  "cited": 623,
+  "abstract": "To achieve the best image quality, noise and artifacts are generally removed at the cost of a loss of details generating the blur effect. To control and quantify the emergence of the blur effect, blur metrics have already been proposed in the literature. By associating the blur effect with the edge spreading, these metrics are sensitive not only to the threshold choice to classify the edge, but also to the presence of noise which can mislead the edge detection. Based on the observation that we have difficulties to perceive differences between a blurred image and the same reblurred image, we propose a new approach which is not based on transient characteristics but on the discrimination between different levels of blur perceptible on the same picture. Using subjective tests and psychophysics functions, we validate our blur perception theory for a set of pictures which are naturally unsharp or more or less blurred through one or two-dimensional low-pass filters. Those tests show the robustness and the ability of the metric to evaluate not only the blur introduced by a restoration processing but also focal blur or motion blur. Requiring no reference and a low cost implementation, this new perceptual blur metric is applicable in a large domain from a simple metric to a means to fine-tune artifacts corrections.",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1117/12.702790"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/CVPR.2015.7298665",
+  "title": "Just noticeable defocus blur detection and estimation",
+  "type": "conference-paper",
+  "year": 2015,
+  "cited": 246,
+  "abstract": "We tackle a fundamental problem to detect and estimate just noticeable blur (JNB) caused by defocus that spans a small number of pixels in images. This type of blur is common during photo taking. Although it is not strong, the slight edge blurriness contains informative clues related to depth. We found existing blur descriptors based on local information cannot distinguish this type of small blur reliably from unblurred structures. We propose a simple yet effective blur feature via sparse representation and image decomposition. It directly establishes correspondence between sparse edge representation and blur strength estimation. Extensive experiments manifest the generality and robustness of this feature.",
+  "pdfs": [],
+  "landings": [
+   "http://gateway.isiknowledge.com/gateway/Gateway.cgi?GWVersion=2&SrcAuth=LinksAMR&SrcApp=PARTNER_APP&DestLinkType=FullRecord&DestApp=WOS&KeyUT=000387959200072",
+   "https://doi.org/10.1109/cvpr.2015.7298665"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/TCYB.2017.2671898",
+  "title": "FUIQA: Fetal Ultrasound Image Quality Assessment With Deep Convolutional Networks",
+  "type": "article",
+  "year": 2017,
+  "cited": 242,
+  "abstract": "The quality of ultrasound (US) images for the obstetric examination is crucial for accurate biometric measurement. However, manual quality control is a labor intensive process and often impractical in a clinical setting. To improve the efficiency of examination and alleviate the measurement error caused by improper US scanning operation and slice selection, a computerized fetal US image quality assessment (FUIQA) scheme is proposed to assist the implementation of US image quality control in the clinical obstetric examination. The proposed FUIQA is realized with two deep convolutional neural network models, which are denoted as L-CNN and C-CNN, respectively. The L-CNN aims to find the region of interest (ROI) of the fetal abdominal region in the US image. Based on the ROI found by the L-CNN, the C-CNN evaluates the image quality by assessing the goodness of depiction for the key structures of stomach bubble and umbilical vein. To further boost the performance of the L-CNN, we augment the input sources of the neural network with the local phase features along with the original US data. It will be shown that the heterogeneous input sources will help to improve the performance of the L-CNN. The performance of the proposed FUIQA is compared with the subjective image quality evaluation results from three medical doctors. With comprehensive experiments, it will be illustrated that the computerized assessment with our FUIQA scheme can be comparable to the subjective ratings from medical doctors.",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1109/tcyb.2017.2671898",
+   "https://pubmed.ncbi.nlm.nih.gov/28362600"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1109/ICCV48922.2021.00510",
+  "title": "MUSIQ: Multi-scale Image Quality Transformer",
+  "type": "conference-paper",
+  "year": 2021,
+  "cited": 1008,
+  "abstract": "Image quality assessment (IQA) is an important research topic for understanding and improving visual experience. The current state-of-the-art IQA methods are based on convolutional neural networks (CNNs). The performance of CNN-based models is often compromised by the fixed shape constraint in batch training. To accommodate this, the input images are usually resized and cropped to a fixed shape, causing image quality degradation. To address this, we design a multi-scale image quality Transformer (MUSIQ) to process native resolution images with varying sizes and aspect ratios. With a multi-scale image representation, our proposed method can capture image quality at different granularities. Furthermore, a novel hash-based 2D spatial embedding and a scale embedding is proposed to support the positional embedding in the multi-scale representation. Experimental results verify that our method can achieve state-of-the-art performance on multiple large scale IQA datasets such as PaQ-2-PiQ [41], SPAQ [11], and KonIQ-10k [16].1",
+  "pdfs": [
+   "https://arxiv.org/pdf/2108.05997"
+  ],
+  "landings": [
+   "http://arxiv.org/abs/2108.05997",
+   "https://doi.org/10.1109/iccv48922.2021.00510",
+   "https://doi.org/10.48550/arxiv.2108.05997"
+  ],
+  "licenses": [],
+  "oa_status": "green"
+ },
+ {
+  "doi": "10.1109/tcsvt.2018.2886771",
+  "title": "Blind Image Quality Assessment Using a Deep Bilinear Convolutional Neural Network",
+  "type": "article",
+  "year": 2018,
+  "cited": 960,
+  "abstract": "We propose a deep bilinear model for blind image quality assessment that works for both synthetically and authentically distorted images. Our model constitutes two streams of deep convolutional neural networks (CNNs), specializing in two distortion scenarios separately. For synthetic distortions, we first pre-train a CNN to classify the distortion type and the level of an input image, whose ground truth label is readily available at a large scale. For authentic distortions, we make use of a pre-train CNN (VGG-16) for the image classification task. The two feature sets are bilinearly pooled into one representation for a final quality prediction. We fine-tune the whole network on the target databases using a variant of stochastic gradient descent. The extensive experimental results show that the proposed model achieves state-of-the-art performance on both synthetic and authentic IQA databases. Furthermore, we verify the generalizability of our method on the large-scale Waterloo Exploration Database, and demonstrate its competitiveness using the group maximum differentiation competition methodology.",
+  "pdfs": [
+   "https://arxiv.org/pdf/1907.02665"
+  ],
+  "landings": [
+   "http://arxiv.org/abs/1907.02665",
+   "https://doi.org/10.1109/tcsvt.2018.2886771",
+   "https://doi.org/10.48550/arxiv.1907.02665"
+  ],
+  "licenses": [],
+  "oa_status": "green"
+ },
+ {
+  "doi": "10.1016/j.proeng.2013.09.086",
+  "title": "Image Sharpness Measure for Blurred Images in Frequency Domain",
+  "type": "conference-paper",
+  "year": 2013,
+  "cited": 146,
+  "abstract": "One of the most challenging problems for researchers in the field of image processing is image quality assessment. A very important factor in image quality assessment is image sharpness/blurriness. The goal of researchers in the field of image quality assessment is to design and develop algorithms and measures for detecting sharpness and blurriness in an image. In this pape r a new technique is proposed to calculate image sharpness/blurriness measure in frequency domain.",
+  "pdfs": [
+   "https://www.sciencedirect.com/science/article/pii/S1877705813016007/pdf"
+  ],
+  "landings": [
+   "https://doi.org/10.1016/j.proeng.2013.09.086"
+  ],
+  "licenses": [
+   "cc-by-nc-nd"
+  ],
+  "oa_status": "diamond"
+ },
+ {
+  "doi": "10.1016/j.media.2019.101548",
+  "title": "Multi-task learning for quality assessment of fetal head ultrasound images",
+  "type": "article",
+  "year": 2019,
+  "cited": 128,
+  "abstract": "<no abstract>",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1016/j.media.2019.101548",
+   "https://pubmed.ncbi.nlm.nih.gov/31525671"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1007/978-3-030-00928-1_42",
+  "title": "Real Time RNN Based 3D Ultrasound Scan Adequacy for Developmental Dysplasia of the Hip",
+  "type": "conference-paper",
+  "year": 2018,
+  "cited": 20,
+  "abstract": "<no abstract>",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1007/978-3-030-00928-1_42"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ },
+ {
+  "doi": "10.1007/978-3-319-46976-8_14",
+  "title": "Fully Automating Graf’s Method for DDH Diagnosis Using Deep Convolutional Neural Networks",
+  "type": "conference-paper",
+  "year": 2016,
+  "cited": 41,
+  "abstract": "<no abstract>",
+  "pdfs": [],
+  "landings": [
+   "https://doi.org/10.1007/978-3-319-46976-8_14"
+  ],
+  "licenses": [],
+  "oa_status": "closed"
+ }
+]

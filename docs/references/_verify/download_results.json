@@ -1,0 +1,218 @@
+[
+ {
+  "label": "01-02",
+  "file": "Lee_2021_DDH-segmentation-keypoint.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://www.mdpi.com/2075-4418/11/7/1174/pdf",
+  "note": "not pdf: text/html; charset=utf-8 (https://pmc.ncbi.nlm.nih.gov/articles/PMC8303134/pdf/diagnostics-11-01174.pdf) len=1817"
+ },
+ {
+  "label": "01-04",
+  "file": "Ahn_2025_standard-plane-global-local.pdf",
+  "status": "OK",
+  "size": 1334769,
+  "url": "https://link.springer.com/content/pdf/10.1186/s12911-025-02926-8.pdf?error=cookies_not_supported&code=57689383-6821-4599-a9df-e95282595eb0",
+  "note": "CC BY 4.0"
+ },
+ {
+  "label": "01-08",
+  "file": "Pulik_2025_AI-segmentation-8-structures.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://www.mdpi.com/2077-0383/14/17/6332/pdf",
+  "note": "not pdf: text/html; charset=utf-8 (https://pmc.ncbi.nlm.nih.gov/articles/PMC12389933/pdf/sensors-25-05195.pdf) len=1814"
+ },
+ {
+  "label": "01-10",
+  "file": "Fadell_2025_game-changing-advances-review.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/jum.70161",
+  "note": "HTTP 403"
+ },
+ {
+  "label": "01-11",
+  "file": "Bhavsar_2025_AI-DDH-systematic-review.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1111/jpc.70172",
+  "note": "HTTP 403"
+ },
+ {
+  "label": "01-12",
+  "file": "Kamath_2026_AI-DDH-imaging-systematic-review.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://eor.bioscientifica.com/downloadpdf/journals/eor/11/4/EOR-24-0165.pdf",
+  "note": "HTTP 403"
+ },
+ {
+  "label": "01-13",
+  "file": "Xu_2025_HipSonoNeuNet-multicenter.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://www.thelancet.com/action/showPdf?pii=S2589-5370%2825%2900419-8",
+  "note": "not pdf: text/html;charset=UTF-8 (https://linkinghub.elsevier.com/retrieve/pii/S2589537025004857) len=2774"
+ },
+ {
+  "label": "01-14",
+  "file": "Chi_2026_MultiHipPoseNet.pdf",
+  "status": "OK",
+  "size": 2865032,
+  "url": "https://www.frontiersin.org/journals/pediatrics/articles/10.3389/fped.2026.1939157/pdf",
+  "note": "CC BY 4.0"
+ },
+ {
+  "label": "01-16",
+  "file": "Darilmaz_2025_AI-SPS-standard-plane.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/jor.70020",
+  "note": "HTTP 403"
+ },
+ {
+  "label": "01-17",
+  "file": "Cevik_2022_standard-plane-detection.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://dergipark.org.tr/en/download/article-file/2220149",
+  "note": "URLError: <urlopen error [WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。>"
+ },
+ {
+  "label": "01-19",
+  "file": "Shimizu_2025_bone-signal-heterogeneity.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://www.mdpi.com/2075-4418/15/4/403/pdf",
+  "note": "HTTP 403"
+ },
+ {
+  "label": "01-20",
+  "file": "Lee_2025_automated-neonatal-hip-system.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12920978/pdf/",
+  "note": "not pdf: text/html; charset=utf-8 (https://link.springer.com/article/10.1007/s10278-025-01498-3?error=cookies_not_supported&code=f6e418) len=313812"
+ },
+ {
+  "label": "01-22",
+  "file": "Hareendranathan_2022_AI-scan-quality.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://www.mdpi.com/2076-3417/12/8/4072/pdf?version=1650278370",
+  "note": "HTTP 403"
+ },
+ {
+  "label": "01-24",
+  "file": "Ulziibat_2024_nurses-vs-junior-physicians.pdf",
+  "status": "OK",
+  "size": 934614,
+  "url": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0300753&type=printable",
+  "note": "CC BY 4.0"
+ },
+ {
+  "label": "01-25",
+  "file": "Hers_2025_SegFormer3D-robustness.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://doi.org/10.1016/j.ultrasmedbio.2024.12.013",
+  "note": "not pdf: text/html;charset=UTF-8 (https://linkinghub.elsevier.com/retrieve/pii/S0301562924004733) len=2741"
+ },
+ {
+  "label": "01-26",
+  "file": "Liu_2022_normal-hip-morphology-China.pdf",
+  "status": "OK",
+  "size": 696847,
+  "url": "https://www.frontiersin.org/journals/pediatrics/articles/10.3389/fped.2022.914545/pdf",
+  "note": "CC BY 4.0"
+ },
+ {
+  "label": "01-27",
+  "file": "Zhu_2026_YOLOv8-keypoint-radiomics.pdf",
+  "status": "OK",
+  "size": 1942109,
+  "url": "https://link.springer.com/content/pdf/10.1186/s12887-026-07150-5.pdf?error=cookies_not_supported&code=863b0b89-451d-45f9-8150-f0e76af497fe",
+  "note": "CC BY-NC-ND 4.0"
+ },
+ {
+  "label": "01-28",
+  "file": "Pulik_2026_end-to-end-preprint.pdf",
+  "status": "OK",
+  "size": 1240586,
+  "url": "https://assets-eu.researchsquare.com/files/rs-9439534/v1/e0fae275-133b-4c16-9236-0d60986243b1.pdf?c=1778748651",
+  "note": "CC BY 4.0 (preprint, not peer reviewed)"
+ },
+ {
+  "label": "01-30",
+  "file": "Pandey_2019_ShadowPeak.pdf",
+  "status": "OK",
+  "size": 1293029,
+  "url": "https://easychair.org/publications/open/kK6h",
+  "note": "EPiC open access (bronze)"
+ },
+ {
+  "label": "01-29",
+  "file": "Sezer_2020_speckle-noise-augmentation.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "http://www.umbjournal.org/article/S0301562919315182/pdf",
+  "note": "HTTP 403"
+ },
+ {
+  "label": "02-16",
+  "file": "Zhang_2021_CNN-medical-US-IQA.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://downloads.hindawi.com/journals/complexity/2021/9938367.pdf",
+  "note": "HTTP 403"
+ },
+ {
+  "label": "02-18",
+  "file": "Ke_2021_MUSIQ.pdf",
+  "status": "OK",
+  "size": 5576166,
+  "url": "https://arxiv.org/pdf/2108.05997",
+  "note": "arXiv non-exclusive license"
+ },
+ {
+  "label": "02-19",
+  "file": "Zhang_2018_DBCNN.pdf",
+  "status": "OK",
+  "size": 3905559,
+  "url": "https://arxiv.org/pdf/1907.02665",
+  "note": "arXiv non-exclusive license"
+ },
+ {
+  "label": "02-20",
+  "file": "De_2013_frequency-domain-sharpness.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://www.sciencedirect.com/science/article/pii/S1877705813016007/pdf",
+  "note": "HTTP 403"
+ },
+ {
+  "label": "02-17",
+  "file": "Zhang_2017_fetal-head-QA-measure.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5531416/pdf/",
+  "note": "not pdf: text/html; charset=utf-8 (https://pmc.ncbi.nlm.nih.gov/articles/PMC5531416/pdf/main.pdf) len=1817"
+ },
+ {
+  "label": "02-13",
+  "file": "Shi_2015_JNB-defocus.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://www.cse.cuhk.edu.hk/leojia/projects/motion_deblurring/paper/defocus_cvpr15.pdf",
+  "note": "not pdf: text/html; charset=UTF-8 (https://www.cse.cuhk.edu.hk/) len=164441"
+ },
+ {
+  "label": "02-04",
+  "file": "Narvekar_2009_CPBD-QoMEX.pdf",
+  "status": "FAIL",
+  "size": 0,
+  "url": "https://scien.stanford.edu/pages/labsite/2009/...",
+  "note": ""
+ }
+]

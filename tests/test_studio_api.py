@@ -98,6 +98,33 @@ class ApiTests(unittest.TestCase):
         for path in ('/', '/studio.css', '/studio.js'):
             self.assertEqual(self.request(path)[0], 200)
 
+    def test_open_output_creates_missing_directory_and_reports_path(self):
+        self.assertEqual(self.request('/api/project', {'source': str(self.source), 'work': str(self.root/'work')})[0], 200)
+        output = Path(json.loads(self.request('/api/status')[1])['output'])
+        with patch('crop_studio.subprocess.Popen') as launch:
+            code, body = self.request('/api/output/open', {})
+        self.assertEqual(code, 200)
+        self.assertEqual(json.loads(body)['path'], str(output))
+        launch.assert_called_once()
+        self.assertIn('explorer', str(launch.call_args[0][0][0]).lower())
+        self.assertTrue(output.is_dir(), '输出目录被删除后应自动重建')
+
+    def test_default_work_prefers_recent_existing_then_documents(self):
+        from crop_studio import default_work
+        work = self.root/'work'
+        self.service.configure(str(self.source), str(work))
+        self.assertEqual(default_work(self.service), str(work))
+        with patch('crop_studio.documents_dir', return_value=self.root/'docs'), \
+                patch.object(RecentProjects, 'entries', return_value=[]):
+            self.assertEqual(default_work(self.service), str(self.root/'docs'/'DDH裁剪结果'))
+
+    def test_bootstrap_default_work_uses_last_used_directory(self):
+        work = self.root/'somewhere'
+        self.service.configure(str(self.source), str(work))
+        self.service.remember()
+        payload = json.loads(self.request('/api/bootstrap')[1])
+        self.assertEqual(payload['default_work'], str(work))
+
     def test_shutdown_is_authenticated_and_desktop_only(self):
         self.assertEqual(self.request('/api/shutdown', {})[0], 400)
         self.server.desktop = True

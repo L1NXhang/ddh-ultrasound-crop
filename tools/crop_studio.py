@@ -29,6 +29,48 @@ ASSETS = {'/': ('studio.html', 'text/html; charset=utf-8'),
           '/collaboration.js': ('collaboration.js', 'text/javascript; charset=utf-8'),
           '/studio.css': ('studio.css', 'text/css; charset=utf-8')}
 
+FROZEN = bool(getattr(sys, 'frozen', False))
+
+
+def documents_dir():
+    """用户「文档」目录。跟随系统 Known Folder（兼容 OneDrive 重定向），失败回退 ~/Documents。"""
+    fallback = Path.home()/'Documents'
+    if os.name != 'nt':
+        return fallback
+    import ctypes
+    from ctypes import wintypes
+
+    class GUID(ctypes.Structure):
+        _fields_ = [('Data1', ctypes.c_ulong), ('Data2', ctypes.c_ushort),
+                    ('Data3', ctypes.c_ushort), ('Data4', ctypes.c_ubyte*8)]
+
+    documents = GUID(0xFDD39AD0, 0x238F, 0x46AF,
+                     (ctypes.c_ubyte*8)(0xAD, 0xB4, 0x6C, 0x85, 0x48, 0x03, 0x69, 0xC7))
+    buffer = ctypes.c_wchar_p()
+    if ctypes.windll.shell32.SHGetKnownFolderPath(ctypes.byref(documents), 0, None, ctypes.byref(buffer)) == 0:
+        result = Path(buffer.value)
+        ctypes.windll.ole32.CoTaskMemFree(buffer)
+        return result
+    return fallback
+
+
+def default_work(service):
+    """默认保存位置：最近一次使用且仍然存在的目录优先；绝不指向安装目录。
+
+    安装目录不可写用户数据（卸载即丢），因此 frozen 版会跳过位于安装目录内的历史记录。
+    """
+    install = ROOT.parent if FROZEN else None
+    try:
+        for row in service.recent_projects():
+            work = Path(row['work'])
+            if install is not None and (work == install or install in work.parents):
+                continue
+            if work.is_dir():
+                return str(work)
+    except ValueError:
+        pass  # 最近记录损坏不应阻塞启动，回退文档目录
+    return str(documents_dir()/'DDH裁剪结果')
+
 
 def pick_directory(initial):
     if os.name != 'nt':
@@ -122,7 +164,7 @@ class StudioHandler(BaseHTTPRequestHandler):
             file, content_type = ASSETS[path]
             self.send((ROOT/'tools/webapp'/file).read_bytes(), content_type)
         elif path == '/api/bootstrap':
-            self.json({'token': self.server.token, 'default_work': str(ROOT.parent),
+            self.json({'token': self.server.token, 'default_work': default_work(service),
                        'status': service.status(), 'recent_projects': service.recent_projects()})
         elif path == '/api/recent':
             self.json({'rows': service.recent_projects()})
@@ -183,6 +225,11 @@ class StudioHandler(BaseHTTPRequestHandler):
     def post_route(self, path, body):
         service = self.server.service
         if path == '/api/project':
+            if FROZEN:
+                work = Path(body['work']).resolve()
+                install = ROOT.parent
+                if work == install or install in work.parents:
+                    raise ValueError('保存位置不能放在软件安装目录里：卸载或升级时结果会被一起删除')
             self.json(service.configure(body['source'], body['work']))
         elif path == '/api/folder':
             self.json({'path': pick_directory(body.get('initial') or ROOT.parent)})
@@ -211,10 +258,15 @@ class StudioHandler(BaseHTTPRequestHandler):
             self.json(service.collaboration.stop())
         elif path == '/api/output/open':
             service.idle()
+            output = service.project.output
+            output.mkdir(parents=True, exist_ok=True)
             if os.name != 'nt':
-                raise ValueError('输出目录：'+str(service.project.output))
-            os.startfile(service.project.output)
-            self.json({'ok': True})
+                raise ValueError('输出目录：'+str(output))
+            # 不用 os.startfile（ShellExecuteW）：后台无窗口进程发起时资源管理器
+            # 窗口可能不前置甚至不显示（装机日志：9 次点击全部 200 但用户看不到窗口）。
+            # explorer.exe 无论从哪个进程上下文启动都会前台开新窗口。
+            subprocess.Popen(['explorer.exe', str(output)])
+            self.json({'ok': True, 'path': str(output)})
         elif path == '/api/shutdown':
             if not self.server.desktop:
                 raise ValueError('此操作仅供桌面软件退出时使用')

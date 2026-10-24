@@ -104,7 +104,7 @@ $('cropMode').onclick=()=>setMode('crop');$('windowMode').onclick=()=>setMode('w
 $('scope').onchange=()=>{scope=$('scope').value;refreshQueue().catch(error=>toast(error.message));};
 $('finishLater').onclick=()=>{visible('finish',false);refreshQueue().catch(error=>toast(error.message));};$('finishZip').onclick=makeArchive;
 $('archiveSide').onclick=()=>{if(!status?.saved&&!status?.failed){toast('先保存一张结果，再打包');return;}showFinish('保存压缩包',status.saved+' 张已保存，其中 '+status.reviewed+' 张已审核。');};
-$('openOutput').onclick=()=>api('/api/output/open',{}).catch(error=>toast(error.message));$('stopBatch').onclick=()=>api('/api/batch/stop',{}).then(()=>toast('将在当前图片处理后停止')).catch(error=>toast(error.message));
+$('openOutput').onclick=()=>api('/api/output/open',{}).then(()=>toast('已在新窗口打开结果文件夹')).catch(error=>toast(error.message));$('stopBatch').onclick=()=>api('/api/batch/stop',{}).then(()=>toast('将在当前图片处理后停止')).catch(error=>toast(error.message));
 document.addEventListener('keydown',event=>{
  if(/INPUT|SELECT|TEXTAREA/.test(event.target.tagName)||event.target.isContentEditable||!editable())return;
  const key=event.key.toLowerCase();

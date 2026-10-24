@@ -7,6 +7,10 @@ let view={scale:1,x:0,y:0}, pan=null, spaceHeld=false;
 const canvas=$('canvas'), ctx=canvas.getContext('2d');
 const flagText={no_content:'未找到成像区域',area_too_small:'窗口可能偏小',area_too_large:'窗口可能包含界面内容',multiple_blocks:'检测到多个区域',touches_border:'成像内容靠近图片边缘',content_beyond_right:'请检查窗口右边界',content_beyond_left:'请检查窗口左边界',content_beyond_bottom:'请检查窗口下边界',content_beyond_top:'请检查窗口上边界'};
 function visible(id,show){$(id).classList.toggle('hidden',!show)}
+/* 夜间模式：跟随系统为默认；用户手动切换后记住选择 */
+function applyMode(mode){document.documentElement.dataset.mode=mode;}
+$('modeToggle').onclick=()=>{const mode=document.documentElement.dataset.mode==='dark'?'light':'dark';try{localStorage.setItem('ddh-mode',mode);}catch(error){}applyMode(mode);};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',event=>{let stored=null;try{stored=localStorage.getItem('ddh-mode');}catch(error){}if(!stored)applyMode(event.matches?'dark':'light');});
 function toast(message){$('toast').textContent=message;visible('toast',true);clearTimeout(toast.timer);toast.timer=setTimeout(()=>visible('toast',false),3500)}
 async function api(path,body){
  const payload=reviewMode&&body&&body.id?{...body,task_token:current?.task_token}:body;

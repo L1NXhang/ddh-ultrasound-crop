@@ -58,12 +58,21 @@ class StudioService:
     def status(self):
         project = self.project
         records = list(project.records.values()) if project else []
+        adjustments = []
+        for record in records:
+            if not (record.get('human_reviewed') and record.get('exported')):
+                continue
+            prediction = record.get('latest_prediction') or record.get('prediction') or {}
+            clean, model = record.get('clean_box'), prediction.get('crop_box')
+            if clean and model and len(clean) == 4 and len(model) == 4:
+                adjustments.append((abs(clean[1]-model[1])+abs(clean[3]-model[3]))/2)
         return {'configured': project is not None, 'source': str(project.source) if project else '',
                 'work': str(project.work) if project else '', 'output': str(project.output) if project else '',
                 'total': len(project.rows) if project else 0, 'saved': sum(bool(r.get('exported')) for r in records),
                 'reviewed': sum(bool(r.get('human_reviewed')) for r in records),
                 'failed': sum(not r.get('exported') for r in records), 'skipped': len(self.skipped),
                 'drafts': len(self.drafts.rows) if self.drafts else 0,
+                'avg_adjust_px': round(sum(adjustments)/len(adjustments)) if adjustments else None,
                 'flagged': sum(bool(r.get('flags')) for r in records), 'job': copy.deepcopy(self.job),
                 'device': self.runner.device, 'model': self.runner.metadata}
 

@@ -2,7 +2,7 @@
 const EDIT_HISTORY_LIMIT = 40;
 const DRAFT_DELAY_MS = 350;
 let editHistory = [], editIndex = -1, draftTimer = null, draftSaving = null;
-let persistedGeometry = '', preview = false, draftHasPersisted = false;
+let persistedGeometry = '', preview = false, compare = false, draftHasPersisted = false;
 
 function geometry() {
  return {window: windowBox ? [...windowBox] : null, clean_box: cleanBox ? [...cleanBox] : null};
@@ -22,6 +22,9 @@ function updateEditButtons() {
  $('previewCrop').disabled=!enabled || !cleanBox || stale();
  $('previewCrop').setAttribute('aria-pressed',String(preview));
  $('previewCrop').textContent=preview?'返回原图':'成品预览';
+ $('compareToggle').classList.toggle('hidden',!preview||!cleanBox||stale());
+ $('compareToggle').disabled=!enabled;
+ $('compareToggle').setAttribute('aria-pressed',String(compare));
 }
 function initEdits() {
  clearTimeout(draftTimer);
@@ -95,7 +98,16 @@ function resetPrediction() {
 }
 function togglePreview() {
  if(!editable() || !cleanBox || stale())return;
- preview=!preview;fit();updateInfo();updateEditButtons();
+ preview=!preview;
+ if(!preview)compare=false;
+ visible('compareLabels',preview&&compare);
+ fit();updateInfo();updateEditButtons();
+}
+function toggleCompare() {
+ if(!preview || !cleanBox || stale())return;
+ compare=!compare;
+ visible('compareLabels',compare);
+ fit();updateInfo();updateEditButtons();
 }
 function renderRecents(rows) {
  visible('recentTasks',rows.length>0);
@@ -137,6 +149,7 @@ function setupSessionControls() {
  $('redoEdit').onclick=()=>undoEdit(1);
  $('resetPrediction').onclick=resetPrediction;
  $('previewCrop').onclick=togglePreview;
+ $('compareToggle').onclick=toggleCompare;
  $('cancelSetup').onclick=()=>{visible('setup',false);updateEditButtons();};
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushDraft();});
  window.addEventListener('pagehide',()=>{

@@ -58,6 +58,14 @@ class ServiceTests(unittest.TestCase):
         self.assertEqual(result['clean_box'], [25, 30, 160, 170])
         self.assertEqual(len(self.service.queue('reviewed')), 1)
 
+    def test_status_reports_average_manual_adjustment(self):
+        self.assertIsNone(self.service.status()['avg_adjust_px'])
+        row = next(r for r in self.service.project.rows if r['file'] == 'sample.png')
+        pred = self.service.predict(row['id'])
+        # FakeRunner 预测 clean_box=[10,30,190,170]；人工改为 [25,45,160,155]：上下各调 15px
+        self.service.review(row['id'], pred['window'], [25, 45, 160, 155])
+        self.assertEqual(self.service.status()['avg_adjust_px'], 15)
+
     def test_window_edit_requires_reprediction(self):
         row = next(r for r in self.service.project.rows if r['file'] == 'sample.png')
         self.service.predict(row['id'])

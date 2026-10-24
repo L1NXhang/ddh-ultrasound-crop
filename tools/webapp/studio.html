@@ -24,6 +24,7 @@
    <span><b id="countTotal">0</b> 张</span><span>已保存 <b id="countSaved">0</b></span><span>已审核 <b id="countReviewed">0</b></span>
   </div>
   <div class="progress-track"><i id="progressBar"></i></div>
+  <div class="session-stats" aria-label="本次统计"><span>平均调整</span><b id="statAdjust" class="mono">—</b></div>
   <div class="queue-head"><span>图片</span><select id="scope" aria-label="筛选图片"><option value="pending">待审核</option><option value="all">全部</option><option value="reviewed">已审核</option></select></div>
   <div id="queue" class="queue"><div class="muted empty-list">打开文件夹后显示图片。</div></div>
   <div class="sidebar-bottom">
@@ -38,22 +39,26 @@
   <div class="editor-head">
    <div class="image-heading"><div id="imageName" class="image-name">选择图片</div><div id="imageMeta" class="muted"></div></div>
    <div class="editor-tools">
+    <button id="backHome" class="quiet" title="返回主界面，选择其他文件夹或任务">← 主界面</button>
     <button id="undoEdit" class="quiet icon-button" title="撤销（Ctrl+Z）" aria-label="撤销" disabled>↶</button>
     <button id="redoEdit" class="quiet icon-button" title="重做（Ctrl+Shift+Z）" aria-label="重做" disabled>↷</button>
     <button id="resetPrediction" class="quiet" title="恢复最近一次模型建议">恢复预测</button>
     <button id="previewCrop" class="quiet" aria-pressed="false" title="查看最终裁剪效果（P）">成品预览</button>
+    <button id="compareToggle" class="quiet hidden" aria-pressed="false" title="并排对比原图与成品">对比</button>
    </div>
   </div>
   <div id="stage" class="stage">
    <div id="emptyStage" class="empty-stage"><p>从左侧选择一张图片</p></div>
    <canvas id="canvas" aria-label="原图与裁剪框"></canvas>
    <div id="zoomBadge" class="zoom-badge hidden" aria-live="polite">100%</div>
+   <div id="compareLabels" class="compare-labels hidden"><span>原图</span><span>成品</span></div>
    <div id="loading" class="loading hidden" role="status"><span class="spinner"></span><b>正在预测…</b><span>首次预测需要加载模型。</span></div>
   </div>
   <div class="editor-info">
    <span id="cropSize" class="mono">—</span>
    <span id="draftState" class="draft-state" role="status"></span>
    <span id="notice" class="notice"></span>
+   <details class="coordinate-details"><summary>快捷键</summary><div class="shortcut-popup"><table><tr><td><kbd>Enter</kbd></td><td>保存并下一张</td></tr><tr><td><kbd>C</kbd> / <kbd>W</kbd></td><td>裁剪范围 / 成像窗口</td></tr><tr><td><kbd>R</kbd></td><td>按当前窗口重新预测</td></tr><tr><td><kbd>P</kbd></td><td>成品预览（预览中滚轮缩放、中键拖动）</td></tr><tr><td><kbd>↑</kbd><kbd>↓</kbd></td><td>裁剪上边界微调 1px（Shift 10px）</td></tr><tr><td><kbd>K</kbd></td><td>稍后处理</td></tr><tr><td><kbd>Ctrl+Z</kbd></td><td>撤销（Shift 恢复）</td></tr><tr><td><kbd>Ctrl+S</kbd></td><td>保存</td></tr></table></div></details>
    <details class="coordinate-details"><summary>坐标 / 图例</summary><div class="coordinate-popup"><code id="coordinates">原图像素坐标</code><div class="legend"><span><i class="red"></i>成像窗口</span><span><i class="green"></i>裁剪范围</span></div></div></details>
   </div>
   <div class="editor-actions">
@@ -68,8 +73,18 @@
 
 <div id="setup" class="overlay">
  <section class="setup-card" aria-labelledby="setupTitle">
+  <svg class="setup-art" viewBox="0 0 220 200" fill="none" stroke="currentColor" aria-hidden="true">
+   <path d="M28 60c0-8 6-14 14-14h34c10 0 16 6 20 14l6 14c4 10 14 16 25 16h18c12 0 21 9 21 21v6c0 12-9 21-21 21h-14l-8 26c-2 8-9 14-17 14h-16c-7 0-12-6-10-13l7-27H62c-10 0-19-6-22-16l-8-24c-3-9-4-19-4-28Z" stroke-width="5"/>
+   <circle cx="158" cy="70" r="34" stroke-width="5"/>
+   <path d="M140 96l-14 26" stroke-width="5" stroke-linecap="round"/>
+  </svg>
   <h1 id="setupTitle">打开图片文件夹</h1>
   <p class="subtitle">选择图片和保存位置，开始裁剪。</p>
+  <ol class="setup-steps" aria-label="使用步骤">
+   <li><b>① 打开文件夹</b><span>自动找出成像窗口并预测裁剪线</span></li>
+   <li><b>② 逐张确认</b><span>拖动四边微调，Enter 保存并下一张</span></li>
+   <li><b>③ 导出结果</b><span>裁剪图 + 标线图 + 审核记录，可打包 ZIP</span></li>
+  </ol>
   <div class="field">
    <label for="sourcePath">图片文件夹</label>
    <div class="path-input"><input id="sourcePath" placeholder="选择需要裁剪的图片" spellcheck="false"><button id="chooseSource">选择文件夹</button></div>

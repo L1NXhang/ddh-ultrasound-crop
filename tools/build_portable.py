@@ -13,9 +13,10 @@ from studio_project import file_hash
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT/'data/portable_build'
-VERSION = '0.5.1'
+VERSION = '0.6.0'
 NAME = f'DDH_Crop_{VERSION}_Windows_x64_CPU'
-AUTO_VERSION = '0.5.1'
+AUTO_VERSION = '0.6.0'
+TRAIN_VERSION = '0.6.0'
 WEB_ASSETS = ('studio.html', 'studio.css', 'studio.js', 'studio_session.js', 'desktop.js', 'review_client.js', 'collaboration.js')
 PREFIXES = ('ddh_multidevice_v2/backend/', 'ddh_multidevice_v2/desktop/runtime/',
             'ddh_multidevice_v2/desktop/WebView2Runtime/', 'ddh_multidevice_v2/THIRD_PARTY_LICENSES/')
@@ -34,7 +35,8 @@ README = '''DDH 图像裁剪工具 · Windows 便携 CPU 版 v{version}
 7. 未确认调整保存为草稿。确认后导出 PNG 与 JSON；完成后可自选是否保存 ZIP。
 8. 点击右上角“协作审核”可给组员设置账号和密码；组员通过浏览器审核，记录直接存回主机。
    局域网使用 IP 和端口；外网需另行配置加密组网或 HTTPS 代理。软件不会自动修改防火墙。
-9. v0.5.1默认直接使用模型最终裁剪线，不再额外外扩2%；旧的已确认结果和草稿保留。
+9. v0.6.0：成品预览支持滚轮缩放、拖动与原图/成品对比；新增夜间模式；「打开结果文件夹」
+   修复为始终弹出窗口；默认保存位置改为「文档\DDH裁剪结果」，并记住上次选择。
 
 本包不含项目图片、样例病例或本机审核数据。内含现有模型、CPU 推理环境和固定版 WebView2，
 不需要安装 Python，不需要独立显卡，裁剪过程中不需要联网。
@@ -101,11 +103,11 @@ def licenses(destination, build=BUILD):
 
 
 def package(destination, reuse_frozen=False, variant='cpu', make_archive=True):
-    if variant not in {'cpu', 'auto'}:
+    if variant not in {'cpu', 'auto', 'train'}:
         raise ValueError('Unknown inference variant')
     build = BUILD if variant == 'cpu' else ROOT/'data/portable_gpu_build'
     version = VERSION if variant == 'cpu' else AUTO_VERSION
-    label = 'CPU' if variant == 'cpu' else 'CPU_GPU'
+    label = {'cpu': 'CPU', 'auto': 'CPU_GPU', 'train': 'GPU_TRAIN'}[variant]
     destination = destination.resolve()
     if destination.exists():
         raise ValueError('Release folder already exists; choose a new output folder')
@@ -135,9 +137,18 @@ def package(destination, reuse_frozen=False, variant='cpu', make_archive=True):
     (app/'model_manifest.json').write_text(json.dumps(model_meta, indent=2), encoding='utf-8')
     (app/'portable.json').write_text(json.dumps({'version': version, 'platform': 'Windows x64',
                                                'inference': variant, 'contains_project_images': False}), encoding='utf-8')
-    readme = README.format(version=version) if variant == 'cpu' else README.format(version=version).replace('CPU 版 v'+version, 'CPU/GPU 自动版 v'+version).replace(
-        '现有模型、CPU 推理环境和固定版 WebView2', '现有模型、CPU/CUDA 推理环境和固定版 WebView2').replace(
-        'CPU 推理速度取决于电脑配置。', '有兼容的 NVIDIA CUDA 显卡时自动使用 GPU，否则使用 CPU；GPU 加载或推理失败时自动切回 CPU。AMD/Intel 显卡使用 CPU。')
+    readme = README.format(version=version)
+    if variant == 'auto':
+        readme = readme.replace('CPU 版 v'+version, 'CPU/GPU 自动版 v'+version).replace(
+            '现有模型、CPU 推理环境和固定版 WebView2', '现有模型、CPU/CUDA 推理环境和固定版 WebView2').replace(
+            'CPU 推理速度取决于电脑配置。', '有兼容的 NVIDIA CUDA 显卡时自动使用 GPU，否则使用 CPU；GPU 加载或推理失败时自动切回 CPU。AMD/Intel 显卡使用 CPU。')
+    if variant == 'train':
+        readme = readme.replace('CPU 版 v'+version, 'GPU+训练版 v'+version).replace(
+            '现有模型、CPU 推理环境和固定版 WebView2', '现有模型、CPU/CUDA 推理环境、模型训练组件和固定版 WebView2').replace(
+            'CPU 推理速度取决于电脑配置。',
+            '有兼容的 NVIDIA CUDA 显卡时自动使用 GPU，否则使用 CPU；GPU 加载或推理失败时自动切回 CPU。'
+            '本版包含训练组件：右上角「训练」可用已审核的标注清单在本机重新训练裁剪线模型（需要 NVIDIA 显卡）。').replace(
+            '软件不会自行重新训练或替换模型。', '「训练」功能只在您主动操作时运行，不会自行重新训练或替换模型。')
     (destination/'先读我.txt').write_text(readme, encoding='utf-8-sig')
     licenses(app/'THIRD_PARTY_LICENSES', build)
     files = clean_inventory(destination)
@@ -174,9 +185,10 @@ def package(destination, reuse_frozen=False, variant='cpu', make_archive=True):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', type=Path)
-    parser.add_argument('--variant', choices=['cpu', 'auto'], default='cpu')
+    parser.add_argument('--variant', choices=['cpu', 'auto', 'train'], default='cpu')
     parser.add_argument('--reuse-frozen', action='store_true')
     parser.add_argument('--no-archive', action='store_true')
     args = parser.parse_args()
-    name = NAME if args.variant == 'cpu' else f'DDH_Crop_{AUTO_VERSION}_Windows_x64_CPU_GPU'
+    name = {'cpu': NAME, 'auto': f'DDH_Crop_{AUTO_VERSION}_Windows_x64_CPU_GPU',
+            'train': f'DDH_Crop_{TRAIN_VERSION}_Windows_x64_GPU_TRAIN'}[args.variant]
     package(args.out or ROOT.parent/'release'/name, args.reuse_frozen, args.variant, not args.no_archive)

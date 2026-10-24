@@ -51,6 +51,19 @@ namespace DDHDesktop
                     view.PostWebMessageAsJson(json.Serialize(new { id = id, result = new { path = saved } }));
                     return;
                 }
+                if (action == "pickFile")
+                {
+                    string initial = message.ContainsKey("initial") && !string.IsNullOrWhiteSpace(Convert.ToString(message["initial"]))
+                        ? Convert.ToString(message["initial"]) : Program.Root;
+                    using (var picker = new OpenFileDialog { Title = "选择标注清单", Filter = "标注清单 (*.jsonl)|*.jsonl|所有文件 (*.*)|*.*" })
+                    {
+                        string directory = File.Exists(initial) ? Path.GetDirectoryName(initial) : initial;
+                        if (Directory.Exists(directory)) picker.InitialDirectory = directory;
+                        string path = picker.ShowDialog(owner) == DialogResult.OK ? picker.FileName : "";
+                        view.PostWebMessageAsJson(json.Serialize(new { id = id, result = new { path = path } }));
+                    }
+                    return;
+                }
                 if (action != "pickFolder") throw new ArgumentException("无效的桌面操作。");
                 string initial = message.ContainsKey("initial") ? Convert.ToString(message["initial"]) : Program.Root;
                 using (var picker = new FolderBrowserDialog { Description = "选择工作目录或待裁图片文件夹", ShowNewFolderButton = true })

@@ -170,10 +170,10 @@ canvas.panning { cursor: grabbing; }
 .notice { flex: 1; min-width: 0; color: var(--accent-strong); text-align: right; }
 .coordinate-details { flex-shrink: 0; }
 .coordinate-details summary { cursor: pointer; }
-.coordinate-popup { position: absolute; bottom: 34px; right: 12px; z-index: 5; display: block; max-width: min(90vw, 650px); padding: 12px 16px; border: 1px solid var(--line); border-radius: 8px; color: var(--text); background: var(--surface-popover); box-shadow: var(--cds-shadow-popover); line-height: 1.8; overflow-wrap: anywhere; }
+.coordinate-popup { position: absolute; bottom: 34px; right: 12px; z-index: 5; display: block; max-width: min(90vw, 650px); padding: 12px 16px; border: 1px solid var(--line); border-radius: 8px; color: var(--text); background: var(--cds-surface-popover); box-shadow: var(--cds-shadow-popover); line-height: 1.8; overflow-wrap: anywhere; }
 .coordinate-popup code { display: block; }
 .coordinate-popup .legend { display: flex; margin-top: 8px; }
-.shortcut-popup { position: absolute; bottom: 34px; right: 12px; z-index: 5; padding: 12px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-popover); box-shadow: var(--cds-shadow-popover); }
+.shortcut-popup { position: absolute; bottom: 34px; right: 12px; z-index: 5; padding: 12px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--cds-surface-popover); box-shadow: var(--cds-shadow-popover); }
 .shortcut-popup table { border-collapse: collapse; }
 .shortcut-popup td { padding: 3px 10px 3px 0; font-size: 11px; color: var(--muted); white-space: nowrap; }
 .shortcut-popup td:first-child { color: var(--text); }
@@ -229,7 +229,7 @@ html[data-mode="dark"] .setup-art { opacity: .14; }
 body:has(#setup:not(.hidden)) .workspace { visibility: hidden; }
 
 .dialog-overlay { background: rgba(0, 0, 0, .42); }
-.dialog-card { width: min(480px, 100%); margin: auto; padding: 28px; background: var(--surface-popover); border: 1px solid var(--line); border-radius: var(--radius-dialog); box-shadow: var(--cds-shadow-lg); }
+.dialog-card { width: min(480px, 100%); margin: auto; padding: 28px; background: var(--cds-surface-popover); border: 1px solid var(--line); border-radius: var(--radius-dialog); box-shadow: var(--cds-shadow-lg); }
 .dialog-card h2 { margin: 0 0 13px; font: 500 24px/1.5 var(--display); }
 .dialog-card p { margin: 0 0 14px; font-size: 12px; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
@@ -240,6 +240,12 @@ body:has(#setup:not(.hidden)) .workspace { visibility: hidden; }
 .download-link { display: inline-block; margin-top: 18px; color: var(--accent); font-size: 12px; text-underline-offset: 3px; }
 .dialog-card .fine { margin: 9px 0 0; font: 10px/1.7 var(--mono); }
 .batch-file { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.training-card { width: min(640px, 96vw); max-height: 92vh; overflow-y: auto; }
+.train-inline { display: flex; align-items: center; gap: 10px; margin-top: 18px; }
+.train-inline label { font-size: 12px; font-weight: 500; white-space: nowrap; }
+.train-inline input { width: 90px; padding: 7px 9px; border: 1px solid var(--cds-border-strong); border-radius: 5px; color: var(--text); background: var(--surface); }
+.train-log { margin: 10px 0 0; padding: 12px 14px; max-height: 300px; overflow: auto; border-radius: 8px; background: var(--stage); color: #c9c5b8; font: 10.5px/1.7 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.train-state { font-weight: 500; }
 .large-progress { height: 3px; overflow: hidden; margin: 22px 0 12px; background: var(--cds-alpha-1); }
 .batch-numbers { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 11px; color: var(--muted); }
 .batch-numbers b { font: 12px/1.5 var(--mono); color: var(--text); }
@@ -247,7 +253,7 @@ body:has(#setup:not(.hidden)) .workspace { visibility: hidden; }
 .loading b { font-weight: 400; font-size: 13px; }
 .loading > span:last-child { color: #a6a296; font-size: 10px; }
 .spinner { width: 20px; height: 20px; margin-bottom: 2px; border: 1px solid #646052; border-top-color: #e2dac7; border-radius: 50%; animation: spin .8s linear infinite; }
-.toast { position: fixed; z-index: 50; bottom: 80px; left: 50%; max-width: min(80vw, 620px); padding: 10px 15px; border-radius: 8px; background: var(--surface-popover); color: var(--text); box-shadow: var(--cds-shadow-popover); transform: translateX(-50%); font-size: 12px; }
+.toast { position: fixed; z-index: 50; bottom: 80px; left: 50%; max-width: min(80vw, 620px); padding: 10px 15px; border-radius: 8px; background: var(--cds-surface-popover); color: var(--text); box-shadow: var(--cds-shadow-popover); transform: translateX(-50%); font-size: 12px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .eyebrow { display: block; margin-bottom: 9px; font-size: 11px; color: var(--muted); letter-spacing: .04em; }
 .dialog-card .field > input, .collaboration-advanced > input { width: 100%; min-height: 36px; }

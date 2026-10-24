@@ -99,6 +99,35 @@ $owner.Dispose()
     return result.stdout.strip()
 
 
+def pick_file(initial, title='选择文件'):
+    """选择单个文件（用于训练数据清单等），返回完整路径或空字符串。"""
+    if os.name != 'nt':
+        raise ValueError('当前系统请直接粘贴文件路径')
+    script = '''
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+Add-Type -AssemblyName System.Windows.Forms
+$picker = New-Object System.Windows.Forms.OpenFileDialog
+$picker.Title = $env:DDH_PICKER_TITLE
+$picker.InitialDirectory = $env:DDH_PICKER_INITIAL
+$picker.Filter = '标注清单 (*.jsonl)|*.jsonl|所有文件 (*.*)|*.*'
+$owner = New-Object System.Windows.Forms.Form
+$owner.TopMost = $true
+if ($picker.ShowDialog($owner) -eq [System.Windows.Forms.DialogResult]::OK) {
+    [Console]::Write($picker.FileName)
+}
+$picker.Dispose()
+$owner.Dispose()
+'''
+    result = subprocess.run(['powershell.exe', '-NoProfile', '-STA', '-Command', script],
+                            env={**os.environ, 'DDH_PICKER_INITIAL': str(initial), 'DDH_PICKER_TITLE': title},
+                            capture_output=True, encoding='utf-8', timeout=300,
+                            creationflags=subprocess.CREATE_NO_WINDOW)
+    if result.returncode:
+        logging.error('File picker failed: %s', result.stderr)
+        raise ValueError('文件选择器未能打开，请直接粘贴文件路径')
+    return result.stdout.strip()
+
+
 class StudioServer(ThreadingHTTPServer):
     daemon_threads = True
 
@@ -107,6 +136,8 @@ class StudioServer(ThreadingHTTPServer):
         self.service = service
         from studio_collaboration import Collaboration
         self.service.collaboration = Collaboration(service, ROOT/'tools/webapp')
+        from studio_training import TrainingService
+        self.training = TrainingService(ROOT/'data/studio_runtime')
         self.token = secrets.token_urlsafe(32)
         self.desktop = False
         self.stopped = threading.Event()
@@ -187,6 +218,8 @@ class StudioHandler(BaseHTTPRequestHandler):
             if file is None:
                 raise ValueError('该压缩包已过期，请重新打包')
             self.send_file(file, 'application/zip', filename=file.name)
+        elif path == '/api/train/status':
+            self.json(self.server.training.status())
         else:
             self.json({'error': '未找到页面'}, 404)
 
@@ -267,6 +300,13 @@ class StudioHandler(BaseHTTPRequestHandler):
             # explorer.exe 无论从哪个进程上下文启动都会前台开新窗口。
             subprocess.Popen(['explorer.exe', str(output)])
             self.json({'ok': True, 'path': str(output)})
+        elif path == '/api/pick-file':
+            initial = body.get('initial') or str(ROOT.parent)
+            self.json({'path': pick_file(initial, body.get('title') or '选择文件')})
+        elif path == '/api/train/start':
+            self.json(self.server.training.start(body))
+        elif path == '/api/train/stop':
+            self.json(self.server.training.stop())
         elif path == '/api/shutdown':
             if not self.server.desktop:
                 raise ValueError('此操作仅供桌面软件退出时使用')
@@ -275,6 +315,12 @@ class StudioHandler(BaseHTTPRequestHandler):
             request_shutdown(self.server)
         else:
             self.json({'error': '未知操作'}, 404)
+
+
+def run_train_job(spec_file):
+    """--train-job 子进程入口：在独立进程里完成一次训练并打印结果行。"""
+    from studio_training import run_train_job as run
+    run(spec_file)
 
 
 def main():
@@ -290,7 +336,11 @@ def main():
     parser.add_argument('--session-file')
     parser.add_argument('--parent-pid', type=int)
     parser.add_argument('--state-dir', type=Path, default=ROOT/'data/studio_runtime')
+    parser.add_argument('--train-job', help='内部参数：训练作业 spec 的 JSON 文件路径')
     args = parser.parse_args()
+    if args.train_job:
+        run_train_job(args.train_job)
+        return
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
     from studio_session import RecentProjects
     service = StudioService(ModelRunner(args.checkpoint, args.device, margin=args.margin),

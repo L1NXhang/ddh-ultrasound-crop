@@ -165,6 +165,46 @@ $('scope').onchange=()=>{scope=$('scope').value;refreshQueue().catch(error=>toas
 $('finishLater').onclick=()=>{visible('finish',false);refreshQueue().catch(error=>toast(error.message));};$('finishZip').onclick=makeArchive;
 $('archiveSide').onclick=()=>{if(!status?.saved&&!status?.failed){toast('先保存一张结果，再打包');return;}showFinish('保存压缩包',status.saved+' 张已保存，其中 '+status.reviewed+' 张已审核。');};
 $('openOutput').onclick=()=>api('/api/output/open',{}).then(()=>toast('已在新窗口打开结果文件夹')).catch(error=>toast(error.message));$('stopBatch').onclick=()=>api('/api/batch/stop',{}).then(()=>toast('将在当前图片处理后停止')).catch(error=>toast(error.message));
+/* ---------- 模型训练 ---------- */
+let trainTimer=null;
+function setTrainView(running){
+ visible('trainForm',!running);visible('trainRunning',running);visible('trainStop',running);
+ $('trainStart').textContent=running?'训练中…':'开始训练';$('trainStart').disabled=running;
+}
+async function pollTrain(){
+ try{const job=await api('/api/train/status');
+  setTrainView(job.running);
+  if(job.running||job.state!=='idle'){$('trainLog').textContent=(job.lines||[]).join('\n');const box=$('trainLog');box.scrollTop=box.scrollHeight;}
+  if(job.state==='completed'&&!pollTrain.reported){pollTrain.reported=true;setTrainView(false);$('trainState').textContent='训练完成';toast('训练完成，模型已保存到 '+(job.result?.output||'输出位置'));}
+  if(job.state==='failed'&&!pollTrain.reported){pollTrain.reported=true;setTrainView(false);$('trainState').textContent='训练失败';$('trainError').textContent=job.error||'训练失败，请查看日志';}
+ }catch(error){/* 关闭窗口后轮询失败则停止 */}
+ finally{if(!$('trainPanel').classList.contains('hidden'))trainTimer=setTimeout(pollTrain,1500);}
+}
+function choosePath(field,mode){
+ const button=$(field==='trainManifest'?'chooseTrainManifest':field==='trainRoot'?'chooseTrainRoot':'chooseTrainOutput');
+ button.disabled=true;
+ (async()=>{try{
+   const isDesktop=typeof desktopRequest==='function'&&window.chrome?.webview;
+   const result=isDesktop?await desktopRequest(mode==='file'?'pickFile':'pickFolder',{initial:$(field).value||''})
+                         :await api(mode==='file'?'/api/pick-file':'/api/folder',{initial:$(field).value||''});
+   if(result.path)$(field).value=result.path;
+  }catch(error){$('trainError').textContent=error.message;}
+  finally{button.disabled=false;}})();
+}
+$('trainOpen').onclick=async()=>{if(reviewMode){toast('协作审核模式下不开放训练');return;}
+ visible('trainPanel',true);$('trainError').textContent='';pollTrain.reported=false;pollTrain();};
+$('trainClose').onclick=()=>{visible('trainPanel',false);clearTimeout(trainTimer);};
+$('trainStop').onclick=()=>api('/api/train/stop',{}).then(r=>toast(r.note||'正在停止训练')).catch(error=>toast(error.message));
+$('trainStart').onclick=async()=>{
+ $('trainError').textContent='';
+ const spec={manifest:$('trainManifest').value.trim(),root:$('trainRoot').value.trim(),
+             output:$('trainOutput').value.trim(),epochs:parseInt($('trainEpochs').value||'30',10)};
+ if(!spec.manifest||!spec.root||!spec.output){$('trainError').textContent='请填写数据清单、图片根目录与输出位置';return;}
+ try{await api('/api/train/start',spec);pollTrain.reported=false;setTrainView(true);toast('训练已开始');}
+ catch(error){$('trainError').textContent=error.message;}};
+$('chooseTrainManifest').onclick=()=>choosePath('trainManifest','file');
+$('chooseTrainRoot').onclick=()=>choosePath('trainRoot','folder');
+$('chooseTrainOutput').onclick=()=>choosePath('trainOutput','folder');
 document.addEventListener('keydown',event=>{
  if(/INPUT|SELECT|TEXTAREA/.test(event.target.tagName)||event.target.isContentEditable||!editable())return;
  const key=event.key.toLowerCase();

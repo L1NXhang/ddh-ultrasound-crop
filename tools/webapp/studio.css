@@ -91,6 +91,9 @@ kbd { font: 10px/1.5 var(--mono); color: var(--muted); }
 .legend .red { background: var(--red); }
 .stage { position: relative; min-height: 0; overflow: hidden; background: #232320; }
 canvas { position: absolute; cursor: crosshair; touch-action: none; }
+canvas.previewing { cursor: grab; }
+canvas.panning { cursor: grabbing; }
+.zoom-badge { position: absolute; top: 10px; right: 12px; z-index: 4; padding: 3px 10px; border-radius: 999px; background: #000000a8; color: #ece9df; font: 11px/1.6 var(--mono); pointer-events: none; }
 .empty-stage { position: absolute; inset: 0; display: grid; place-items: center; color: #aaa79c; font-size: 12px; pointer-events: none; }
 .editor-info { position: relative; display: flex; align-items: center; gap: 16px; min-height: 35px; padding: 7px 20px; border-top: 1px solid var(--line); font-size: 10px; color: var(--muted); }
 .notice { flex: 1; min-width: 0; color: #8b6246; text-align: right; }

@@ -3,6 +3,7 @@ const $ = id => document.getElementById(id);
 let token='', status=null, current=null, image=null, scale=1, mode='crop', active=null, anchor=null;
 let windowBox=null, cleanBox=null, predictionWindow=null, busy=false, scope='pending', runMode='review';
 let queue=[], lastBatchPrompt='', reviewPrompted=false, pollTimer=null;
+let view={scale:1,x:0,y:0}, pan=null, spaceHeld=false;
 const canvas=$('canvas'), ctx=canvas.getContext('2d');
 const flagText={no_content:'未找到成像区域',area_too_small:'窗口可能偏小',area_too_large:'窗口可能包含界面内容',multiple_blocks:'检测到多个区域',touches_border:'成像内容靠近图片边缘',content_beyond_right:'请检查窗口右边界',content_beyond_left:'请检查窗口左边界',content_beyond_bottom:'请检查窗口下边界',content_beyond_top:'请检查窗口上边界'};
 function visible(id,show){$(id).classList.toggle('hidden',!show)}
@@ -50,8 +51,21 @@ async function loadImage(id){
  catch(error){toast(error.message);$('notice').textContent=error.message;}
  finally{setBusy(false);visible('loading',false);}
 }
-function clearCanvas(){preview=false;clearTimeout(draftTimer);draftLabel('');image=null;current=null;windowBox=null;cleanBox=null;ctx.clearRect(0,0,canvas.width,canvas.height);visible('emptyStage',true);$('imageName').textContent='选择图片';$('imageMeta').textContent='';$('cropSize').textContent='—';$('coordinates').textContent='原图像素坐标';$('notice').textContent='';}
-function fit(){if(!image)return;const stage=$('stage');const width=preview?cleanBox[2]-cleanBox[0]:image.width,height=preview?cleanBox[3]-cleanBox[1]:image.height;scale=Math.max(.01,Math.min((stage.clientWidth-36)/width,(stage.clientHeight-30)/height));canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);canvas.style.left=(stage.clientWidth-canvas.width)/2+'px';canvas.style.top=(stage.clientHeight-canvas.height)/2+'px';draw();}
+function clearCanvas(){preview=false;clearTimeout(draftTimer);draftLabel('');image=null;current=null;windowBox=null;cleanBox=null;ctx.clearRect(0,0,canvas.width,canvas.height);visible('emptyStage',true);canvas.classList.remove('previewing','panning');$('zoomBadge').classList.add('hidden');$('imageName').textContent='选择图片';$('imageMeta').textContent='';$('cropSize').textContent='—';$('coordinates').textContent='原图像素坐标';$('notice').textContent='';}
+function fit(){if(!image)return;const stage=$('stage');$('zoomBadge').classList.toggle('hidden',!preview);
+ if(preview&&cleanBox){const width=cleanBox[2]-cleanBox[0],height=cleanBox[3]-cleanBox[1];
+  view.scale=Math.max(.1,Math.min((stage.clientWidth-36)/width,(stage.clientHeight-30)/height,1));
+  view.x=(stage.clientWidth-width*view.scale)/2;view.y=(stage.clientHeight-height*view.scale)/2;
+  applyView();draw();return;}
+ const width=image.width,height=image.height;scale=Math.max(.01,Math.min((stage.clientWidth-36)/width,(stage.clientHeight-30)/height));canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);canvas.style.left=(stage.clientWidth-canvas.width)/2+'px';canvas.style.top=(stage.clientHeight-canvas.height)/2+'px';draw();}
+function applyView(){const width=cleanBox[2]-cleanBox[0],height=cleanBox[3]-cleanBox[1];
+ canvas.width=Math.max(1,Math.round(width*view.scale));canvas.height=Math.max(1,Math.round(height*view.scale));
+ canvas.style.left=view.x+'px';canvas.style.top=view.y+'px';canvas.classList.toggle('previewing',preview);
+ $('zoomBadge').textContent=Math.round(view.scale*100)+'%';}
+function zoomTo(next,cx,cy){const target=Math.max(.1,Math.min(4,next));if(target===view.scale)return;
+ const ix=(cx-view.x)/view.scale,iy=(cy-view.y)/view.scale;
+ view.scale=target;view.x=cx-ix*target;view.y=cy-iy*target;applyView();draw();}
+function zoomBy(factor){const stage=$('stage');zoomTo(view.scale*factor,stage.clientWidth/2,stage.clientHeight/2);}
 function box(rect,color,dashed){if(!rect)return;ctx.strokeStyle=color;ctx.lineWidth=2;ctx.setLineDash(dashed?[6,4]:[]);ctx.strokeRect(rect[0]*scale,rect[1]*scale,(rect[2]-rect[0])*scale,(rect[3]-rect[1])*scale);ctx.setLineDash([]);}
 function draw(){
  ctx.clearRect(0,0,canvas.width,canvas.height);if(!image)return;
@@ -63,7 +77,7 @@ function draw(){
 function updateInfo(){
  if(!current)return;$('imageName').textContent=current.file;$('imageMeta').textContent=current.original_size.join(' × ')+' px · '+(current.reviewed?'已审核':'待审核');
  $('coordinates').textContent='窗口 '+JSON.stringify(windowBox)+' · 裁剪 '+JSON.stringify(cleanBox);$('cropSize').textContent=cleanBox?(cleanBox[2]-cleanBox[0])+' × '+(cleanBox[3]-cleanBox[1])+' px':'—';
- const flags=(current.flags||[]).map(flag=>flagText[flag]||'请检查窗口边界');$('notice').title=flags.join('；');$('notice').textContent=preview?'成品预览 · 按 P 返回原图':stale()?'窗口已修改，请重新预测':!windowBox?'未找到窗口：按 W 手动框选':flags.length?flags.slice(0,2).join('；'):'拖动框的四边可微调';
+ const flags=(current.flags||[]).map(flag=>flagText[flag]||'请检查窗口边界');$('notice').title=flags.join('；');$('notice').textContent=preview?'成品预览 · 滚轮缩放 · 中键或空格+左键拖动 · 双击复位 · P 返回':stale()?'窗口已修改，请重新预测':!windowBox?'未找到窗口：按 W 手动框选':flags.length?flags.slice(0,2).join('；'):'拖动框的四边可微调';
 }
 function point(event){const rect=canvas.getBoundingClientRect();return [Math.round(Math.max(0,Math.min(image.width,(event.clientX-rect.left)/scale))),Math.round(Math.max(0,Math.min(image.height,(event.clientY-rect.top)/scale)))];}
 canvas.addEventListener('pointerdown',event=>{
@@ -80,6 +94,24 @@ canvas.addEventListener('pointermove',event=>{
 function finishDrag(){if(active!==null)changedGeometry();active=null;anchor=null;}
 canvas.addEventListener('pointerup',finishDrag);
 canvas.addEventListener('pointercancel',finishDrag);
+/* 成品预览的查看交互：滚轮缩放（光标为锚点）、中键或空格+左键拖动、双击复位 */
+$('stage').addEventListener('wheel',event=>{
+ if(!preview||!image)return;event.preventDefault();
+ const rect=$('stage').getBoundingClientRect();
+ zoomTo(view.scale*(event.deltaY<0?1.15:1/1.15),event.clientX-rect.left,event.clientY-rect.top);
+},{passive:false});
+$('stage').addEventListener('pointerdown',event=>{
+ if(!preview||!image||(event.button!==1&&!(event.button===0&&spaceHeld)))return;
+ event.preventDefault();pan={x:event.clientX-view.x,y:event.clientY-view.y};
+ canvas.classList.add('panning');try{$('stage').setPointerCapture(event.pointerId);}catch(error){}
+});
+$('stage').addEventListener('pointermove',event=>{if(!pan)return;view.x=event.clientX-pan.x;view.y=event.clientY-pan.y;applyView();});
+function endPan(){if(pan===null)return;pan=null;canvas.classList.remove('panning');}
+$('stage').addEventListener('pointerup',endPan);
+$('stage').addEventListener('pointercancel',endPan);
+$('stage').addEventListener('dblclick',()=>{if(preview&&image)fit();});
+document.addEventListener('keydown',event=>{if(!preview||/INPUT|SELECT|TEXTAREA/.test(event.target.tagName)||event.target.isContentEditable||/BUTTON|SUMMARY|A/.test(event.target.tagName))return;if(event.key===' '){event.preventDefault();spaceHeld=true;}});
+document.addEventListener('keyup',event=>{if(event.key===' ')spaceHeld=false;});
 async function repredict(){if(!current||!windowBox||busy)return;setBusy(true);visible('loading',true);try{const result=await api('/api/repredict',{id:current.id,window:windowBox});predictionWindow=[...result.window];cleanBox=[...result.crop_box];current.latest_prediction=result;persistedGeometry='';changedGeometry();setMode('crop');fit();updateInfo();toast('已按当前窗口重新预测，可继续调整四边');}catch(error){toast(error.message);}finally{setBusy(false);visible('loading',false);}}
 async function saveReview(){
  if(!current||busy)return;if(stale()){toast('请先按 R 重新预测');return;}if(!cleanBox){toast('请先定位窗口并重新预测');return;}
@@ -121,6 +153,8 @@ document.addEventListener('keydown',event=>{
  else if(key==='c')setMode('crop');
  else if(key==='k')skip();
  else if(key==='p')togglePreview();
+ else if(preview&&(key==='='||key==='+')){event.preventDefault();zoomBy(1.2);}
+ else if(preview&&key==='-'){event.preventDefault();zoomBy(1/1.2);}
  else if(event.key==='Escape'&&preview)togglePreview();
  else if(!preview&&['ArrowUp','ArrowDown'].includes(event.key)&&cleanBox){
   event.preventDefault();const delta=(event.key==='ArrowUp'?-1:1)*(event.shiftKey?10:1);

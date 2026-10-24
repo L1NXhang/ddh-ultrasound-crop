@@ -1,0 +1,1553 @@
+
+===== PAGE 1 =====
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+Original Article
+Deep learning-based no-reference quality assessment of anterior 
+segment ultrasound biomicroscopy panoramic images
+Qing-Hao Miao
+1
+, Xiao-Chun Wang
+1
+, Jun Yang
+1
+, Xiao-Ning Wang
+1
+, Xin-Qi Yu
+1
+, You Zhou
+1
+,  
+Zhi-Yuan Zhao
+1
+, Bin Wu
+2,3
+, Sheng Zhou
+1
+1
+State Key Laboratory of Advanced Medical Materials and Devices, Institute of Biomedical Engineering, Tianjin Institutes of Health Science, 
+Chinese Academy of Medical Science and Peking Union Medical College, Tianjin, China; 
+2
+Department of Visual Function Examination, Tianjin Eye 
+Hospital, Tianjin, China; 
+3
+Tianjin Key Lab of Ophthalmology and Visual Science, Tianjin, China
+Contributions: (I) Conception and design: All authors; (II) Administrative support: XC Wang, S Zhou, B Wu, J Yang, XN Wang; (III) Provision of 
+study materials or patients: B Wu; (IV) Collection and assembly of data: B Wu, XC Wang, S Zhou, QH Miao; (V) Data analysis and interpretation: 
+QH Miao, XC Wang, S Zhou, B Wu, J Yang, XQ Yu, Y Zhou, ZY Zhao; (VI) Manuscript writing: All authors; (VII) Final approval of manuscript: All 
+authors.
+Correspondence to: Sheng Zhou, PhD. State Key Laboratory of Advanced Medical Materials and Devices, Institute of Biomedical Engineering, Tianjin 
+Institutes of Health Science, Chinese Academy of Medical Science and Peking Union Medical College, Building 23, Huijin Cheng, East T uanbo 
+Avenue, North Beihua Road, T uanbo New T own, Jinghai District, Tianjin 301600, China. Email: zhousheng@bme.pumc.edu.cn; Bin Wu, PhD. 
+Department of Visual Function Examination, Tianjin Eye Hospital, No. 4 Gansu Road, Heping District, Tianjin 300020, China; Tianjin Key Lab of 
+Ophthalmology and Visual Science, Tianjin, China. Email: tianjinyankewubin@163.com.
+Background: Ultrasound biomicroscopy (UBM) enables high-resolution imaging of the anterior segment, 
+essential for accurate diagnosis and anatomical assessment. However, the quality evaluation of UBM 
+currently relies on subjective judgment, which is time-consuming and inconsistent. This study proposes a 
+deep learning (DL)-based no-reference method for objective and automated UBM image quality assessment 
+(IQA), facilitating reliable selection of high-quality images for clinical use.
+Methods: A total of 1,154 clinical panoramic UBM images of the anterior segment were collected from 
+Tianjin Eye Hospital. The YOLOv8s_DW_FOCUS model was employed to accurately extract the region 
+of interest (ROI) and identify five key anatomical landmarks: the central corneal epithelium, central corneal 
+endothelium, posterior lens capsule, left ciliary groove, and right ciliary groove. In collaboration with clinical 
+ophthalmologists, eight key criteria for assessing anterior segment UBM image quality were established, 
+integrating general medical image evaluation parameters and ophthalmic expertise. Based on these criteria, 
+each frame was assigned a quality score. Images scoring 7 or higher were classified as high-quality, whereas 
+those receiving a perfect score of 8 were considered standard. T o validate the feasibility of our method, we 
+conducted rigorous evaluations of its accuracy, focus on key regions, generalization capability, inter- and 
+intra-class discrimination, and consistency in assessment results.
+Results: The target detection model achieved a mean average precision (mAP) of 0.935, a recall of 0.898, 
+and a precision of 0.925. Additionally, it effectively focused on key regions, as demonstrated by the heatmap 
+analysis. The t-distributed stochastic neighbor embedding (t-SNE) plot further highlighted the model’s 
+strong discriminative capability across different classes and its excellent generalization performance. T o assess 
+the consistency between our no-reference quality assessment method and expert evaluations, we analyzed  
+174 standard images that had been subjectively selected by clinical ophthalmologists. Among them,  
+146 images received a score of 8, whereas 26 images scored 7, indicating a high level of agreement with 
+clinical experts in identifying high-quality images. Moreover, our method applies stricter criteria for defining 
+standard images, enabling a more precise selection of high-quality anterior segment UBM images.
+Conclusions: The DL-based no-reference quality assessment method proposed in this study provides an 
+11236
+===== PAGE 2 =====
+Miao et al. DL-based quality assessment of UBM images11220
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+Introduction
+The anterior segment is a critical part of the eye, 
+encompassing the region between the cornea and the lens. 
+It includes key structures such as the cornea, sclera, anterior 
+chamber, iris, pupil, and lens, all of which are essential 
+for visual function and overall ocular health. Imaging the 
+anterior segment provides valuable insights for diagnosing 
+diseases, detecting lesions, and assessing anatomical 
+structures and ocular parameters. Among various imaging 
+techniques, ultrasound biomicroscopy (UBM) is particularly 
+notable for its ability to capture high-resolution images of 
+the anterior segment. Operating at ultrasound frequencies 
+of 50–100 MHz, UBM enables detailed visualization and 
+precise measurement of deep ocular structures, including 
+the ciliary body, posterior chamber, and posterior lens 
+capsule (1,2).
+In ophthalmic clinical practice, medical image quality 
+directly affects diagnostic accuracy and treatment 
+effectiveness (3,4). Clinicians tend to prefer high-quality 
+images to ensure diagnostic precision, with a primary focus 
+on their practical value for diagnosis and treatment (5,6). 
+Obtaining high-quality images that clearly capture the full 
+structure and typical morphology of the eye is essential 
+for precise diagnosis and successful treatment. However, 
+ensuring the acquisition of high-quality images relies on 
+accurate and reliable image quality assessment (IQA) (7). 
+Medical IQA is generally categorized into two main 
+approaches: subjective and objective evaluation. Subjective 
+evaluation relies on radiologists to assess image quality 
+based on their clinical experience. Although widely used, 
+this traditional method has several limitations: results 
+depend entirely on the radiologist’s expertise, leading to 
+significant inter-observer variability; the process is labor-
+intensive and time-consuming; high workloads increase 
+the likelihood of errors; and inexperienced doctors may 
+struggle to obtain high-quality images in complex clinical 
+settings (8,9). In contrast, objective evaluation employs 
+quantitative algorithms or models to generate standardized 
+image quality scores. It is typically classified into full-
+reference (FR-IQA), reduced-reference (RR-IQA), and 
+no-reference (NR-IQA) methods. FR-IQA requires high-
+quality reference images and assesses image quality using 
+metrics such as structural similarity (SSIM), root mean 
+square error (RMSE), peak signal-to-noise ratio (PSNR), 
+and visual information fidelity (VIF), which compare the 
+test image to the reference image (10). RR-IQA evaluates 
+key features extracted from both the reference and test 
+images. NR-IQA, on the other hand, does not rely on a 
+reference image and directly assesses image quality based on 
+pixel-level features, offering efficiency, flexibility, and broad 
+applicability. Compared to subjective evaluation, objective 
+quality assessment eliminates inconsistencies and scoring 
+biases associated with human judgment while maintaining a 
+strong correlation with radiologists’ subjective evaluations. 
+As a result, objective IQA methods are increasingly being 
+adopted in medical imaging applications (11-14).
+Currently, there is no standardized system for assessing 
+the quality of anterior segment UBM images, and 
+automated quality evaluation remains underdeveloped. 
+Subjective evaluation by clinicians remains the primary 
+method, with objective assessment approaches still in 
+their early stages. Several factors hinder the acquisition of 
+standard UBM images that encompass all critical structures. 
+These include the strict requirements for eye movement 
+control and patient cooperation, anatomical structure 
+overlap, and the need for real-time imaging. Additionally, 
+individual anatomical variations and pathological differences 
+among patients make it challenging to establish universal 
+high-quality reference images. Consequently, traditional 
+FR-IQA and RR-IQA methods may not be well-suited 
+for UBM IQA, whereas NR-IQA is more appropriate. 
+Clinicians assess image quality not only based on pixel-
+level attributes but also on the diagnostic value of the 
+objective evaluation of anterior segment UBM image quality. It effectively identifies high-quality images, 
+significantly improving the efficiency of ophthalmic imaging professionals and demonstrating strong clinical 
+potential for widespread adoption.
+Keywords: Deep learning (DL); anterior segment ultrasound biomicroscopy images (anterior segment UBM 
+images); object detection; reference-free quality assessment; medical image quality control
+Submitted Mar 08, 2025. Accepted for publication Aug 07, 2025. Published online Oct 17, 2025.
+doi: 10.21037/qims-2025-592
+View this article at: https://dx.doi.org/10.21037/qims-2025-592
+===== PAGE 3 =====
+Quantitative Imaging in Medicine and Surgery, Vol 15, No 11 November 2025 11221
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+image content (15). Therefore, NR-IQA evaluation metrics 
+should seamlessly integrate general quality parameters 
+with structured features, efficiently incorporating prior 
+clinical knowledge and statistical patterns to minimize false 
+detection rates (16). Furthermore, in medical imaging, the 
+goal is not to obtain the most aesthetically pleasing image, 
+rather an interpretable image that contains all necessary 
+diagnostic structures. Thus, NR-IQA should prioritize 
+evaluating the quality of regions of interest (ROIs) that are 
+most relevant to clinicians, rather than solely focusing on 
+overall visual quality (17). This study is built upon these 
+principles.
+The rapid development of artificial intelligence 
+(AI), particularly deep learning (DL) technologies, 
+has significantly enhanced medical IQA by improving 
+efficiency, automation, and precision. These advancements 
+have revitalized image quality control, offering more 
+reliable and scalable solutions. Piccini et al. proposed an 
+automated IQA algorithm for evaluating cardiac magnetic 
+resonance imaging (MRI) images, demonstrating a strong 
+correlation with clinical assessments (18). Esses et al. 
+developed a convolutional neural network (CNN)-based 
+DL algorithm for screening non-diagnostic T2-weighted 
+liver MRI images, achieving real-time performance with a 
+low likelihood of misdiagnosis (19). T aye et al. explored the 
+application of DL algorithms in trauma ultrasound IQA, 
+providing valuable insights into automation and real-time 
+quality control
+ 
+(20). Wang et al. introduced an ophthalmic 
+optical coherence tomography (OCT) quality assessment 
+system based on the ResNet-50 model, which automatically 
+evaluates retinal OCT image quality based on signal 
+occlusion, centralization, and the position of the ROI (21). 
+Abramovich et al. developed a regression-based method for 
+fundus IQA using the Inception-V3 model, demonstrating 
+strong generalization capabilities (22). T aksoee-Vester  
+et al. applied a U-Net-based model for standard plane 
+recognition (8 planes), anatomical segmentation (28 
+features), and quality evaluation in fetal echocardiography, 
+with the quality assessments of high-quality images 
+closely matching those of clinical experts (23). Sujit et al. 
+employed a deep convolutional neural network (DCNN) 
+to automatically assess the quality of structural brain MRI 
+images from multiple centers, achieving stable performance 
+across institutions and devices (accuracy of 0.84), making 
+it particularly suitable for large-scale screening and quality 
+control of imaging data (24). T o overcome the limitations 
+of low image quality and limited computing power in 
+mobile fundus imaging, Pérez et al. developed Mobile 
+Fundus Quality Network (MFQ-Net), an ultra-lightweight 
+CNN capable of real-time binary and three-level image 
+quality classification. Despite its compact design, MFQ-
+Net achieves accuracy comparable to larger models, making 
+it well-suited for primary screening and telemedicine 
+applications (25). In summary, DL-based objective IQA 
+methods have been widely applied in the medical field, 
+but further refinement is needed to meet the demands of 
+clinical practice. As AI technology continues to advance and 
+medical image standardization progresses, DL is expected 
+to play an increasingly critical role in medical image quality 
+control.
+This study addresses clinical needs by collaborating 
+with ophthalmic imaging specialists to integrate general 
+medical IQA parameters with domain-specific ophthalmic 
+expertise. T o enhance the quality evaluation of anterior 
+segment UBM panoramic images, we have defined eight 
+key quality metrics: Image Clarity (IC), Cornea Visibility 
+(CV), Posterior Capsule Visibility (PCV), Posterior 
+Capsule Horizontal Centering (PCHC), Anterior Vertical 
+Alignment (AVA), Ciliary Groove Visibility (CGV), 
+Ciliary Groove Focal Zone (CGFZ), and Ciliary Groove 
+Horizontal Alignment (CGHA). Leveraging the YOLOv8s_
+DW_FOCUS DL model, we achieved high detection 
+accuracy, effectively capturing fine anatomical details 
+within anterior segment images. These quality indicators 
+were then employed for NR-IQA, providing an objective 
+and precise evaluation of UBM images. This method is 
+designed to assist clinicians in efficiently extracting standard 
+UBM cross-sectional views of the anterior segment and 
+reliably identifying high-quality images. The results 
+demonstrate that this NR-IQA approach closely aligns with 
+subjective evaluations performed by clinicians, confirming 
+its feasibility and strong potential for clinical application. 
+We present this article in accordance with the CLEAR 
+reporting checklist (available at https://qims.amegroups.
+com/article/view/10.21037/qims-2025-592/rc).
+Methods
+Datasets
+The dataset for this study was sourced from patients who 
+underwent panoramic UBM examinations at Tianjin 
+Eye Hospital between 11 April 2019 and 1 December 
+2024. The images, captured by experienced ophthalmic 
+imaging specialists, have a resolution of 1024×576 pixels. 
+A total of 1,154 images were used for both training and 
+===== PAGE 4 =====
+Miao et al. DL-based quality assessment of UBM images11222
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+testing, with the data split in an 80:20 ratio. The UBM 
+device employed in this study was the MD-300L (MEDA 
+Co., Ltd., Tianjin, China), featuring an ultrasound probe 
+frequency of 50 MHz, a scan depth of 11 mm, and a width 
+of 17.5 mm. T o protect patient privacy and ensure data 
+security, all UBM images were anonymized. The study was 
+conducted in accordance with the Declaration of Helsinki 
+and its subsequent amendments and received approval from 
+the Medical Ethics Committee of Tianjin Eye Hospital 
+(Approval No. KY-202417). As this was a retrospective 
+study using anonymized UBM images, informed consent 
+was not required.
+T o reflect real-world clinical conditions, the dataset 
+consisted of a 2:1 mix of high-quality and low-quality UBM 
+images, with image quality subjectively assessed by an 
+ophthalmic imaging physician with 10 years of experience. 
+The images were annotated independently by the physician 
+using LabelMe (Massachusetts Institute of T echnology, 
+Cambridge, MA, USA) software, followed by a secondary 
+review to ensure annotation accuracy. Each UBM image 
+was annotated based on eight key quality control indicators, 
+specifying the coordinates of five key points: the central 
+corneal epithelium, central corneal endothelium, left 
+and right ciliary grooves, and the posterior lens capsule. 
+Additionally, rectangular bounding boxes were drawn 
+around the ROIs. These annotations served as the gold 
+standard for the object detection task.
+Model
+After a comprehensive comparison and validation of the 
+accuracy and real-time performance of various classic object 
+detection models, and taking into account the need for 
+deployment on low-resource hardware, this study ultimately 
+selected the YOLOv8s_DW_FOCUS model for key point 
+and ROI detection. After detecting the objects in each 
+frame, the model integrates the results into quality control 
+indicators, enabling the calculation of a quality score for the 
+current frame.
+The YOLOv8 architecture consists of three primary 
+components: the Backbone, the Neck, and the YOLO 
+Head. The Backbone is responsible for extracting high-
+level features from the input image, consisting of multiple 
+convolutional layers and network modules. The Neck 
+facilitates the fusion and transmission of the features 
+extracted by the Backbone, transforming them into a format 
+suitable for object detection. Finally, the YOLO Head 
+converts these processed feature maps into specific object 
+detection outputs.
+The network structure of the YOLOv8s_DW_FOCUS 
+model is shown in Figure 1.
+In this model, depthwise separable convolutions 
+(DWConv) are used in place of standard convolutional 
+layers. This replacement enables the use of more 
+convolutional layers without significantly increasing 
+computational costs, thereby deepening the network and 
+enhancing its ability to capture small objects and intricate 
+details. This is particularly advantageous for accurately 
+detecting subtle key points in anterior segment UBM 
+images.
+Additionally, the FOCUS module is integrated into 
+the input layer of the backbone. By reducing the spatial 
+resolution of the input image and focusing on specific 
+ROIs, this module enhances the efficiency of information 
+extraction while filtering out unnecessary background 
+information. As a result, the YOLOv8s_DW_FOCUS 
+model significantly improves detection accuracy, especially 
+in the detection of small objects and the precise localization 
+of key points in anterior segment images.
+Quality control indicators
+By integrating general medical IQA parameters with clinical 
+expertise in ophthalmology, this study effectively addresses 
+the key clinical factors influencing the quality of anterior 
+segment UBM images, while also exploring the feasibility 
+of implementing quality control methods. In collaboration 
+with imaging specialists from Tianjin Eye Hospital, eight 
+essential quality control indicators were established, as 
+summarized in T able 1.
+T o emphasize the most informative regions in anterior 
+segment images, we extracted the ROI and evaluated image 
+clarity by calculating the Laplacian variance of the ROI. 
+The calculation process is described as follows:
+Firstly, the pixel transformation values within the ROI 
+are obtained using the following equation:
+( ) ( )
+22
+2
+22,, IILxy I xy xy
+∂∂= ∇= + ∂∂
+ 
+[1]
+Here, x and y  denote the horizontal and vertical 
+coordinates of a pixel in the ROI image, respectively. I(x,y) 
+represents the grayscale intensity at that location, ( )
+2 ,I xy∇  
+denotes the Laplacian-transformed value at (x,y), and L(x,y) 
+refers to the pixel transformation value after applying the 
+Laplacian operator.
+Subsequently, the mean of the pixel transformation 
+===== PAGE 5 =====
+Quantitative Imaging in Medicine and Surgery, Vol 15, No 11 November 2025 11223
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+values is calculated using the following equation:
+( )
+x1y1
+1 ,
+MN
+LxyMNµ
+= =
+= × ∑∑  [2]
+Where μ represents the mean of the pixel transformation 
+values, and M ×N denotes the total number of pixels in the 
+image.
+Finally, the Laplacian variance V ar(L) within the ROI is 
+obtained.
+( ) ( )( )
+2
+x1y1
+1 ,
+MN
+Var L L x yMN µ
+= =
+= −× ∑∑  [3]
+High-quality images typically exhibit sharper edges 
+and larger variations in grayscale gradients, leading to 
+higher Laplacian variance values. In the early stages of 
+the study, we empirically tuned the Laplacian variance 
+threshold and compared the AI model’s IC assessments 
+with those of clinical experts to evaluate accuracy and 
+consistency. T o determine the optimal threshold, a 
+set of UBM images with varying levels of clarity was 
+selected. The Laplacian variance within the ROI of each 
+image was computed, and the threshold was iteratively 
+adjusted. The value that best differentiated image 
+quality and showed the highest agreement with expert 
+evaluations was ultimately chosen. Accordingly, the 
+optimal threshold for V ar(L) was set to 150.
+The CV indicator requires the anterior and posterior 
+surfaces of the cornea to display a crescent-shaped region of 
+high echogenicity. A well-defined crescent structure reflects 
+a uniform distribution of echo signals, ensuring the image’s 
+diagnostic value. Similarly, the PCV indicator requires the 
+posterior lens capsule to exhibit a reverse crescent-shaped 
+pattern of high echogenicity. This distinct reverse crescent 
+structure reflects the optimal alignment of ultrasound waves 
+Figure 1 Network architecture of YOLOv8s_DW_FOCUS.
+Focus
+k=3  s=2  P=1
+Input
+1024×1024×3
+UBM  1024×1024×3
+512×512×64
+256×256×128
+256×256×128
+128×128×256
+128×128×256
+128×128×256
+128×128×256
+128×128×256
+128×128×256
+128×128×256
+128×128×256
+64×64×512
+64×64×512
+64×64×512
+64×64×512 64×64×512
+64×64×512
+64×64×512
+64×64×512
+64×64×512
+64×64×512 64×64×512
+32×32×768
+32×32×768
+32×32×768
+32×32×768
+32×32×768
+32×32×768 32×32×768
+32×32×76832×32×768
+32×32×768
+32×32×768
+16×16×1024
+16×16×1024 16×16×1024
+16×16×1024
+16×16×1024
+16×16×1024
+16×16×1024
+16×16×1024
+k=3  s=2  P=1
+k=3  s=2  P=1
+k=3  s=2  P=1
+k=3  s=2  P=1
+k=3  s=2  P=1
+k=3  s=2  P=1
+k=3  s=2  P=1
+shortcut=true
+shortcut=true
+shortcut=true
+shortcut=true
+shortcut=true
+shortcut=false
+shortcut=false
+shortcut=false
+shortcut=false
+shortcut=false
+shortcut=false
+Conv
+C2f
+Conv
+Conv
+Conv
+Conv
+DWConv
+DWConv
+DWConv
+Upsample
+Upsample
+Upsample
+Concat
+Concat
+Concat
+Concat
+Concat
+Detect
+Detect
+Detect
+Det
+Det
+Det
+Det
+LOSS
+Detect
+9
+27
+24
+21
+12
+15
+18
+13
+25
+22
+16
+19
+7
+5
+3
+1
+0
+6
+4
+2
+8
+P6
+P5
+P4
+P3
+10
+29
+14
+17
+20
+26
+23
+2811
+P5
+P4
+P3
+P2
+P1
+C2f
+C2f
+C2f
+C2f
+C2
+C2
+C2
+C2
+C
+C
+C
+C
+C
+C
+Us
+Us
+Us
+C2
+C2
+C2
+C2
+C2
+C2
+P3
+P4
+P5
+P6
+DW
+DW
+DW
+C2
+C2
+ConcatSPFF
+Backbone YOLO neck + head
+YOLOv8s_DW_FOCUS
+===== PAGE 6 =====
+Miao et al. DL-based quality assessment of UBM images11224
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+with the lens and the meridian section of the eye, which are 
+essential for selecting high-quality images. The visibility 
+of these anatomical structures was assessed by calculating 
+the average pixel brightness values for the central corneal 
+epithelium, central corneal endothelium, and posterior 
+capsule regions. Following a similar approach to the 
+threshold selection for V ar(L) , a set of UBM images with 
+varying brightness levels in the target regions was selected. 
+The average pixel brightness values were calculated, and the 
+threshold was iteratively adjusted. The AI-based assessments 
+were then compared with expert clinical evaluations to 
+verify consistency and discriminative effectiveness. As a 
+result, the optimal average brightness threshold for both the 
+CV and PCV was determined to be 27 (8-bit).
+The actual dimensions of the UBM image are 
+17.5×11 mm. T o evaluate horizontal alignment, the 
+position of the posterior capsule center was analyzed. An 
+image is considered horizontally centered if the horizontal 
+coordinate of the posterior capsule lies within ±1 mm of the 
+image center, increasing the likelihood of fully capturing 
+the anterior segment structure. This criterion was used for 
+the PCHC indicator.
+In comparison to anterior segment optical coherence 
+tomography (AS-OCT), UBM offers a significant advantage 
+as ultrasound can penetrate the iris pigment epithelium, 
+clearly displaying the ciliary body structure (26). In anterior 
+segment UBM imaging, a single-element high-frequency 
+ultrasound transducer generates a fixed focal region. Within 
+this focal zone, the image maintains high resolution, 
+but resolution diminishes sharply outside this area. For 
+diagnostic reliability, the ciliary groove must be positioned 
+within the focal zone. The MD-300L device has a focal 
+zone located vertically between 5 and 7 mm in the image. 
+The CGFZ indicator evaluates the vertical positioning of 
+the ciliary groove, whereas the CGV indicator assesses its 
+overall visibility.
+T o ensure proper alignment of the anterior segment 
+structures, two additional indicators were established: The 
+CGHA and AVA. These indicators measure the degree 
+of tilt in the horizontal and vertical structures of the 
+image. T esting and validation determined the optimal tilt 
+angle thresholds for CGHA and AVA to be 5° and 10°, 
+respectively.
+In this study, each of the eight quality control indicators 
+was formally assigned an equal weight of 1 point. However, 
+during the design process, the clinical significance of each 
+anatomical structure in the evaluation of UBM image 
+quality was fully considered to improve the accuracy and 
+clinical applicability of the assessment. For example, the 
+PCV indicator is used to determine whether the scanning 
+plane is close to the lens axis and the meridional section of 
+the eye, with the posterior capsule playing a critical role 
+in image quality evaluation. Therefore, the scores for the 
+PCHC and AVA indicators, which are closely related to the 
+Table 1 Key quality control indicators and descriptions
+Quality control indicators Abbreviation Indicator specification
+Image Clarity IC The Laplacian variance reflecting the clarity of the ROI image is greater than the 
+threshold
+Cornea Visibility CV Both the anterior and posterior surfaces of the cornea exhibit crescent-shaped 
+echoes, with the average pixel brightness greater than the threshold
+Posterior Capsule Visibility PCV The posterior capsule of the lens exhibits a reverse crescent-shaped echo, with 
+the average pixel brightness greater than the threshold
+Posterior Capsule Horizontally 
+Centered
+PCHC The center of the posterior capsule of the lens is located within a ±1 mm ranges 
+from the center of the image
+Ciliary Groove Visibility CGV Both the left and right ciliary grooves are identified
+Ciliary Groove Focal Zone CGFZ Both the left and right ciliary grooves are within the focal zone of the UBM 
+imaging
+Ciliary Groove Horizontal Alignment CGHA The inclination of the left and right ciliary grooves in the vertical direction is less 
+than 5°
+Anterior Vertical Alignment AVA The deviation between the center of the posterior capsule and the midpoint of 
+the corneal anterior edge in the horizontal direction is less than 10°
+ROI, region of interest; UBM, ultrasound biomicroscopy.
+===== PAGE 7 =====
+Quantitative Imaging in Medicine and Surgery, Vol 15, No 11 November 2025 11225
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+posterior capsule, depend on the PCV assessment results, 
+implicitly assigning greater weight to the posterior capsule 
+in the scoring system. Similar dependency exists among the 
+CGV , CGFZ, and CGHA indicators. Thus, although the 
+scores are equally weighted, the design of the indicators 
+inherently reflects differences in the clinical importance of 
+the anatomical structures, balancing model simplicity with 
+clinical relevance.
+The quality score for each frame is displayed, with 
+images scoring 7 or above classified as high-quality, and 
+those achieving a perfect score of 8 designated as standard-
+plane images. In this study, a standard-plane image refers 
+to a UBM image acquired along the meridional plane that 
+passes through the visual axis, clearly depicting key anterior 
+segment structures, including the central corneal epithelium 
+and endothelium, the posterior lens capsule, and both the 
+left and right ciliary grooves.
+T o be considered a standard-plane image, the frame 
+must meet all eight predefined quality control criteria, 
+which assess sharpness (IC), structural visibility (CV , PCV , 
+CGV), positional accuracy (PCHC, CGFZ), and geometric 
+alignment (CGHA, AVA). These criteria collectively ensure 
+consistency in scanning planes and reliable anatomical 
+representation.
+Experimental procedure
+This study employed DL techniques to automatically 
+identify the ROI and five key points in anterior segment 
+UBM images, while simultaneously evaluating image 
+quality based on eight predefined quality control indicators. 
+The primary objective of this approach is to assist clinicians 
+in efficiently extracting standard anterior segment UBM 
+cross-sectional views and selecting high-quality images. The 
+workflow of this process is illustrated in Figure 2.
+Initially, using 1,154 UBM images annotated by clinical 
+ophthalmologists, the YOLOv8s_DW_FOCUS DL model 
+performs real-time object detection to identify the ROI 
+and the positions of five key points for each frame. The 
+ROI detection box represents the actual size of the anterior 
+segment; each key point is enclosed by a detection box 
+measuring 30.72×17.28 pixels, with the center of the box 
+serving as the key point’s coordinate. After object detection, 
+the necessary pixel-level and geometric information is 
+extracted from the image. The frame is then evaluated 
+based on the previously established eight quality control 
+Figure 2 Block diagram of the overall process. AVA, anterior vertical alignment; CGFZ, ciliary groove focal zone; CGHA, ciliary groove 
+horizontal alignment; CGV , ciliary groove visibility; CV , cornea visibility; IC, image clarity; PCHC, posterior capsule horizontal centering; 
+PCV , posterior capsule visibility; QC, quality control; ROI, region of interest; UBM, ultrasound biomicroscopy.
+IC
+CV
+PCV
+PCHC
+CGV
+CGFZ
+CGHA
+AVA
+Score
+=8
+<8
+Standard
+Yes
+Yes
+Yes
+Yes
+Yes
+Yes
+Yes
+Yes
+UBM figures
+Backbone
+Feature extraction
+Neck
+Feature fusion
+Head
+Result output
+ROI
+Object detection
+QC indicators
+QC score
+Images after detection
+Key point 
+location
+YOLOv8s_DW_FOCUS
+===== PAGE 8 =====
+Miao et al. DL-based quality assessment of UBM images11226
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+criteria, with the parameters required for scoring displayed 
+in Figure 3.
+The IC indicator assesses the clarity of the image within 
+the ROI by calculating the Laplacian variance. A score of 
+1 is assigned if the variance exceeds 150. The CV indicator 
+requires the detection of both the central corneal epithelium 
+and central corneal endothelium, with the average pixel 
+intensity within their detection boxes exceeding 27 (8-bit). 
+Similarly, the PCV indicator mandates the detection of 
+the posterior lens capsule, with an average pixel intensity 
+above 27. The PCHC indicator ensures that the posterior 
+lens capsule is positioned within the horizontal central 
+zone, defined as a ±1 mm range from the image’s horizontal 
+center. The CGV indicator requires the detection of both 
+the left and right ciliary grooves in the image. For the 
+CGFZ indicator, the left and right ciliary grooves must lie 
+within the focal zone, defined as the vertical range between 
+5 and 7 mm in the image. The CGHA indicator ensures 
+that the horizontal angle ( α) between the left and right 
+ciliary grooves is less than 5 degrees, whereas the AVA 
+indicator ensures that the vertical angle ( β) between the 
+posterior lens capsule and the central corneal epithelium is 
+less than 10 degrees.
+Once these criteria are evaluated, the quality control 
+score for each frame is displayed in real-time in the upper-
+right corner of the image, providing clinicians with an 
+intuitive reference. Images that achieve a score of 7 or 
+higher are classified as high-quality, whereas those receiving 
+a perfect score of 8 are considered standard-plane images.
+T o ensure consistency between the proposed no-
+reference quality assessment model and the subjective 
+evaluations of clinical experts, we selected 174 images 
+previously identified as standard anterior segment UBM 
+images by clinicians. These images were processed through 
+the no-reference quality assessment model, and the results 
+were compared to the clinicians’ subjective evaluations to 
+assess any discrepancies between the two approaches.
+Environment setup
+In this study, the YOLOv8s_DW_FOCUS model was 
+employed, with the model training framework set to 
+PyT orch 2.4.1 (Linux Foundation, San Francisco, CA, 
+USA), Python version 3.11.9 (Python Software Foundation, 
+Wilmington, DE, USA), and the GPU being an NVIDIA 
+RTX 3090Ti 24 GB (NVIDIA, Santa Clara, CA, USA). 
+The computation platform used was CUDA version 12.1 
+(NVIDIA). 
+Evaluation metrics
+In this study, the performance of the object detection model 
+was evaluated using several metrics, including mean average 
+precision (mAP), precision, recall, and detection speed (FPS, 
+frames per second). These metrics were used to compare 
+the DL detection results with the ground truth.
+Figure 3 Parameter information required for quality control. ROI, region of interest.
+===== PAGE 9 =====
+Quantitative Imaging in Medicine and Surgery, Vol 15, No 11 November 2025 11227
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+T o visually present discrepancies between the predicted 
+results and the ground truth labels, a confusion matrix was 
+employed. This approach allows for a clearer assessment of 
+detection accuracy across different categories. Additionally, 
+the precision-recall (P-R) curve was used to further analyze 
+the model’s classification and detection performance. The 
+P-R curve illustrates the relationship between precision and 
+recall at an Intersection over union (IoU) threshold of 0.5, 
+offering a comprehensive evaluation of the model’s overall 
+performance.
+Heatmaps were also employed to visualize the model’s 
+attention to different regions during image processing. 
+The color intensity in the heatmaps indicates the degree 
+of focus the model places on specific areas, with darker 
+colors reflecting stronger attention. Finally, t-distributed 
+stochastic neighbor embedding (t-SNE) was applied to 
+map high-dimensional data into two- or three-dimensional 
+space. This technique provides insights into how the model 
+processes and differentiates between various categories 
+of data, enabling a visual assessment of the training data 
+quality (27).
+Results
+Initially, this study conducted a comprehensive analysis and 
+evaluation of the overall performance of several commonly 
+used object detection models for ROI detection and key 
+point localization. The results of these tests are summarized 
+in T able 2.
+The results clearly demonstrate that the YOLOv8s_
+DW_FOCUS model outperformed other models in terms 
+of mAP , recall, and precision. Its superior ability to detect 
+small objects and capture fine details, while utilizing the 
+same computational resources, makes it the most suitable 
+model for ROI detection and keypoint localization in 
+anterior segment UBM images. Additionally, the model 
+achieved a detection speed of 41.44 FPS, significantly 
+surpassing the clinical UBM detection requirement of 
+3–5 FPS. The confusion matrix and P-R curve for the 
+YOLOv8s_DW_FOCUS model post-training are shown in 
+Figure 4.
+The confusion matrix shows that the YOLOv8s_DW_
+FOCUS model exhibited a low error rate in detecting ROIs 
+and key points within the internal datasets, underscoring 
+its robust classification capabilities. The P-R curve shows 
+an area under the curve (AUPRC) of 0.935, indicating that 
+the model effectively maintains high precision and recall, 
+reflecting its exceptional performance.
+Additionally, heatmaps provide an intuitive visualization 
+of the neural network’s feature maps. Figure 5 illustrates the 
+heatmaps and detection results for the target detection task 
+in this study.
+The YOLOv8s_DW_FOCUS model successfully 
+identified the complete ROI and all key points in high-
+quality images. In contrast, for low-quality images, the 
+model detected the ROI and three key points, with the 
+missing key points also absent in the original images. In 
+both high- and low-quality images, the global heatmap’s 
+darker regions were concentrated in the larger ROI area, 
+whereas the local heatmap’s darker regions were focused 
+Table 2 Performance comparison of object detection models
+Models mAP Recall Precision FPS
+YOLOv5s 0.916 0.876 0.902 42.83
+YOLOv8s 0.923 0.891 0.898 44.71
+YOLOv8s_swin 0.923 0.898 0.910 43.64
+YOLOv8s_SEAattention 0.920 0.893 0.905 44.25
+YOLOv8s_GE 0.912 0.884 0.894 42.42
+YOLOv8s_focus 0.923 0.889 0.902 44.64
+YOLOv8s_DW_FOCUS 0.935 0.898 0.925 41.44
+YOLOv8s_small 0.918 0.883 0.893 42.68
+YOLOv8s-efficientViT 0.924 0.894 0.894 23.62
+RT-DETR 0.898 0.864 0.852 18.10
+FPS, frames per second; mAP , mean average precision.
+===== PAGE 10 =====
+Miao et al. DL-based quality assessment of UBM images11228
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+on the smaller key point areas. This demonstrates that the 
+model effectively concentrates on critical regions during 
+target recognition tasks.
+The t-SNE plots generated from both internal and 
+external datasets are shown in Figure 6. The internal dataset 
+consists of 1,154 UBM images used for training and testing, 
+whereas the external dataset comprises 892 newly acquired 
+UBM images.
+By analyzing the t-SNE plots of the YOLOv8s_DW_
+FOCUS model on both internal and external datasets, the 
+following key characteristics emerged:
+(I) Clear Inter-Class Separation: The feature points 
+of different categories are distinctly separated in 
+the low-dimensional space, demonstrating the 
+model’s strong ability to differentiate between 
+various classes. Although some overlap exists in the 
+clustering of the central corneal epithelium and 
+central corneal endothelium, this overlap reflects 
+their close proximity in reality and aligns with their 
+actual spatial relationship, rather than indicating a 
+lack of discriminatory power in the model for these 
+categories.
+Figure 4 Confusion matrix and P-R curve. mAP , mean average precision; P-R, precision-recall; ROI, region of interest.
+Figure 5 Visualization of heatmaps and detection outcomes for high-quality and low-quality images using deep learning techniques. (A) 
+Detection result of high-quality image. (B) Global heatmap of high-quality image. (C) Local heatmap of high-quality image. (D) Detection 
+result of low-quality image. (E) Global heatmap of low-quality image. (F) Local heatmap of low-quality image.
+Detection result of high-quality image
+Detection result of low-quality image
+Global heatmap of high-quality image
+Global heatmap of low-quality image
+Local heatmap of high-quality image
+Local heatmap of low-quality image
+A
+D
+B
+E
+C
+F
+P-R curve
+Recall
+Precision
+Confusion matrix
+Left ciliary 
+groove
+Central corneal 
+epithelium
+Central corneal 
+endothelium
+ROI 
+eye
+Right ciliary 
+groove
+Posterior capsula
+lentis
+Background12 22 17 10 11
+Left ciliary groove
+Right ciliary groove
+Central corneal epithelium
+Posterior lens capsule
+ROI eye
+Central corneal endothelium
+Background
+172
+172
+175
+103
+216
+181 27
+2
+8
+25
+31
+28 200
+175
+150
+125
+100
+75
+50
+25
+0
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+0.0 0.2 0.4 0.6 0.8 1.0
+Left ciliary groove 0.935
+Right ciliary groove 0.909
+Central corneal epithelium 0.888
+Posterior lens capsule 0.967
+ROl eye 0.995
+Central corneal endothelium 0.916
+All classes 0.935 mAP@0.5
+===== PAGE 11 =====
+Quantitative Imaging in Medicine and Surgery, Vol 15, No 11 November 2025 11229
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+(II) Compact Intra-Class Clustering: Feature points 
+for each category form relatively tight clusters, 
+indicating the model’s high accuracy in recognizing 
+individual categories.
+(III) Consistent Distribution Features: The t-SNE 
+plots for both the internal and external datasets 
+exhibit similar distributions, reflecting the model’s 
+consistent performance across different datasets and 
+highlighting its robust generalization capability.
+These results suggest that the YOLOv8s_DW_FOCUS 
+model excels in detecting targets in anterior segment UBM 
+images, demonstrating superior category discrimination, 
+recognition accuracy, and generalization ability.
+After validating the target detection performance of 
+the YOLOv8s_DW_FOCUS model, clinical UBM videos 
+were analyzed using the proposed no-reference quality 
+assessment method, which incorporates the eight previously 
+mentioned quality control indicators. The quality evaluation 
+results are presented in Figure 7.
+Based on the scoring rules of the eight quality control 
+indicators, the individual scores and total score for each 
+frame are displayed in real-time in the top-right corner of 
+the image. The results show that as the scores decrease, 
+there is a noticeable decline in image quality, making it 
+easily distinguishable. Verification of the pixel-level and 
+geometric features revealed that the DL-based assessment 
+results are generally reasonable and effectively reflect the 
+image quality.
+Finally, 174 standard images, selected subjectively by 
+clinical doctors, were input into the no-reference quality 
+assessment method proposed in this study. A comparison 
+between the results of the two quality control methods was 
+performed. Figure 8 presents the score distribution for these 
+174 images, along with the reasons for the lost points.
+As shown in the figure, the image scores are primarily 
+concentrated in the 7–8 point range, with only a few images 
+exhibiting significant differences in evaluation results. This 
+indicates a high degree of consistency between the no-
+reference quality assessment model and clinical practice. 
+The lost points are mainly attributed to PCHC and CGFZ, 
+reflecting the fact that when selecting standard images, 
+clinical doctors were not overly strict about whether the 
+image was perfectly centered or whether the left and right 
+ciliary grooves fell within the focal zone. In contrast, the 
+no-reference quality assessment model applies stricter 
+quality control criteria, resulting in higher-quality standard 
+images. Relaxing the standards for PCHC and CGFZ would 
+likely improve the consistency between the two evaluation 
+methods.
+Figure 9 presents the evaluation results of the standard 
+images, subjectively selected by ophthalmologists, using 
+the no-reference quality assessment model proposed in this 
+study.
+The following insights can be drawn from Figure 9: the 
+low score for the 5-point image is attributed to the DL 
+model’s failure to detect the posterior lens capsule in this 
+frame, resulting in a score of 0 for PCV , PCHC, and AVA. 
+However, the posterior lens capsule is clearly visible to 
+the human eye within this frame. For the 6-point image, 
+human observation confirms that PCHC and CGFZ meet 
+Figure 6 t-SNE plots of internal (A) and external (B) datasets. ROI, region of interest; t-SNE, t-distributed stochastic neighbor embedding.
+80
+60
+40
+20
+0
+–20
+–40
+–60
+–80
+60
+40
+20
+0
+–20
+–40
+–60
+Left ciliary groove
+Right ciliary groove
+Central corneal epithelium
+Posterior capsula lentis
+ROI eye
+Central corneal endothelium
+Left ciliary groove
+Right ciliary groove
+Central corneal epithelium
+Posterior capsula lentis
+ROI eye
+Central corneal endothelium
+t-SNE component 2
+t-SNE component 2
+t-SNE component 1
+t-SNE visualization of the internal dataset
+t-SNE component 1
+t-SNE visualization of the external dataset
+–75 –50 –25 0   25 50 75 –60 –40 –20 0   20 40 60 80
+A B
+===== PAGE 12 =====
+Miao et al. DL-based quality assessment of UBM images11230
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+Figure 7 Quality assessment results for UBM images. AVA, Anterior Vertical Alignment; CGFZ, Ciliary Groove Focal Zone; CGHA, 
+Ciliary Groove Horizontal Alignment; CGV , Ciliary Groove Visibility; CV , Cornea Visibility; IC, Image Clarity; PCHC, Posterior Capsule 
+Horizontal Centering; PCV , Posterior Capsule Visibility; QS, quality score; UBM, ultrasound biomicroscopy.
+UBM figuresQS
+8
+7
+6
+5
+4
+3
+2
+1
+0
+===== PAGE 13 =====
+Quantitative Imaging in Medicine and Surgery, Vol 15, No 11 November 2025 11231
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+Figure 8 Distribution of scores and statistics of lost points for subjectively selected standard images. (A) QS distribution chart. (B) Score 
+loss item statistics. AVA, Anterior Vertical Alignment; CGFZ, Ciliary Groove Focal Zone; CGHA, Ciliary Groove Horizontal Alignment; 
+CGV , Ciliary Groove Visibility; CV , Cornea Visibility; IC, Image Clarity; PCHC, Posterior Capsule Horizontal Centering; PCV , Posterior 
+Capsule Visibility; QS, quality score.
+Figure 9 No-reference evaluation results of subjectively selected standard images. AVA, Anterior Vertical Alignment; CGFZ, Ciliary Groove 
+Focal Zone; CGHA, Ciliary Groove Horizontal Alignment; CGV , Ciliary Groove Visibility; CV , Cornea Visibility; IC, Image Clarity; 
+PCHC, Posterior Capsule Horizontal Centering; PCV , Posterior Capsule Visibility; QS, quality score; UBM, ultrasound biomicroscopy.
+Standard UBM figures
+140
+120
+100
+80
+60
+40
+20
+0
+16
+14
+12
+10
+8
+6
+4
+2
+0
+Num
+Num
+QS distribution chart Score loss item statistics
+QS Index
+IC      CV     PCV   PCHC  CGV  CGFZ  CGHA  AVA 
+26
+146 17
+12
+1 1
+0 1 2 3 4 5 6 7 8
+A B
+1 1
+===== PAGE 14 =====
+Miao et al. DL-based quality assessment of UBM images11232
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+the specified requirements, yet the model’s object detection 
+results exhibit discrepancies, suggesting that the no-
+reference quality assessment model may occasionally make 
+errors. In the case of the 7-point images, the posterior lens 
+capsule was not located within the central ±1 mm range, 
+and the left and right ciliary grooves were not fully within 
+the focal zone, which aligns with the actual situation. 
+The 8-point images, having undergone stricter screening, 
+demonstrate higher image quality.
+Overall, although the no-reference quality assessment 
+model occasionally makes errors, its evaluation results are 
+highly consistent with clinical practice. This highlights 
+the model’s strong reliability and its ability to effectively 
+identify higher-quality standard anterior segment UBM 
+images.
+Discussion
+DL methods in medical imaging have primarily focused 
+on areas such as disease classification, computer-aided 
+diagnosis, tissue segmentation, image registration, and 
+content retrieval. However, research on using DL for 
+medical IQA remains relatively limited. Existing studies on 
+DL applications in IQA have predominantly concentrated 
+on fields such as fetal cardiac four-chamber views, MRI, and 
+retinal images. T o the best of our knowledge, no research 
+has yet been conducted on DL-based quality assessment for 
+anterior segment UBM images.
+Currently, the quality assessment of anterior segment 
+UBM images largely relies on traditional subjective 
+evaluation methods, which are time-consuming, labor-
+intensive, and subject to significant observer variability, 
+making it difficult to maintain consistent evaluation 
+accuracy. This highlights the urgent need for an accurate, 
+reliable, and efficient quality assessment method for 
+anterior segment UBM images in clinical practice, in order 
+to reduce the workload of radiologists.
+Furthermore, due to the complexity of human eye 
+structures, individual differences, and the high level of 
+patient cooperation required for UBM image acquisition, 
+obtaining standard anterior segment images is a challenging 
+task. In clinical environments, characterized by complexity 
+and strict diagnostic requirements, clinicians often 
+struggle to quickly and accurately isolate the standard 
+anterior segment UBM sections necessary for parameter 
+measurement and disease diagnosis. 
+UBM imaging presents several modality-specific 
+challenges: probe misalignment can shift critical anatomical 
+structures away from the image center, diminishing 
+diagnostic value; acoustic shadowing and air bubble artifacts 
+reduce image clarity and obscure essential features; limited 
+acoustic impedance differences among ocular tissues result 
+in low contrast and indistinct anatomical boundaries; 
+and variability in scanning planes introduces spatial 
+inconsistencies that affect reproducibility and quantitative 
+analysis. These factors collectively increase the complexity 
+of quality control in UBM imaging.
+Given these challenges, traditional NR-IQA methods 
+such as Blind/Referenceless Image Spatial Quality 
+Evaluator (BRISQUE), Natural Image Quality Evaluator 
+(NIQE), and Blind Image Quality Index (BIQI), primarily 
+developed for natural images, are insufficient for addressing 
+these challenges, as they do not consider domain-specific 
+anatomical structures or spatial relationships crucial for 
+medical interpretation (28-30).
+T o overcome these limitations, we propose a DL-based 
+NR-IQA method for anterior segment UBM images, 
+integrating structure-aware evaluation and clinical quality 
+control criteria. Our method based on the YOLOv8s_DW_
+FOCUS model and incorporates eight clinically relevant 
+quality control indicators (IC, CV , PCV , PCHC, CGV , 
+CGFZ, CGHA, and AVA), developed in collaboration 
+with ophthalmic imaging experts. This method ensures a 
+scientifically grounded and objective evaluation standard.
+The model accurately identifies detailed anatomical 
+structures by detecting five key landmarks—central corneal 
+epithelium, central corneal endothelium, posterior lens 
+capsule, left and right ciliary grooves—and quantifies 
+their spatial and pixel-level features to assess image quality 
+comprehensively.
+Compared to traditional methods such as BRISQUE, 
+NIQE and BIQI, our proposed method offers notable 
+advantages in structural recognition, adaptability, and 
+clinical applicability. By integrating clinical anatomical 
+prior knowledge, the model not only evaluates image 
+sharpness but also determines whether key anatomical 
+structures are sufficiently visible for diagnostic purposes. 
+The eight quality control indicators–covering sharpness, 
+structural visibility, positional accuracy, and geometric 
+consistency–are specifically designed to reflect the practical 
+quality requirements of UBM images in clinical settings. In 
+contrast, traditional methods rely on statistical assumptions 
+derived from natural images and often fail to accommodate 
+the complex textures and low-contrast boundaries typical 
+of medical imaging. Our DL-based approach overcomes 
+these limitations by learning the intrinsic relationships 
+===== PAGE 15 =====
+Quantitative Imaging in Medicine and Surgery, Vol 15, No 11 November 2025 11233
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+between anatomical structures and image quality, thereby 
+demonstrating superior domain specificity, robustness, and 
+generalizability in UBM IQA.
+Additionally, a comprehensive analysis of the method’s 
+accuracy, focus on key regions, generalization ability, inter-
+class and out-of-class discriminability, rationality, and 
+consistency of evaluation results confirmed the feasibility of 
+the no-reference quality assessment approach. This method 
+not only enables efficient quality assessment of anterior 
+segment UBM images but also provides reliable and 
+practical technical support for ophthalmic clinical practice.
+Compared to existing AI approaches applied to medical 
+IQA, the method proposed in this study offers significant 
+advantages in terms of evaluation comprehensiveness, 
+interpretability, and clinical relevance. Although the model 
+by Piccini et al. (18) achieved a high level of agreement 
+with clinical experts, it primarily focused on anatomical 
+structure clarity and coronary artery visualization, resulting 
+in a limited set of evaluation criteria. This narrow scope 
+leads to substantial uncertainty when assessing images of 
+intermediate quality. By contrast, our method combines 
+general pixel-level metrics with ophthalmic anatomical 
+knowledge, incorporating a rich and diverse set of 
+indicators. The use of a 0–8 point grading system allows 
+for a more continuous and interpretable assessment of 
+image quality. In the model created by Esses et al. (19), the 
+quality assessment of liver MRI images did not include 
+diagnostic information such as lesion detectability or organ 
+morphology, thereby limiting the model’s ability to reflect 
+clinical image utility. Our method addresses this limitation 
+by emphasizing critical anatomical structures such as the 
+posterior lens capsule, ciliary sulcus, and cornea, and by 
+incorporating their spatial location and echo characteristics. 
+This leads to a more robust and comprehensive evaluation, 
+with enhanced resistance to artifacts and noise. Abramovich 
+et al. (22) developed a fundus image quality scoring model 
+based on binary classification, which fails to capture the 
+continuous nature of medical image quality. In contrast, our 
+method employs a graded scoring approach, offering clearer 
+distinctions in quality levels and yielding more intuitive 
+and clinically meaningful results. Although Pérez et al. (25) 
+achieved accurate assessment of fundus image quality on 
+mobile platforms, their model only provided an overall 
+acceptability score, limiting interpretability. Our approach 
+quantitatively evaluates image quality across multiple 
+dimensions, allowing clinicians to clearly understand both 
+the strengths and limitations of each image. In summary, 
+the proposed method integrates quantitative image quality 
+metrics with domain-specific ophthalmic knowledge. 
+Compared to existing approaches, it provides superior 
+interpretability, visual clarity, and multidimensional 
+assessment capability, demonstrating strong potential for 
+practical clinical deployment.
+The target detection method built on the YOLOv8s_
+DW_FOCUS model demonstrated exceptional  
+performance, with an mAP value of 0.935, recall of 0.898, 
+and precision of 0.925. The model effectively focused on 
+key areas in heatmaps, and t-SNE plots validated its high 
+discriminability between classes and robust generalization 
+performance. These results indicate that the target detection 
+method can effectively and accurately detect the ROI 
+range and the positions of the five key points in anterior 
+segment UBM images, providing a solid foundation for the 
+parameters involved in quality control.
+Moreover, this study provides highly discriminative IQA 
+results through the eight key quality control indicators, 
+ensuring the reliability of the parameters. T o validate the 
+consistency between the proposed no-reference quality 
+assessment model and subjective assessments by clinicians, 
+174 standard images, subjectively selected by clinicians, 
+were input into the model. The results showed that 172 
+images scored 7 or 8, indicating a high level of agreement 
+between the two evaluation methods. An analysis of the 
+reasons for score discrepancies revealed two contributing 
+factors: first, a small number of images scored lower due to 
+errors in target detection; second, the stricter evaluation 
+standards of the no-reference quality assessment model 
+resulted in a more rigorous selection process for images, 
+leading to discrepancies with subjective evaluations. These 
+findings further demonstrate that the proposed method can 
+not only quickly extract standard cuts from anterior segment 
+UBM images but also efficiently and accurately evaluate 
+image quality, significantly enhancing the efficiency of 
+imaging specialists. Although the method shows significant 
+potential, its clinical efficacy requires further validation 
+through practical application and clinical trials.
+From a clinical application perspective, the proposed 
+model demonstrates strong feasibility for deployment. 
+The model was trained and validated on a single NVIDIA 
+RTX 3090Ti GPU, achieving an inference speed of 41.44 
+FPS—far exceeding the 3–5 fps typically required for 
+anterior segment UBM imaging, thereby fully meeting 
+real-time processing demands. The YOLO architecture 
+inherently offers efficient data handling and low hardware 
+dependency. By incorporating DWConv and the FOCUS 
+module, we constructed a lightweight version—YOLOv8s_
+===== PAGE 16 =====
+Miao et al. DL-based quality assessment of UBM images11234
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+DW_FOCUS—which effectively reduces computational 
+overhead. Given the moderate resolution (1,024×576) and 
+frame rate of UBM images, the model runs smoothly on 
+standard hospital workstations or even devices equipped 
+with lightweight GPUs, making it particularly suitable for 
+resource-limited clinical environments.
+The model can be seamlessly integrated as a plug-in 
+into existing UBM imaging systems, enabling real-time 
+image quality scoring and feedback with minimal user 
+intervention. This allows clinicians to immediately assess 
+image diagnostic suitability during acquisition, facilitating 
+the rapid collection of high-quality images. Such design 
+offers notable advantages in terms of system compatibility, 
+scalability, and clinical practicality.
+Nevertheless, several challenges remain for broader 
+clinical implementation. These include integration with 
+hospital information systems, compliance with data privacy 
+regulations, and the need for model interpretability expected 
+by healthcare professionals. Therefore, in future work, 
+we will further optimize the human–computer interaction 
+interface of the model, enhance its interpretability, and 
+conduct clinical validation in complex real-world settings to 
+facilitate its clinical implementation.
+Beyond improving workflow efficiency, the proposed 
+system also holds significant potential for enhancing patient 
+outcomes. On the one hand, standardized quality control 
+can help to reduce misdiagnosis or missed diagnoses caused 
+by suboptimal image quality. On the other hand, improving 
+consistency in image follow-up facilitates the assessment 
+of disease progression and evaluation of treatment efficacy. 
+Therefore, we believe that this system holds great promise 
+for improving diagnostic accuracy in clinical practice and 
+optimizing the allocation of medical resources.
+This study has some limitations. First, the data source 
+was somewhat limited: all UBM images were collected 
+using the MD-300L model, with fixed image resolution and 
+format, and the data were only from patients at Tianjin Eye 
+Hospital. The sample does not include data from multiple 
+countries or diverse ethnic groups, which somewhat restricts 
+the generalizability of the no-reference quality assessment 
+model. T o address this, we plan to actively expand 
+collaborations with other medical centers and UBM device 
+manufacturers in order to incorporate more diverse data 
+sources, imaging modalities, and pathological cases. Such 
+efforts will help improve the robustness and adaptability of 
+the model across different devices and clinical conditions. 
+Moreover, we highly value the suggestion to conduct 
+subgroup analyses involving anterior segment diseases 
+such as glaucoma and cataracts. Future research will aim to 
+incorporate a broader range of pathological data to explore 
+the model’s performance and reliability in these clinically 
+relevant subgroups.
+Second, the target detection model still has some errors 
+in the detection results. Future work should focus on 
+optimizing the model structure and increasing the dataset 
+size to further improve detection accuracy. Additionally, the 
+recognition of the eight quality control indicators proposed 
+in this study requires further enhancement. These indicators 
+were developed in collaboration with ophthalmic imaging 
+specialists at Tianjin Eye Hospital, and their standards need 
+to be verified and refined through additional research and 
+expert validation. This will help to further improve the no-
+reference quality assessment system for anterior segment 
+UBM images.
+Conclusions
+Through accuracy comparison tests of the DL model, 
+verification of key region focus, evaluation of inter-class 
+and out-of-class performance, as well as analyses of the 
+accuracy, rationality, and consistency of the no-reference 
+quality assessment method, the proposed DL-based no-
+reference quality assessment method for anterior segment 
+UBM images demonstrates exceptional performance. This 
+method facilitates accurate, objective, and real-time IQA. The 
+results indicate that the assessment method aligns closely with 
+subjective evaluations by ophthalmic imaging specialists, while 
+applying more stringent image quality control standards. It 
+can effectively assist clinicians in quickly extracting standard 
+anterior segment UBM cross-sectional views and accurately 
+selecting high-quality images, significantly improving the 
+efficiency of imaging specialists and offering substantial clinical 
+value for widespread adoption.
+Although the method shows great potential, its practical 
+performance requires further validation in the complex 
+and dynamic clinical environment. With continuous 
+optimization and enhancement, it is expected to be 
+gradually adapted for broader clinical use.
+Acknowledgments
+None.
+Footnote
+Reporting Checklist: The authors have completed the CLEAR 
+===== PAGE 17 =====
+Quantitative Imaging in Medicine and Surgery, Vol 15, No 11 November 2025 11235
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+reporting checklist. Available at https://qims.amegroups.
+com/article/view/10.21037/qims-2025-592/rc
+Data Sharing Statement: Available at https://qims.
+amegroups.com/article/view/10.21037/qims-2025-592/dss
+Funding: This study was supported by Tianjin Municipal 
+Science and T echnology Project (grant number 
+24ZXZSSS00110), Tianjin Health Research Project 
+(grant number TJWJ2025MS056), Tianjin Metrology 
+T echnology Foundation (grant numbers 2024TJMT035, 
+2025TJMT018), CAMS Innovation Fund for Medical 
+Sciences (grant numbers 2022-I2M-2-003, 2023-I2M-2-
+008), and Tianjin Key Medical Discipline Construction 
+(grant number TJYXZDXK-3-004A-3).
+Conflicts of Interest: All authors have completed the ICMJE 
+uniform disclosure form (available at https://qims.
+amegroups.com/article/view/10.21037/qims-2025-592/
+coif). The authors have no conflicts of interest to declare.
+Ethical Statement: The authors are accountable for all 
+aspects of the work in ensuring that questions related 
+to the accuracy or integrity of any part of the work are 
+appropriately investigated and resolved. The study was 
+conducted in accordance with the Declaration of Helsinki 
+and its subsequent amendments. Ethical approval was 
+approved by the Medical Ethics Committee of Tianjin 
+Eye Hospital (Approval No. KY-202417). Since this was a 
+retrospective study utilizing de-identified UBM images, the 
+requirement for informed consent was waived.
+Open Access Statement: This is an Open Access article 
+distributed in accordance with the Creative Commons 
+Attribution-NonCommercial-NoDerivs 4.0 International 
+License (CC BY-NC-ND 4.0), which permits the non-
+commercial replication and distribution of the article with 
+the strict proviso that no changes or edits are made and the 
+original work is properly cited (including links to both the 
+formal publication through the relevant DOI and the license). 
+See: https://creativecommons.org/licenses/by-nc-nd/4.0/.
+References
+1. Janssens R, van Rijn LJ, Eggink CA, Jansonius NM, Janssen 
+SF . Ultrasound biomicroscopy of the anterior segment in 
+patients with primary congenital glaucoma: a review of the 
+literature. Acta Ophthalmol 2022;100:605-13.
+2. Qian Y, Liu L, Shi Y, Wang M, Li M, Zou J. Assessment 
+of Anterior Chamber by Ultrasound Biomicroscopy and 
+Anterior Segment Optical Coherence T omography in 
+Patients with Inflammatory Glaucoma. J Int Med Res 
+2019;47:5950-6.
+3. Coyner AS, Swan R, Campbell JP , Ostmo S, Brown 
+JM, Kalpathy-Cramer J, Kim SJ, Jonas KE, Chan RVP , 
+Chiang MF; Imaging and Informatics in Retinopathy of 
+Prematurity Research Consortium. Automated Fundus 
+Image Quality Assessment in Retinopathy of Prematurity 
+Using Deep Convolutional Neural Networks. Ophthalmol 
+Retina 2019;3:444-50.
+4. Dias JMP , Oliveira CM, da Silva Cruz LA. Retinal image 
+quality assessment using generic image quality indicators. 
+Inf Fusion 2014;19:73-90.
+5. Bradley D, Bradley KE. The value of diagnostic medical 
+imaging. N C Med J 2014;75:121-5.
+6. Chow LS, Paramesran R. Review of medical image 
+quality assessment. Biomed Signal Process Control 
+2016;27:145-54.
+7. Herath HMSS, Herath HMKKMB, Madusanka N, 
+Lee BI. A Systematic Review of Medical Image Quality 
+Assessment. J Imaging 2025;11:100.
+8. Dong J, Liu S, Liao Y, Wen H, Lei B, Li S, Wang T . A 
+Generic Quality Control Framework for Fetal Ultrasound 
+Cardiac Four-Chamber Planes. IEEE J Biomed Health 
+Inform 2020;24:931-42.
+9. Zhang B, Liu H, Luo H, Li K. Automatic quality 
+assessment for 2D fetal sonographic standard plane 
+based on multitask learning. Medicine (Baltimore) 
+2021;100:e24427.
+10. Ohashi K, Nagatani Y, Y oshigoe M, Iwai K, T suchiya 
+K, Hino A, Kida Y, Yamazaki A, Ishida T . Applicability 
+Evaluation of Full-Reference Image Quality Assessment 
+Methods for Computed T omography Images. J Digit 
+Imaging 2023;36:2623-34.
+11. Raj A, Tiwari AK, Martini MG. Fundus image quality 
+assessment: survey, challenges, and future scope. IET 
+Image Process 2019;13:1211-24.
+12. Mason A, Rioux J, Clarke SE, Costa A, Schmidt M, 
+Keough V , Huynh T , Beyea S. Comparison of Objective 
+Image Quality Metrics to Expert Radiologists' Scoring 
+of Diagnostic Quality of MR Images. IEEE T rans Med 
+Imaging 2020;39:1064-72.
+13. Chow LS, Rajagopal H, Paramesran R; Alzheimer's 
+Disease Neuroimaging Initiative. Correlation between 
+subjective and objective assessment of magnetic resonance 
+(MR) images. Magn Reson Imaging 2016;34:820-31.
+===== PAGE 18 =====
+Miao et al. DL-based quality assessment of UBM images11236
+Copyright © 2025 AME Publishing Company. All rights reserved.   Quant Imaging Med Surg 2025;15(11):11219-11236 | https://dx.doi.org/10.21037/qims-2025-592
+14. Kamble V , Bhurchandi KM. No-reference image quality 
+assessment algorithms: a survey. Optik 2015;126:1090-7.
+15. Song Y, Zhong Z, Zhao B, Zhang P , Wang Q, Wang Z, 
+Yao L, Lv F , Hu Y. Medical ultrasound image quality 
+assessment for autonomous robotic screening. IEEE Robot 
+Autom Lett 2022;7:6290-6.
+16. Lin Z, Li S, Ni D, Liao Y, Wen H, Du J, Chen S, Wang 
+T , Lei B. Multi-task learning for quality assessment of fetal 
+head ultrasound images. Med Image Anal 2019;58:101548.
+17. Cavaro-Ménard C, Zhang L, Le Callet P . Diagnostic 
+quality assessment of medical images: challenges 
+and trends. 2010 2nd European Workshop on Visual 
+Information Processing (EUVIP) 2010:277-84.
+18. Piccini D, Demesmaeker R, Heerfordt J, Y erly J, Di Sopra 
+L, Masci PG, Schwitter J, Van De Ville D, Richiardi 
+J, Kober T , Stuber M. Deep Learning to Automate 
+Reference-Free Image Quality Assessment of Whole-
+Heart MR Images. Radiol Artif Intell 2020;2:e190123.
+19. Esses SJ, Lu X, Zhao T , Shanbhogue K, Dane B, Bruno 
+M, Chandarana H. Automated image quality evaluation 
+of T(2) -weighted liver MRI utilizing deep learning 
+architecture. J Magn Reson Imaging 2018;47:723-8.
+20. T aye M, Morrow D, Cull J, Smith DH, Hagan M. Deep 
+Learning for FAST Quality Assessment. J Ultrasound Med 
+2023;42:71-9.
+21. Wang J, Deng G, Li W, Chen Y, Gao F , Liu H, He Y, Shi 
+G. Deep learning for quality assessment of retinal OCT 
+images. Biomed Opt Express 2019;10:6057-72.
+22. Abramovich O, Pizem H, Van Eijgen J, Oren I, Melamed 
+J, Stalmans I, Blumenthal EZ, Behar JA. FundusQ-Net: 
+A regression quality assessment deep learning algorithm 
+for fundus images quality grading. Comput Methods 
+Programs Biomed 2023;239:107522.
+23. T aksoee-Vester CA, Mikolaj K, Bashir Z, Christensen 
+AN, Petersen OB, Sundberg K, Feragen A, Svendsen 
+MBS, Nielsen M, T olsgaard MG. AI supported fetal 
+echocardiography with quality assessment. Sci Rep 
+2024;14:5809.
+24. Sujit SJ, Coronado I, Kamali A, Narayana PA, Gabr RE. 
+Automated image quality evaluation of structural brain 
+MRI using an ensemble of deep learning networks. J Magn 
+Reson Imaging 2019;50:1260-7.
+25. Pérez AD, Perdomo O, González FA. A lightweight 
+deep learning model for mobile eye fundus image quality 
+assessment. 15th International Symposium on Medical 
+Information Processing and Analysis. SPIE 2020:151-8.
+26. Maslin JS, Barkana Y, Dorairaj SK. Anterior segment 
+imaging in glaucoma: An updated review. Indian J 
+Ophthalmol 2015;63:630-40.
+27. Wu L, Cheng JZ, Li S, Lei B, Wang T , Ni D. FUIQA: 
+Fetal Ultrasound Image Quality Assessment With 
+Deep Convolutional Networks. IEEE T rans Cybern 
+2017;47:1336-49.
+28. Mittal A, Moorthy AK, Bovik AC. No-reference image 
+quality assessment in the spatial domain. IEEE T rans 
+Image Process 2012;21:4695-708.
+29. Mittal A, Soundararajan R, Bovik AC. Making a 
+“completely blind” image quality analyzer. IEEE Signal 
+Process Lett 2013;20:209-12.
+30. Athar S, Wang Z. A comprehensive performance 
+evaluation of image quality assessment algorithms. IEEE 
+Access 2019;7:140030-70.
+(English Language Editor: J. Jones)
+Cite this article as: Miao QH, Wang XC, Yang J, Wang XN, 
+Yu XQ, Zhou Y, Zhao ZY, Wu B, Zhou S. Deep learning-based 
+no-reference quality assessment of anterior segment ultrasound 
+biomicroscopy panoramic images. Quant Imaging Med Surg 
+2025;15(11):11219-11236. doi: 10.21037/qims-2025-592

@@ -1,0 +1,912 @@
+
+===== PAGE 1 =====
+© AME Publishing Company.   Quant Imaging Med Surg 2023;13(1):185-195 | https://dx.doi.org/10.21037/qims-22-513
+Original Article
+Developmental retardation of femoral head size and femoral head 
+ossification in mild and severe developmental dysplasia of the hip 
+in infants: a preliminary cross-sectional study based on ultrasound 
+images
+Hualin Yan
+1#
+^, Lanxin Du
+2#
+, Juxian Liu
+1
+^, Xiaodong Yang
+3
+, Yan Luo
+1
+^
+1
+Department of Medical Ultrasound, West China Hospital, Sichuan University, Chengdu, China; 
+2
+Department of Ultrasound, West China Second 
+University Hospital, Sichuan University, Chengdu, China; 
+3
+Department of Pediatric Surgery, West China Hospital, Sichuan University, Chengdu, 
+China
+Contributions: (I) Conception and design: H Yan, L Du, J Liu; (II) Administrative support: J Liu, Y Luo; (III) Provision of study materials or patients: 
+H Yan, L Du, X Yang, J Liu; (IV) Collection and assembly of data: H Yan, L Du, X Yang; (V) Data analysis and interpretation: H Yan, L Du, Y Luo; (VI) 
+Manuscript writing: All authors; (VII) Final approval of manuscript: All authors.
+#
+These authors contributed equally to this work.
+Correspondence to: Juxian Liu. Department of Medical Ultrasound, West China Hospital, Sichuan University, No. 37 Guoxue Xiang, Chengdu 
+610041, China. Email: liujuxian@wchscu.cn.
+Background: For infants up to 6 months, ultrasound (US) screening of developmental dysplasia of the hip 
+(DDH) is recommended. This cross-sectional study investigated the developmental data of femoral head size 
+and femoral head ossification in mature infant hips and the impact of mild and severe DDH on femoral head 
+development based on US images.
+Methods: We reviewed all hip US studies performed from January 2018 to December 2019 to evaluate 
+DDH in infants younger than 6 months at West China Hospital, Sichuan University. The femoral head 
+diameter (FHD) and femoral head ossification center type of each hip were recorded. A total of 1,037 normal 
+participants with 2,074 mature hips and 367 DDH participants with 456 dysplastic hips were included in this 
+study.
+Results: For normal mature hips (Graf I), the FHD of mature male hips was significantly larger than that 
+of female hips from the age of 2 months to 6 months (all P values <0.01), and the femoral head ossification 
+center of males occurred significantly later than that of females at the same age from 3 months to 6 months 
+(all P values <0.05). Compared with the matched mature hips, the FHDs of Graf IIa (–), IIb, IIc, and D, III 
+or IV hips were significantly smaller (1.64 vs. 1.72 cm, 1.75 vs. 1.79 cm, 1.65 vs. 1.73 cm, 1.51 vs. 1.71 cm, 
+respectively; all P values <0.05), and the occurrence of the femoral head ossification center was delayed in 
+Graf IIa (–) and D, III or IV hips (both P values <0.05). However, no significant developmental retardation 
+of the femoral head was observed in Graf IIa (+) hips.
+Conclusions: We identified a relatively normal range for the development of infants’ hips from 1 month 
+old to 6 months old and found significant developmental retardation of the femoral head in Graf IIa (–), IIb, 
+IIc, and D, III or IV hips. This is a preliminary study of the developmental impact of DDH on the femoral 
+head, and we will continue the follow-up study after treatment.
+Keywords: Developmental dysplasia of the hip (DDH); infants; femoral head; ultrasound (US)
+195
+ 
+^ ORCID: Juxian Liu, 0000-0002-5315-5482; Hualin Yan, 0000-0003-1338-1124; Yan Luo, 0000-0003-2985-1768.
+===== PAGE 2 =====
+Yan et al. Developmental retardation of the femoral head in DDH infants186
+© AME Publishing Company.   Quant Imaging Med Surg 2023;13(1):185-195 | https://dx.doi.org/10.21037/qims-22-513
+Introduction
+Developmental dysplasia of the hip (DDH) is a common 
+developmental disorder in infants, with an incidence of 
+1.5 to 20 per 1,000 births (1,2). DDH refers to a broad 
+spectrum of abnormalities affecting the hip joint, ranging 
+from dysplasia to subluxation to dislocation. Unrecognized 
+and untreated DDH can lead to premature osteoarthritis 
+and is responsible for up to 15–20% of hip replacements in 
+adults under the age of 50 years (3).
+For infants up to 6 months, ultrasound (US) screening of 
+DDH using the Graf method is recommended by Chinese, 
+European, and American imaging guidelines (4-6). There 
+is no doubt that dislocation or decentered hips (Graf D, III 
+or IV) should be treated immediately once diagnosed (7,8). 
+However, it is controversial how and when to treat well-
+centered stable infant hips with acetabular dysplasia (Graf 
+II) (9-11). From 6 weeks of age, if the US examination does 
+not show that the hip has improved to Graf IIa (+) or Graf 
+I, Graf II hips should be treated according to international 
+DDH guidelines (5).
+Regarding the influence of DDH on the development of 
+the femoral head, Wanner et al. (12) found that the femoral 
+head diameter (FHD) in the severe DDH (Graf D, III, or 
+IV) group was significantly smaller than that in the normal 
+hip group. The severe DDH femoral head growth rate was 
+significantly slower than the normal femoral head growth 
+rate. The ossification center of the femoral head typically 
+appears between 4 months and 6 months of age, which is 
+often delayed in DDH-affected hips (13). However, there 
+have been few reports of the impact of mild DDH (Graf II) 
+on the development of the femoral head and ossification.
+According to our experience, we speculated that both 
+mild and severe DDH would affect the development of 
+the femoral head and the occurrence of femoral head 
+ossification in infants, which requires appropriate treatment. 
+Thus, we conducted this retrospective study to investigate 
+the developmental data of femoral head and femoral head 
+ossification in mature hips and the impact of mild and 
+severe DDH on femoral head development. We present the 
+following article in accordance with the STROBE reporting 
+checklist (available at https://qims.amegroups.com/article/
+view/10.21037/qims-22-513/rc).
+Methods
+Participant selection
+This retrospective study was conducted in accordance 
+with the Declaration of Helsinki (as revised in 2013) and 
+approved by the institutional review board of West China 
+Hospital, Sichuan University (No. 2022-1372). As it was a 
+retrospective study, the requirement for informed consent 
+was waived. We reviewed all hip US studies performed from 
+January 2018 to December 2019 to evaluate DDH in infants 
+younger than 6 months in West China Hospital, Sichuan 
+University. Participants were included in the study if they 
+(I) had positive physical examinations, including unequal 
+length of legs, asymmetric hip and leg creases, abnormal hip 
+bounce, and limited hip abduction; (II) were people with a 
+potentially high risk, such as a breech delivery and DDH 
+family history; and (III) had a routine physical examination 
+in 4- to 6-week-old infants. Participants were excluded 
+if they had a pathological hip dislocation, hip trauma, 
+congenital multiple joint contractures with hip dislocation, 
+or involvement of the hip due to familial genetic disease.
+The sample size of this study was determined to be at 
+least 1,400 according to our previous pilot sampling and the 
+following sample size formula of the cross-sectional study:
+22
+1 2
+2
+Z SD
+N d
+α−
+=  [1]
+(where N = sample size, Z 1-α/2 = confidence interval, SD = 
+standard deviation, d = desired precision). 
+Initially, 1,450 infants were identified in our US 
+databases, and 46 infants were excluded because of the 
+exclusion criteria. The standard longitudinal and transverse 
+section US images of the hip were collected for Graf 
+type classification and femoral head ossification analysis, 
+respectively. Finally, a total of 1,037 normal participants 
+with 2,074 mature hips and 367 DDH participants with 456 
+dysplastic hips were included in this study (Figure 1).
+Hip US examination
+The Philips iU22 US system (Philips Healthcare, 
+Bothell, WA, USA) with an L12-5 linear array transducer  
+(5–12 MHz) was used. The participants were placed 
+Submitted May 23, 2022. Accepted for publication Sep 27, 2022. Published online Nov 15, 2022.
+doi: 10.21037/qims-22-513
+View this article at: https://dx.doi.org/10.21037/qims-22-513
+===== PAGE 3 =====
+Quantitative Imaging in Medicine and Surgery, Vol 13, No 1 January 2023 187
+© AME Publishing Company.   Quant Imaging Med Surg 2023;13(1):185-195 | https://dx.doi.org/10.21037/qims-22-513
+into a lateral position, with the hip joint slightly flexed. 
+The transducer was placed on the hip joint to obtain 
+the standard coronal section image of the hip joint with  
+3 essential landmarks according to the Graf method: the 
+inferior border of the ilium, the osseous acetabular roof, and 
+the labrum, (14). The α angle is the osseous acetabular roof 
+angle, and the β angle is the acetabular cartilaginous angle 
+(Figure 2). According to the Graf US classification, infant 
+hips can be categorized into the following types: I, IIa, IIb, 
+IIc, and D, III or IV (14). When we measured the femoral 
+head coverage, the FHD was recorded as D (Figure 2).
+Graf type I hips were considered mature hips or the 
+control group. All affected hips that were staged as Graf type 
+IIa–IV were placed into the DDH group and were classified 
+into 5 categories according to disease severity: Graf IIa (+), 
+physiologically immature hip; Graf IIa (–), maturational 
+deficit hip; Graf IIb, dysplastic hip; Graf IIc, heavily 
+dysplastic hip; and Graf D, III or IV , decentered hip (5,8).
+Femoral head ossification center type
+All US standard transverse section images of the hip were 
+read by 2 pediatric radiologists (reader 1 J.L., with 7 years 
+of experience, and reader 2 H.L., with 5 years of experience) 
+to classify the ossification center of the femoral head.
+Maturity of the femoral head ossification center was 
+classified into 4 categories according to US morphology 
+and echo intensity: type I, no ossification; type II, punctate 
+ossification; type III, patchy ossification without acoustic 
+shadow; and type IV , crescent ossification with acoustic 
+shadow (Figure 3) (15).
+1,450 infants younger than 6 months 
+undergoing hip US examination from 
+January 2018 to December 2019
+The standard section US image 
+collection, interpretation, and statistical 
+analysis
+46 infants were excluded:
+20: hip trauma
+22: pathological hip dislocation 
+4: familial genetic diseases
+1,404 infants included
+Normal participants with Graf I 
+hips (n=1,037)
+DDH participants with Graf II–IV 
+hips (n=367)
+Figure 1 Flow diagram of the study design. DDH, developmental dysplasia of the hip; US, ultrasound.
+α
+β
+D
+d
+Figure 2 A hip ultrasound examination of a 2-month-old girl 
+with Graf type I hip. The α and β angles are 63.1° and 61.0°, 
+respectively. The diameter of the femoral head diameter circle 
+is the femoral head diameter, which is 1.46 cm, recorded as D. d 
+refers the distance of the line tangent to the medial femoral head 
+to the osseous acetabular roof.
+===== PAGE 4 =====
+Yan et al. Developmental retardation of the femoral head in DDH infants188
+© AME Publishing Company.   Quant Imaging Med Surg 2023;13(1):185-195 | https://dx.doi.org/10.21037/qims-22-513
+T ests of intraobserver and interobserver reliability
+Forty participants were randomly selected to test 
+the intraobserver and interobserver reliability of the 
+measurement of the α angle, the β angle, FHD, Graf 
+classification, and femoral head ossification center type. 
+The 2 pediatric radiologists were independent in their 
+interpretation of US images.
+Statistical analysis
+SPSS v. 25.0 software (IBM Corp., Armonk, NY, USA) 
+was used for statistical analysis. Propensity score matching 
+for age and sex was used to match the different DDH type 
+patients with the normal participants (1:1). Continuous 
+variables were compared using Student’s t test or 1-way 
+analysis of variance, categorical variables were compared 
+using the χ2
+ test, and ranked variables were compared using 
+the Mann-Whitney test or the Kruskal-Wallis test. For 
+the intraobserver and interobserver variability tests, the 
+intraclass correlation coefficient (ICC), weighted kappa test, 
+and Bland-Altman plots were used. P<0.05 was considered 
+statistically significant.
+Results
+Participant characteristics
+After hip US examination, a total of 1,037 normal 
+participants (607 females aged 4.0±1.2 months; 430 males 
+A B
+C D
+Figure 3 A hip ultrasound examination of femoral head ossification by transverse section images. (A) T ype I, no ossification. (B) T ype II, 
+punctate ossification (arrow). (C) T ype III, patchy ossification without acoustic shadow (arrow). (D) T ype IV , crescent ossification with 
+acoustic shadow (arrow).
+===== PAGE 5 =====
+Quantitative Imaging in Medicine and Surgery, Vol 13, No 1 January 2023 189
+© AME Publishing Company.   Quant Imaging Med Surg 2023;13(1):185-195 | https://dx.doi.org/10.21037/qims-22-513
+aged 3.9±1.2 months) with 2,074 mature hips were included 
+in this study ( T able 1). Among them, 578 participants 
+had positive physical examinations, and 459 participants 
+were scheduled for a routine physical examination at 4- 
+to 6-week-old All participants were outpatients. The 
+age stratification of the participants is shown in T able 1. 
+The femoral head ossification center of males occurred 
+significantly later (i.e., a lower percentage of ossification 
+types II–IV) than that of females (P<0.001; T able 1). A total 
+of 367 DDH participants (301 females aged 3.7±1.6 months;  
+66 males aged 3.3±1.8 months) with 456 dysplastic hips 
+were included in this study (T able 2). Among them,  
+267 participants had positive physical examinations, and 
+100 participants were scheduled for a routine physical 
+examination at 4–6 weeks. All participants were outpatients 
+except for 2 participants who were inpatients with 
+exomphalos. There was a total of 278 cases of unilaterally 
+affected DDH and 89 cases of bilaterally affected DDH. 
+The femoral head ossification center type and mean FHD 
+of each DDH type are shown in T able 2.
+Intraobserver and interobserver reliability
+There was good intraobserver reproducibility of the 
+measurement of the α angle, the β angle, and FHD, 
+with ICCs of 0.99, 0.99, and 0.92, respectively (all P 
+values <0.001). There was good agreement between the  
+2 operators in the measurement of the α angle, the β angle, 
+and FHD, with ICCs of 0.99, 0.95, and 0.91, respectively 
+(all P values <0.001). The weighted kappa values of the 
+measurements of the Graf classification and femoral head 
+ossification type were 0.90 and 0.85, respectively (both P 
+values <0.001), which showed good reliability. The Bland-
+Altman plots also showed good agreement between the 2 
+operators in measuring the α angle, the β angle, and FHD 
+(Figures S1-S3).
+The developmental FHD and femoral head ossification 
+center data in mature hips
+We analyzed the developmental data of mature hips (Graf 
+Table 1 Characteristics of mature hip (Graf type I) participants
+Sex
+Age/month
+† Femoral head ossification center type (hips)/ 
+numbers
+‡ Total participants/
+numbers
+0–<1 1–<2 2–<3 3–<4 4–<5 5–6 I II III IV
+Female 4 41 63 174 174 151 411 (33.9) 101 (8.3) 327 (26.9) 375 (30.9) 607
+Male 2 22 74 126 121 85 484 (56.3) 81 (9.4) 152 (17.7) 143 (16.6) 430
+†
+, data are the number of participants. 
+‡
+, data are the number of hips, with percentages in parentheses. The comparison of female and 
+male ossification type stratification used the Mann-Whitney test.
+Table 2 Femoral head ossification center type and FHD of DDH Hips
+Graf type Unilateral: 
+bilateral
+† Age, month
+‡
+Femoral head ossification center type
+§
+FHD, cm
+‡
+Total hips
+I II III IV
+IIa 75:39 2.0±0.7 133 (91.7) 3 (2.1) 5 (3.4) 4 (2.8) 1.62±0.15 145
+IIb 160:45 4.6±1.2 108 (45.8) 24 (10.2) 43 (18.2) 61 (25.8) 1.75±0.15 236
+IIc 19:17 3.4±1.6 26 (70.3) 2 (5.4) 6 (16.2) 3 (8.1) 1.64±0.18 37
+D 3:2 3.3±1.9 4 (80.0) 0 1 (20.0) 0 1.65±0.25 5
+III 10:0 4.2±1.5 9 (90.0) 0 0 1 (10.0) 1.59±0.14 10
+IV 11:9 3.1±1.4 19 (82.6) 2 (8.7) 2 (8.7) 0 1.44±0.18 23
+†
+, the unilateral affected DDH indicates the affected DDH type hip and another Graf type I hip. The bilateral affected DDH includes the 
+same DDH types and the different DDH type hips. 
+‡
+, data are means ± standard deviations. 
+§
+, data are number of hips, with percentages in 
+parentheses. FHD, femoral head diameter; DDH, developmental dysplasia of the hip.
+===== PAGE 6 =====
+Yan et al. Developmental retardation of the femoral head in DDH infants190
+© AME Publishing Company.   Quant Imaging Med Surg 2023;13(1):185-195 | https://dx.doi.org/10.21037/qims-22-513
+type I). The mean FHD and the corresponding 95% 
+confidence interval of every age stratification are shown in  
+Figure 4 and T able S1. As expected, the FHD of mature male 
+hips was significantly larger than that of female hips from the 
+age of 2 months to 6 months (all P values <0.01; T able S1). 
+The femoral head ossification center occurred at 2–3 months 
+in females and 3–4 months in males (T able S2; Figure 5). 
+From 3 months to 6 months, the femoral head ossification 
+center of males occurred significantly later (i.e., a lower 
+percentage of ossification types II–IV) than that of females of 
+the same age (all P values <0.05; T able S2; Figure 5). There 
+was no significant difference in femoral head ossification 
+center types between males and females at less than 3 months 
+of age (all P values >0.05; T able S2).
+The impact of different DDH types on FHD development
+There was no significant difference in FHD between Graf 
+IIa (+) and age- and sex-matched mature hips (P=0.186; 
+Figure 6A). However, the FHD of Graf IIa (–) was 
+significantly smaller than that of the matched mature hips 
+(1.64±0.15 vs. 1.72±0.13 cm; P=0.006; Figure 6A). The FHD 
+of Graf IIb was also smaller than that of the matched mature 
+hips (1.75±0.15 vs. 1.79±0.15 cm; P=0.006; Figure 6A). The 
+FHD of Graf IIc was significantly smaller than that of the 
+matched mature hips (1.65±0.18 vs. 1.73±0.15 cm; P=0.035; 
+Figure 6A). The FHD of Graf D, III or IV was also markedly 
+smaller than that of the matched mature hips (1.51±0.19 vs. 
+1.71±0.18 cm; P<0.001; Figure 6A). The results indicated 
+marked developmental retardation of the femoral head in 
+Graf IIa (–), IIb, IIc, D, III or IV .
+After age- and sex-matching and intercomparison of 
+different DDH types, the developmental retardation of the 
+femoral head in Graf D, III or IV was the worst among all 
+the DDH types (the FHD was smaller than that of Graf 
+IIa (+), IIa (–), IIb, or IIc; all P values <0.01; Figures 6B,6C). 
+The FHD of Graf IIc was smaller than that of the matched 
+Graf IIb (P=0.027; Figure 6C ). Because of the mismatched 
+age of Graf IIa and IIb, we did not compare the FHDs of 
+these hips.
+The impact of different DDH types on femoral head 
+ossification center development
+The occurrence of femoral head ossification in Graf IIa (–) 
+was significantly delayed compared with that in matched 
+mature hips (P=0.045; Figure 7A). There was no significant 
+difference in femoral head ossification center types 
+between Graf IIa (+)/IIb/IIc and the matched mature hips 
+(Figure 7A). However, the occurrence of the femoral head 
+ossification center in Graf D, III or IV was markedly later 
+than that in matched mature hips (P=0.027; Figure 7A).
+After age- and sex-matching and intercomparison of 
+different DDH types, no significant difference in femoral 
+head ossification center types was found among Graf IIa 
+(+), IIa (–), IIc, and D, III or IV (Figure 7B). However, the 
+occurrence of the femoral head ossification center in Graf 
+D, III or IV was significantly delayed compared with that in 
+matched Graf IIb hips (P=0.008; Figure 7C). Because of the 
+mismatched age of Graf IIa and IIb, we did not compare the 
+femoral head ossification center types of these hips.
+Discussion
+DDH is a developmental disorder and not a congenital 
+disease. A relatively normal range of the development of the 
+femoral head will provide more reference for the evaluation 
+of the development of infants’ hips and as a risk factor for 
+the surveillance of DDH. This study provided a relatively 
+normal range of FHD of male and female infants from 1 to 
+6 months old. From 2 months old, the FHD of males was 
+significantly larger than that of females at the same age. 
+From 3 months old, the femoral head ossification center 
+of males occurred significantly later than that of females 
+of the same age. According to the latest World Health 
+Organization child growth standard, boys develop later than 
+girls at the same age, and the first-year growth rate of boys 
+is faster than that of girls of the same age (16). The peak 
+UL of 95% CI (female)
+Mean (female)
+LL of 95% CI (female)
+UL of 95% CI (male)
+Mean (male)
+LL of 95% CI (male)
+1 2 3 4 5 6 7
+Age, months
+FHD, cm
+2.00
+1.80
+1.60
+1.40
+Figure 4 The developmental FHD of mature male and female 
+hips at different ages. UL, upper limit; CI, confidence interval; LL, 
+lower limit; FHD, femoral head diameter.
+===== PAGE 7 =====
+Quantitative Imaging in Medicine and Surgery, Vol 13, No 1 January 2023 191
+© AME Publishing Company.   Quant Imaging Med Surg 2023;13(1):185-195 | https://dx.doi.org/10.21037/qims-22-513
+Ossification percentage (female), %
+Ossification percentage (male), %
+Type  I
+Type  II
+Type  III
+Type  IV
+Type I
+Type  II
+Type  III
+Type  IV
+100
+80
+60
+40
+20
+0
+100
+80
+60
+40
+20
+0
+1 2 3 4 5 6 71 2 3 4 5 6 7
+MonthsMonths
+A B
+Figure 5 The developmental femoral head ossification type distribution in mature hips. (A) Femoral head ossification type distribution of 
+male participants at different ages. (B) Femoral head ossification type distribution of female participants at different ages.
+Matched 
+Graf I
+Matched 
+Graf I
+FHD, cmFHD, cm
+FHD, cm
+Matched 
+Graf I
+Matched 
+Graf I
+Matched 
+Graf I
+** *
+**
+***
+*** ***
+** *** **
+NS
+Graf D, 
+III, IV
+Graf D, 
+III, IV
+Graf D, 
+III, IV
+Graf 
+IIc
+Graf 
+IIc
+Graf 
+IIc
+Graf 
+IIb
+Graf 
+IIb
+Graf 
+IIa (−)
+Graf 
+IIa (−)
+Graf 
+IIa (+)
+2.2
+2.0
+1.8
+1.6
+1.4
+1.2
+1.0
+2.0
+1.8
+1.6
+1.4
+1.2
+1.0
+2.2
+2.0
+1.8
+1.6
+1.4
+1.2
+1.0
+Graf 
+IIa (+)
+A
+B C
+Figure 6 The impact of different DDH types on FHD development. (A) Violin plots of FHD data of the comparison of different DDH 
+types with the corresponding matched Graf I. (B) Box plots of FHD of an intercomparison of Graf IIa (+), IIa (–), IIc, and D, III or IV . (C) 
+Box plots of FHD of an intercomparison of Graf IIb, IIc, and D, III or IV . *, P<0.05; **, P<0.01; ***, P<0.001. FHD, femoral head diameter; 
+NS, not significant; DDH, developmental dysplasia of the hip.
+===== PAGE 8 =====
+Yan et al. Developmental retardation of the femoral head in DDH infants192
+© AME Publishing Company.   Quant Imaging Med Surg 2023;13(1):185-195 | https://dx.doi.org/10.21037/qims-22-513
+in growth of boys (14–15 years) is later than that of girls  
+(12–13 years), which fits the occurrence time of the femoral 
+head ossification center (17).
+We found that the femoral head ossification center 
+occurred at 2–3 months in females and 3–4 months in 
+males. The ossific nucleus of the femoral head appears 
+radiographically by age 4–6 months in normal hips. 
+Compared with the reported ossification rate curve (18), 
+the femoral head ossification in our study occurred much 
+earlier. The ossification center can be seen 6–8 weeks earlier 
+with sonography than with radiography (19), and the better 
+feeding and nutrition condition currently also accounts for 
+these results (20).
+This study revealed the developmental retardation of 
+the femoral head in DDH. Compared with the matched 
+mature hips, the FHD of Graf IIa (–) hips was significantly 
+smaller, and the occurrence of the femoral head ossification 
+center was delayed. However, no significant developmental 
+retardation was found in Graf IIa (+) hips. The development 
+retardation of FHD was also found in Graf IIb, IIc, and 
+D, III or IV hips. The occurrence of the femoral head 
+ossification center was delayed in Graf D, III or IV hips.
+A right anatomic relationship and located femoral 
+head are necessary for acetabular and femoral head  
+development (21). Persistent lateral hip subluxation and 
+dislocation result in a shallow acetabulum and a mismatched 
+femoral head. A smaller femoral head and delayed 
+appearance of the ossific nucleus in radiographic DDH 
+were also found in the study of Wu et al. (22) and Sugawara 
+et al. (23). More importantly, a smaller femoral head was 
+significantly associated with the incidence of avascular 
+necrosis (22). The surveillance of femoral head size in DDH 
+by US and appropriate treatment are necessary to avoid 
+avascular necrosis or other poor outcomes. Closed reduction 
+and subsequent spica casting are alternative, important, and 
+widespread treatment methods for DDH (24). However, 
+if the diagnosis of DDH is too late, closed reduction is no 
+longer possible, as the femoral head continues growing, 
+making repositioning into the acetabulum mechanically 
+impossible or aggravated.
+Matched 
+Graf I
+Matched 
+Graf I
+Ossification percentage, %Ossification percentage, %
+Ossification percentage, %
+Matched 
+Graf I
+Matched 
+Graf I
+Matched 
+Graf I
+**
+* *
+NS NS
+Graf D, 
+III, IV
+Graf D, 
+III, IV
+Graf D, 
+III, IV
+Graf 
+IIc
+Graf 
+IIc
+Graf 
+IIc
+Graf 
+IIb
+Graf 
+IIb
+Graf 
+IIa (−)
+Graf 
+IIa (−)
+Graf 
+IIa (+)
+Graf 
+IIa (+)
+100
+80
+60
+40
+20
+0
+100
+80
+60
+40
+20
+0
+100
+80
+60
+40
+20
+0
+Type  I
+Type  II
+Type  III
+Type  IV
+Type  I
+Type  II
+Type  III
+Type  IV
+Type  I
+Type  II
+Type  III
+Type  IV
+A
+B C
+Figure 7 The impact of different DDH types on femoral head ossification center development. (A) The comparison of the femoral head 
+ossification percentages of the different DDH types with the corresponding matched Graf I. (B) The intercomparison of the femoral head 
+ossification types as percentages of Graf IIa (+), IIa (–), IIc, and D, III or IV . (C) The intercomparison of the femoral head ossification types 
+as percentages of Graf IIb, IIc, and D, III or IV . *, P<0.05; **, P<0.01. NS, not significant; DDH, developmental dysplasia of the hip.
+===== PAGE 9 =====
+Quantitative Imaging in Medicine and Surgery, Vol 13, No 1 January 2023 193
+© AME Publishing Company.   Quant Imaging Med Surg 2023;13(1):185-195 | https://dx.doi.org/10.21037/qims-22-513
+Management of type IIa/IIa (–) hips remains 
+controversial, and these hips always carry a risk of either 
+overtreatment or development of true hip dysplasia (25,26). 
+If untreated, 95.3% and 84.4% of type IIa (+) and IIa 
+(–) hips, respectively, become normal (27). Therefore, 
+sonographic surveillance for these immature hips is 
+conducted in some areas (10). However, according to the 
+latest international DDH guideline, a Pavlik harness is 
+recommended to treat Graf IIa (–) hips from 6 weeks of age 
+(5,8). Bilgili et al. (25) found that, compared with Graf type 
+IIa (+) hips, Graf type IIa (–) hips were less improved during 
+natural progression and needed more treatment with a hip 
+abduction orthosis. Omeroglu et al. (28) found that Graf 
+T ype IIa (–) had a 93% rate of treatment success by the 
+Pavlik harness. Our study showed significant developmental 
+retardation of Graf IIa (–) hips, which supports the 
+appropriate treatment for these hips.
+Our results showed that US is a useful and easy method 
+for screening and early diagnosis of DDH. However, to 
+evaluate the therapeutic effect following open and closed 
+reduction, magnetic resonance imaging (MRI) is typically 
+performed to confirm the concentric reduction and predict 
+prognosis (24,29). At this point, for severe DDH that needs 
+reduction, the US results of femoral head size and femoral 
+head ossification may be reproduced by MRI images. We 
+would like to continue further studying this topic.
+There are several limitations of this study. First, we 
+employed a retrospective design with no follow-up. The 
+classification of DDH may change over time. Second, we 
+used the Graf type I mature group as the control group. 
+However, there was selection bias in our study. The 
+participants in the Graf I group might have had risk factors 
+or abnormal physical examinations. We will continue 
+future hip studies for healthy infants. Third, we did not 
+record the FHD or the femoral head ossification center 
+type after treatment. Successful treatment should result in 
+the improvement or catch-up of the femoral head. Finally, 
+the present study was conducted in 1 medical center, and 
+validation in different centers is needed.
+In summary, we provided a relatively normal range for 
+the development of infants’ hips from 1 to 6 months old 
+and found significant developmental retardation of the 
+femoral head; that is, delayed ossification and smaller size 
+FHD, in Graf IIa (–), IIb, IIc, and D, III or IV hips. This 
+is a preliminary study of the developmental impact of 
+DDH on the femoral head. We will continue the follow-
+up study after treatment and compare outcomes of different 
+therapeutic strategies.
+Acknowledgments
+The authors are grateful to Professor Li Qiu and the 
+musculoskeletal ultrasound group in the Department 
+of Medical Ultrasound, West China Hospital, Sichuan 
+University, for their help in ultrasound examinations.
+Funding: This study was supported by the National Natural 
+Science Foundation of China (No. 82071940) and the Post-
+Doctor Research Project, West China Hospital, Sichuan 
+University (No. 2018HXBH035).
+Footnote
+Reporting Checklist:  The authors have completed the 
+STROBE reporting checklist. Available at https://qims.
+amegroups.com/article/view/10.21037/qims-22-513/rc
+Conflicts of Interest: All authors have completed the ICMJE 
+uniform disclosure form (available at https://qims.
+amegroups.com/article/view/10.21037/qims-22-513/coif). 
+The authors have no conflicts of interest to declare.
+Ethical Statement: The authors are accountable for all 
+aspects of the work in ensuring that questions related 
+to the accuracy or integrity of any part of the work are 
+appropriately investigated and resolved. The study was 
+conducted in accordance with the Declaration of Helsinki 
+(as revised in 2013). The study was approved by the 
+institutional review board of West China Hospital, Sichuan 
+University (No. 2022-1372), and the informed consent for 
+this retrospective study was waived. 
+Open Access Statement: This is an Open Access article 
+distributed in accordance with the Creative Commons 
+Attribution-NonCommercial-NoDerivs 4.0 International 
+License (CC BY-NC-ND 4.0), which permits the non-
+commercial replication and distribution of the article with 
+the strict proviso that no changes or edits are made and the 
+original work is properly cited (including links to both the 
+formal publication through the relevant DOI and the license). 
+See: https://creativecommons.org/licenses/by-nc-nd/4.0/.
+References
+1. Patel H; Canadian T ask Force on Preventive Health 
+Care. Preventive health care, 2001 update: screening and 
+management of developmental dysplasia of the hip in 
+newborns. CMAJ 2001;164:1669-77.
+===== PAGE 10 =====
+Yan et al. Developmental retardation of the femoral head in DDH infants194
+© AME Publishing Company.   Quant Imaging Med Surg 2023;13(1):185-195 | https://dx.doi.org/10.21037/qims-22-513
+2. Xu N, Xia B, T ao H, Sun K, Liu Q, Chen W, Wang D, 
+Gao H, Guo Y, Liu Y, Gao J, T eng J, Li T , He Q, Wu Z. 
+Epidemiological investigation and ultrasonic diagnosis 
+of developmental dysplasia of the hip in Chinese infants: 
+A large multi-center cohort study. Medicine (Baltimore) 
+2022;101:e28320.
+3. Graf R. Hip sonography: background; technique and 
+common mistakes; results; debate and politics; challenges. 
+Hip Int 2017;27:215-9.
+4. Writing Group of the Pediatric Ultrasound Committee 
+of Ultrasound Branch of Chinese Medical Education 
+Association, Xu N, Xia B, T ao HW, Sun K, Liu QH, 
+Chen WQ, Wang D, Gao H, Guo Y, Liu Y, Gao J, T eng 
+JB. Chinese Expert Consensus on Ultrasonographic 
+Acquisition, Measurement, and Reporting System 
+for Developmental Dysplasia of the Hip. Advanced 
+Ultrasound in Diagnosis and Therapy 2020;4:1-8.
+5. O'Beirne JG, Chlapoutakis K, Alshryda S, Aydingoz U, 
+Baumann T , Casini C, et al. International Interdisciplinary 
+Consensus Meeting on the Evaluation of Developmental 
+Dysplasia of the Hip. Ultraschall Med 2019;40:454-64.
+6. Nguyen JC, Dorfman SR, Rigsby CK, Iyer RS, Alazraki 
+AL, Anupindi SA, Bardo DME, Brown BP , Chan SS, 
+Chandra T , Garber MD, Moore MM, Pandya NK, 
+Shet NS, Siegel A, Karmazyn B. ACR Appropriateness 
+Criteria® Developmental Dysplasia of the Hip-Child. J 
+Am Coll Radiol 2019;16:S94-S103.
+7. Swarup I, Penny CL, Dodwell ER. Developmental 
+dysplasia of the hip: an update on diagnosis and 
+management from birth to 6 months. Curr Opin Pediatr 
+2018;30:84-92.
+8. Chinese Medical Association Pediatric Surgery Branch 
+Orthopaedic Group, Chinese Medical Association 
+Orthopaedic Branch Pediatric T rauma and Orthopaedic 
+Group. Detection and treatment of pediatric 
+developmental dysplasia of the hip in children up to two 
+year of age:clinical practice guideline. Zhonghua Gu Ke 
+Za Zhi 2017;37:641-50.
+9. Bonsel JM, Gielis WP , Pollet V , Weinans HH, Sakkers 
+RJB. Statistical Shape Modeling of US Images to Predict 
+Hip Dysplasia Development in Infants. Radiology 
+2022;303:425-32.
+10. Rosendahl K, Dezateux C, Fosse KR, Aase H, Aukland SM, 
+Reigstad H, Alsaker T , Moster D, Lie RT , Markestad T . 
+Immediate treatment versus sonographic surveillance for 
+mild hip dysplasia in newborns. Pediatrics 2010;125:e9-16.
+11. Wood MK, Conboy V , Benson MK. Does early treatment 
+by abduction splintage improve the development of 
+dysplastic but stable neonatal hips? J Pediatr Orthop 
+2000;20:302-5.
+12. Wanner MR, Loder RT , Jennings SG, Ouyang F , 
+Karmazyn B. Changes in femoral head size and growth 
+rate in young children with severe developmental dysplasia 
+of the hip. Pediatr Radiol 2017;47:1787-92.
+13. Barrera CA, Cohen SA, Sankar WN, Ho-Fung VM, Sze 
+RW, Nguyen JC. Imaging of developmental dysplasia of 
+the hip: ultrasound, radiography and magnetic resonance 
+imaging. Pediatr Radiol 2019;49:1652-68.
+14. Graf R, Scott S, Lercher K, Baumgartner F , Benaroya A. 
+Hip Sonography: Diagnosis and Management of Infant 
+Hip Dysplasia. Springer Berlin Heidelberg; 2006.
+15. Harcke HT , Lee MS, Sinning L, Clarke NM, Borns 
+PF , MacEwen GD. Ossification center of the infant hip: 
+sonographic and radiographic correlation. AJR Am J 
+Roentgenol 1986;147:317-21.
+16. The World Health Organization. WHO child growth 
+standards: length/height-for-age; c2006 [cited 2022 May 
+1]. Available online: https://www.who.int/tools/child-
+growth-standards/standards/length-height-for-age
+17. de Onis M, Onyango AW, Borghi E, Siyam A, Nishida C, 
+Siekmann J. Development of a WHO growth reference for 
+school-aged children and adolescents. Bull World Health 
+Organ 2007;85:660-7.
+18. Stewart RJ, Patterson CC, Mollan RA. Ossification of the 
+normal femoral capital epiphysis. J Bone Joint Surg Br 
+1986;68:653.
+19. Paranjape M, Cziger A, Katz K. Ossification of femoral 
+head: normal sonographic standards. J Pediatr Orthop 
+2002;22:217-8.
+20. Narese F , Puccio G, Mazzucco W, Falzone A, Venturella V , 
+Narese D, Capra E. Earlier appearance of the ossification 
+center of the femoral head in breast-fed versus formula-fed 
+infants. Nutrition 2011;27:1108-11.
+21. Lee MC, Eberson CP . Growth and development of the 
+child's hip. Orthop Clin North Am 2006;37:119-32, v.
+22. Wu J, Yuan Z, Li J, Zhu M, Canavese F , Xun F , Li Y, Xu 
+H. Does the size of the femoral head correlate with the 
+incidence of avascular necrosis of the proximal femoral 
+epiphysis in children with developmental dysplasia of 
+the hip treated by closed reduction? J Child Orthop 
+2020;14:175-83.
+23. Sugawara R, Watanabe H, T aki N, Aihara T , Furukawa 
+R, Nakata W, T akeshita K, Kikkawa I. New radiographic 
+standards for age at appearance of the ossification center 
+of the femoral head in Japanese: Appearance at ≤12 
+months of age is normal in Japanese infants. J Orthop Sci 
+===== PAGE 11 =====
+Quantitative Imaging in Medicine and Surgery, Vol 13, No 1 January 2023 195
+© AME Publishing Company.   Quant Imaging Med Surg 2023;13(1):185-195 | https://dx.doi.org/10.21037/qims-22-513
+2019;24:166-9.
+24. Walter SG, Bornemann R, Koob S, Ossendorff R, Placzek 
+R. Closed Reduction as Therapeutic Gold Standard for 
+T reatment of Congenital Hip Dislocation. Z Orthop 
+Unfall 2020;158:475-80.
+25. Bilgili F , Sağlam Y, Göksan SB, Hürmeydan ÖM, Birişik 
+F , Demirel M. T reatment of Graf T ype IIa Hip Dysplasia: 
+A Cut-off Value for Decision Making Balkan Med J 
+2018;35:427-30.
+26. Alves C, T ruong WH, Thompson MV , Suryavanshi 
+JR, Penny CL, Do HT , Dodwell ER. Diagnostic and 
+treatment preferences for developmental dysplasia of the 
+hip: a survey of EPOS and POSNA members. J Child 
+Orthop 2018;12:236-44.
+27. Roovers EA, Boere-Boonekamp MM, Mostert AK, 
+Castelein RM, Zielhuis GA, Kerkhoff TH. The natural 
+history of developmental dysplasia of the hip: sonographic 
+findings in infants of 1-3 months of age. J Pediatr Orthop 
+B 2005;14:325-30.
+28. Ömero ğlu H, Köse N, Akceylan A. Success of Pavlik 
+Harness T reatment Decreases in Patients ≥ 4 Months 
+and in Ultrasonographically Dislocated Hips in 
+Developmental Dysplasia of the Hip. Clin Orthop Relat 
+Res 2016;474:1146-52.
+29. Johnson MA, Gohel S, Nguyen JC, Sankar WN. MRI 
+Predictors of Residual Dysplasia in Developmental 
+Dysplasia of the Hip Following Open and Closed 
+Reduction. J Pediatr Orthop 2022;42:179-85.
+Cite this article as: Yan H, Du L, Liu J, Yang X, Luo Y. 
+Developmental retardation of femoral head size and femoral 
+head ossification in mild and severe developmental dysplasia of 
+the hip in infants: a preliminary cross-sectional study based on 
+ultrasound images. Quant Imaging Med Surg 2023;13(1):185-
+195. doi: 10.21037/qims-22-513
+===== PAGE 12 =====
+© AME Publishing Company.  https://dx.doi.org/10.21037/qims-22-513
+Supplementary
+Figure S1 Bland-Altman plots of interobserver agreement between 
+two operators in the measurement of the α angle of the hip. 
+Figure S2 Bland-Altman plots of interobserver agreement between 
+two operators in the measurement of the β angle of the hip.
+Figure S3 Bland-Altman plots of interobserver agreement between 
+two operators in the measurement of the femoral head diameter.
+===== PAGE 13 =====
+© AME Publishing Company. https://dx.doi.org/10.21037/qims-22-513
+Table S1 The developmental FHD of male and female in mature hips
+Age/month
+Male FHD/cm Female FHD/cm
+P values
+†
+Mean LL of 95% CI UL of 95% CI Mean LL of 95% CI UL of 95% CI
+1.5 1.663 1.624 1.703 1.591 1.558 1.625 0.464
+2 1.695 1.603 1.787 1.658 1.619 1.697 0.005
+2.5 1.780 1.753 1.808 1.694 1.659 1.730 <0.001
+3 1.796 1.764 1.828 1.706 1.673 1.738 <0.001
+3.5 1.845 1.821 1.868 1.745 1.724 1.765 <0.001
+4 1.853 1.830 1.876 1.773 1.755 1.791 <0.001
+4.5 1.900 1.870 1.929 1.798 1.778 1.818 <0.001
+5 1.892 1.864 1.920 1.807 1.788 1.826 <0.001
+5.5 1.894 1.855 1.934 1.815 1.792 1.839 <0.001
+6 1.919 1.886 1.952 1.813 1.793 1.832 <0.001
+6.5 1.929 1.889 1.969 1.811 1.775 1.847 <0.001
+†
+, the comparison of female and male FHD was using the Student’s t test. CI, confidence interval; FHD, femoral head diameter; LL, lower 
+limit; UL, upper limit.
+Table S2 The developmental femoral head ossification of male and female in mature hips
+Age, month
+Male femoral head ossification (%)
+†
+Female femoral head ossification (%)
+†
+P values
+‡
+Type I Type II Type III Type IV Type I Type II Type III Type IV
+1.5 90.6 9.4 0.0 0.0 85.7 7.1 0.0 7.1 0.822
+2 100.0 0.0 0.0 0.0 92.5 2.5 0.0 5.0 0.265
+2.5 85.4 4.9 7.3 2.4 72.4 8.6 17.2 1.7 0.066
+3 79.7 7.8 9.4 3.1 54.2 15.3 15.3 15.3 0.001
+3.5 63.3 11.7 21.1 3.9 44.5 11.0 31.7 12.8 <0.001
+4 63.6 9.3 16.9 10.2 38.8 8.8 35.3 17.1 <0.001
+4.5 49.1 2.8 24.1 24.1 30.4 6.1 36.5 27.0 0.028
+5 41.8 13.9 28.7 15.6 21.7 11.1 22.2 45.0 <0.001
+5.5 40.6 9.4 12.5 37.5 7.0 10.2 37.5 45.3 0.001
+6 20.4 15.3 13.3 51.0 6.8 4.0 24.4 64.8 0.001
+6.5 17.3 5.8 40.4 36.5 4.3 1.4 22.9 71.4 <0.001
+†
+, data are percentages of different femoral head ossification types. 
+‡
+, the comparison of female and male femoral head ossification was 
+using the Mann–Whitney U test

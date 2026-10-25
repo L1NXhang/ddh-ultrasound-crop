@@ -1,6 +1,7 @@
 """Build a data-free Windows CPU desktop distribution from explicit application assets."""
 import argparse
 import hashlib
+import sys
 import json
 import os
 import shutil
@@ -23,7 +24,8 @@ PREFIXES = ('ddh_multidevice_v2/backend/', 'ddh_multidevice_v2/desktop/runtime/'
             'ddh_multidevice_v2/components/')
 EXACT = {'DDH裁剪工具.exe', 'DDH裁剪工具.exe.config', '先读我.txt', 'release_manifest.json',
          'ddh_multidevice_v2/portable.json', 'ddh_multidevice_v2/model_manifest.json',
-         'ddh_multidevice_v2/runs_v2/crop.pt'} | {'ddh_multidevice_v2/tools/webapp/'+name for name in WEB_ASSETS}
+         'ddh_multidevice_v2/runs_v2/crop.pt', 'ddh_multidevice_v2/components.lock.json'} | \
+        {'ddh_multidevice_v2/tools/webapp/'+name for name in WEB_ASSETS}
 BOOTSTRAP_ONLY = {'ddh_multidevice_v2/components.lock.json'}
 OFFLINE_ONLY = {'ddh_multidevice_v2/desktop/WebView2Runtime/'}
 
@@ -58,6 +60,10 @@ def allowed_path(name):
     path = PurePosixPath(name)
     if path.is_absolute() or '..' in path.parts or path.suffix.lower() in {'.jsonl', '.dcm', '.dicom'}:
         return False
+    if name.startswith('ddh_multidevice_v2/components/'):
+        # 组件内容来自 sha256 校验过的官方 wheel（networkx/sympy 自带测试图片等），
+        # 完整性由 components.lock.json 背书，不受「禁止图片」规则约束。
+        return True
     if path.suffix.lower() in {'.png', '.jpg', '.jpeg', '.bmp'}:
         return False
     return name in EXACT or any(name.startswith(prefix) for prefix in PREFIXES)
@@ -76,6 +82,41 @@ def clean_inventory(folder):
     return inventory
 
 
+def component_stdlib_hiddenimports(build):
+    """扫描组件 wheel 里 import 的标准库模块，供引导版 hiddenimports 使用。
+
+    torch 被 --exclude 后，只有它能走到的标准库（timeit 等）就不会进 bundle，
+    运行时会直接 ModuleNotFoundError。这里把 components wheel 源码里出现的
+    全部标准库顶层模块一次性补上，避免逐个失败。
+    """
+    import ast
+    scan = build/'_component_scan'
+    cache = ROOT/'data/components_cache'
+    if not scan.is_dir() and cache.is_dir():
+        scan.mkdir(parents=True)
+        for whl in sorted(cache.glob('*.whl')):
+            with zipfile.ZipFile(whl) as archive:
+                archive.extractall(scan)
+    if not scan.is_dir():
+        raise ValueError('引导版构建需要组件缓存：先运行 tools/build_components_lock.py')
+    stdlib = set(sys.stdlib_module_names)
+    found = set()
+    for path in scan.rglob('*.py'):
+        try:
+            tree = ast.parse(path.read_text(encoding='utf-8', errors='replace'))
+        except (SyntaxError, ValueError, OSError):
+            continue
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    found.add(alias.name)          # 全点名：unittest.mock 这类子模块也要
+            elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+                found.add(node.module)
+    hidden = sorted(name for name in found if name.split('.')[0] in stdlib
+                    and not name.startswith(('torch', 'torchvision')))
+    return hidden
+
+
 def freeze(python, build=BUILD, exclude_torch=False):
     command = [str(python), '-m', 'PyInstaller', '--noconfirm', '--clean', '--onedir', '--console',
                '--name', 'DDHBackend', '--distpath', str(build/'frozen'), '--workpath', str(build/'freeze_work'),
@@ -83,7 +124,11 @@ def freeze(python, build=BUILD, exclude_torch=False):
                '--exclude-module', 'tkinter', '--exclude-module', 'scipy', '--exclude-module', 'matplotlib',
                '--exclude-module', 'pandas', '--exclude-module', 'pytest', '--exclude-module', 'IPython']
     if exclude_torch:
-        # 引导版：torch/torchvision 由用户机器按需下载（components/ 目录），不进 bundle
+        # 引导版：torch/torchvision 由用户机器按需下载（components/ 目录），不进 bundle。
+        # 但 torch 运行时会用到一批标准库，排除后它们也进不了 bundle —— 从组件源码
+        # 全量扫描补成 hiddenimports，避免逐个 ModuleNotFoundError。
+        for name in component_stdlib_hiddenimports(build):
+            command += ['--hidden-import', name]
         command += ['--exclude-module', 'torch', '--exclude-module', 'torchvision']
     command += [str(ROOT/'tools/crop_studio.py')]
     subprocess.run(command, check=True, cwd=ROOT)

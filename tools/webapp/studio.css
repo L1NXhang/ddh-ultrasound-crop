@@ -17,14 +17,14 @@
  --cds-clay: #d97757;
  --cds-clay-hover: #cc5a36;
  --cds-clay-light: #fbf3ef;
- --cds-brand: #c6613f;
+ --cds-brand: #b4552f;
  --cds-fill-ghost-hover: var(--cds-alpha-1);
  --cds-fill-ghost-selected: var(--cds-alpha-2);
  --cds-fill-brand: var(--cds-brand);
  --cds-fill-danger: #ef4444;
  --cds-text-primary: #1a1915;
  --cds-text-secondary: #52514e;
- --cds-text-muted: #8a8a8a;
+ --cds-text-muted: #74736f;
  --cds-shadow-sm: 0 1px 2px 0 rgba(0,0,0,.05), 0 2px 8px 0 rgba(0,0,0,.08);
  --cds-shadow-lg: 0 4px 8px 0 rgba(0,0,0,.06), 0 12px 28px -2px rgba(0,0,0,.08);
  --cds-shadow-popover: 0 0 0 1px var(--cds-border), 0 8px 24px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.08);

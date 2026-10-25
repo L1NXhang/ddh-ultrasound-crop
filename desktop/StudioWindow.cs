@@ -63,6 +63,8 @@ namespace DDHDesktop
                 string profile = Path.Combine(Program.RuntimePath, "webview_profile");
                 string flags = debugPort > 0 && debugPort <= 65535 ? "--remote-debugging-port=" + debugPort + " --remote-debugging-address=127.0.0.1" : "";
                 string fixedRuntime = await WebViewRuntime.FindAsync();
+                if (fixedRuntime == null)
+                    await WebViewRuntime.EnsureEvergreenAsync(text => { splash.Text = text; });
                 var environment = await CoreWebView2Environment.CreateAsync(fixedRuntime, profile, new CoreWebView2EnvironmentOptions(flags));
                 await browser.EnsureCoreWebView2Async(environment);
                 browser.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;

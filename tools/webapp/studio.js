@@ -205,6 +205,51 @@ $('trainStart').onclick=async()=>{
 $('chooseTrainManifest').onclick=()=>choosePath('trainManifest','file');
 $('chooseTrainRoot').onclick=()=>choosePath('trainRoot','folder');
 $('chooseTrainOutput').onclick=()=>choosePath('trainOutput','folder');
+/* ---------- 推理组件（引导式安装）---------- */
+let componentsTimer=null, componentsHinted=false;
+async function pollComponents(){
+ try{
+  const status=await api('/api/components/status');
+  $('componentsOpen').classList.toggle('hidden',!status.lock_available&&status.torch_ready);
+  if(!status.torch_ready&&!componentsHinted){componentsHinted=true;openComponentsPanel(status);}
+  if($('componentsPanel').classList.contains('hidden'))return;
+  $('componentsBar').style.width=(status.progress&&status.progress.total?100*status.progress.done/status.progress.total:0)+'%';
+  $('componentsFile').textContent=status.progress?`${status.progress.stage} · ${status.progress.file} · ${(status.progress.done/1e6).toFixed(0)}/${status.progress.total?(status.progress.total/1e6).toFixed(0):'?'} MB`:'';
+  $('componentsLog').textContent=(status.lines||[]).join('\n');
+  setComponentsView(status.running);
+  if(!status.running&&pollComponents.lastRunning){pollComponents.lastRunning=false;
+   if(status.state==='completed'){toast('组件安装完成，可以开始裁剪了');visible('componentsPanel',false);}
+   else if(status.state==='failed'){$('componentsError').textContent=status.error||'安装失败，请查看日志';setComponentsView(false);}
+  }
+  pollComponents.lastRunning=status.running;
+ }catch(error){/* 服务未就绪时忽略 */}
+ finally{componentsTimer=setTimeout(pollComponents,1500);}
+}
+function setComponentsView(running){
+ visible('componentsForm',!running);visible('componentsRunning',running);visible('componentsStop',running);
+ $('componentsInstall').textContent=running?'安装中…':'安装组件';$('componentsInstall').disabled=running;
+}
+function openComponentsPanel(status){
+ if(reviewMode){toast('协作审核模式请在主机上安装组件');return;}
+ visible('componentsPanel',true);$('componentsError').textContent='';
+ if(status){
+  $('cpuSize').textContent='· 约 '+(status.variants?.cpu?.missing_bytes/1e6).toFixed(0)+' MB';
+  $('cudaSize').textContent='· 约 '+(status.variants?.cuda?.missing_bytes/1e6).toFixed(0)+' MB';
+  const suggest=status.suggested==='cuda'?'cuda':'cpu';
+  const radio=document.querySelector(`[name=componentVariant][value=${suggest}]`);if(radio)radio.checked=true;
+  if(!status.lock_available)$('componentsError').textContent=status.lock_error||'组件清单缺失：引导版安装包不完整，请重新下载';
+ }
+ pollComponents.lastRunning=false;setComponentsView(false);
+}
+$('componentsOpen').onclick=async()=>{openComponentsPanel(await api('/api/components/status'));};
+$('componentsClose').onclick=()=>{visible('componentsPanel',false);};
+$('componentsStop').onclick=()=>api('/api/components/stop',{}).catch(error=>toast(error.message));
+$('componentsInstall').onclick=async()=>{
+ $('componentsError').textContent='';
+ const variant=document.querySelector('[name=componentVariant]:checked')?.value;
+ if(!variant){$('componentsError').textContent='请先选择 CPU 或 CUDA 组件';return;}
+ try{await api('/api/components/install',{variant});setComponentsView(true);toast('开始下载组件');}
+ catch(error){$('componentsError').textContent=error.message;}};
 document.addEventListener('keydown',event=>{
  if(/INPUT|SELECT|TEXTAREA/.test(event.target.tagName)||event.target.isContentEditable||!editable())return;
  const key=event.key.toLowerCase();
@@ -231,7 +276,7 @@ document.addEventListener('keydown',event=>{
  }
 });
 window.addEventListener('resize',fit);
-async function boot(){if(reviewMode){await reviewBoot();return;}if(location.protocol==='file:'){$('setupError').textContent='请先双击工作区中的“启动裁剪工具.bat”，再打开 http://127.0.0.1:8770/';$('startProject').disabled=true;return;}try{const data=await api('/api/bootstrap');token=data.token;renderRecents(data.recent_projects||[]);$('workPath').value=data.status.work||data.default_work;const suggested=new URL(location.href).searchParams.get('source');$('sourcePath').value=suggested||data.status.source||'';renderStatus(data.status);if(data.status.configured&&!suggested){visible('setup',false);if(data.status.job.state==='running')await refreshQueue();else await nextImage();}pollTimer=setTimeout(poll,1200);}catch(error){$('setupError').textContent='连接失败：'+error.message+'。请重新启动裁剪工具。';}}
+async function boot(){if(reviewMode){await reviewBoot();return;}if(location.protocol==='file:'){$('setupError').textContent='请先双击工作区中的“启动裁剪工具.bat”，再打开 http://127.0.0.1:8770/';$('startProject').disabled=true;return;}try{const data=await api('/api/bootstrap');token=data.token;renderRecents(data.recent_projects||[]);$('workPath').value=data.status.work||data.default_work;const suggested=new URL(location.href).searchParams.get('source');$('sourcePath').value=suggested||data.status.source||'';renderStatus(data.status);if(data.status.configured&&!suggested){visible('setup',false);if(data.status.job.state==='running')await refreshQueue();else await nextImage();}pollComponents();pollTimer=setTimeout(poll,1200);}catch(error){$('setupError').textContent='连接失败：'+error.message+'。请重新启动裁剪工具。';}}
 setupSessionControls();
 setupCollaboration();
 boot();

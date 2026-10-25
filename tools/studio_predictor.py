@@ -22,6 +22,10 @@ class ModelRunner:
     def load(self):
         if self.tool is not None:
             return
+        from studio_components import ensure_components, torch_available
+        ensure_components(Path(__file__).resolve().parents[1])
+        if not torch_available():
+            raise RuntimeError('推理组件未安装：请点右上角「组件」先安装推理组件')
         import torch
         import crop_app
         self.device = ('cuda' if torch.cuda.is_available() else 'cpu') if self.requested_device == 'auto' else self.requested_device

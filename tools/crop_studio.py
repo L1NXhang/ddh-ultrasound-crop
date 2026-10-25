@@ -138,6 +138,8 @@ class StudioServer(ThreadingHTTPServer):
         self.service.collaboration = Collaboration(service, ROOT/'tools/webapp')
         from studio_training import TrainingService
         self.training = TrainingService(ROOT/'data/studio_runtime')
+        from studio_components import ComponentService
+        self.components = ComponentService(ROOT, ROOT/'components.lock.json')
         self.token = secrets.token_urlsafe(32)
         self.desktop = False
         self.stopped = threading.Event()
@@ -220,6 +222,8 @@ class StudioHandler(BaseHTTPRequestHandler):
             self.send_file(file, 'application/zip', filename=file.name)
         elif path == '/api/train/status':
             self.json(self.server.training.status())
+        elif path == '/api/components/status':
+            self.json(self.server.components.status())
         else:
             self.json({'error': '未找到页面'}, 404)
 
@@ -307,6 +311,10 @@ class StudioHandler(BaseHTTPRequestHandler):
             self.json(self.server.training.start(body))
         elif path == '/api/train/stop':
             self.json(self.server.training.stop())
+        elif path == '/api/components/install':
+            self.json(self.server.components.install(body['variant']))
+        elif path == '/api/components/stop':
+            self.json(self.server.components.stop())
         elif path == '/api/shutdown':
             if not self.server.desktop:
                 raise ValueError('此操作仅供桌面软件退出时使用')

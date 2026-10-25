@@ -274,6 +274,7 @@ body:has(#setup:not(.hidden)) .workspace { visibility: hidden; }
 .collaboration-members > div > span:last-child { font-size: 11px; color: var(--muted); }
 body[data-review-only] #newProject, body[data-review-only] #collaborationOpen,
 body[data-review-only] #openOutput, body[data-review-only] #archiveSide,
+body[data-review-only] #trainOpen, body[data-review-only] #componentsOpen,
 body[data-review-only] #setup, body[data-review-only] .archive-prompt,
 body[data-review-only] #finishZip { display: none !important; }
 body[data-review-only] .tool-name { font-size: 12px; }

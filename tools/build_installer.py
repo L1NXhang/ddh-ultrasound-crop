@@ -13,11 +13,11 @@ RELEASE_LIMIT = 2*1024**3
 
 
 def installer_defines(source, output, variant, version, split=False):
-    if variant not in {'cpu', 'auto', 'train'} or not re.fullmatch(r'\d+\.\d+\.\d+', version):
+    if variant not in {'cpu', 'auto', 'train', 'bootstrap'} or not re.fullmatch(r'\d+\.\d+\.\d+', version):
         raise ValueError('Invalid installer variant or version')
     if not (source/'DDH裁剪工具.exe').is_file():
         raise ValueError('Complete portable application folder is required')
-    label = {'cpu': 'CPU', 'auto': 'CPU_GPU', 'train': 'GPU_TRAIN'}[variant]
+    label = {'cpu': 'CPU', 'auto': 'CPU_GPU', 'train': 'GPU_TRAIN', 'bootstrap': 'Bootstrap'}[variant]
     return ['/DAppSource='+str(source.resolve()), '/DInstallerOutput='+str(output.resolve()),
             '/DAppVersion='+version, '/DVariant='+label, '/DDiskParts='+('1' if split else '0')]
 
@@ -36,7 +36,7 @@ def build(source, output, compiler, variant, version, split=False):
     args = installer_defines(source, output, variant, version, split)
     command = [str(compiler), '/Qp', *args, str(ROOT/'desktop/installer.iss')]
     subprocess.run(command, check=True, cwd=ROOT)
-    label = {'cpu': 'CPU', 'auto': 'CPU_GPU', 'train': 'GPU_TRAIN'}[variant]
+    label = {'cpu': 'CPU', 'auto': 'CPU_GPU', 'train': 'GPU_TRAIN', 'bootstrap': 'Bootstrap'}[variant]
     files = sorted(file for file in output.glob(f'DDH_Crop_Setup_{version}_{label}_x64*')
                    if file.suffix in {'.exe', '.bin'})
     if not files or any(file.stat().st_size >= RELEASE_LIMIT for file in files):
@@ -55,8 +55,8 @@ if __name__ == '__main__':
     parser.add_argument('--source', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--compiler', type=Path, required=True)
-    parser.add_argument('--variant', choices=['cpu', 'auto', 'train'], default='cpu')
-    parser.add_argument('--version', default='0.6.0')
+    parser.add_argument('--variant', choices=['cpu', 'auto', 'train', 'bootstrap'], default='cpu')
+    parser.add_argument('--version', default='0.7.0')
     parser.add_argument('--split', action='store_true')
     args = parser.parse_args()
     build(args.source, args.out, args.compiler, args.variant, args.version, args.split)

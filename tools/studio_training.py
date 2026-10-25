@@ -21,6 +21,10 @@ def run_train_job(spec_file):
     """子进程入口：读取 spec → （按需）审计与划分 → 训练 → 打印结果行。"""
     from types import SimpleNamespace
     spec = json.loads(Path(spec_file).read_text(encoding='utf-8'))
+    from studio_components import ensure_components, torch_available
+    ensure_components(Path(__file__).resolve().parents[1])
+    if not torch_available():
+        raise SystemExit('推理组件未安装：无法训练，请先在「组件」中安装 CUDA 组件')
     rows = [json.loads(x) for x in Path(spec['manifest']).read_text(encoding='utf-8').splitlines() if x.strip()]
     if not rows:
         raise SystemExit('清单为空：至少需要一行带 window 与 crop 的标注')

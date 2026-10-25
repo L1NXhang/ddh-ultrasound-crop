@@ -138,6 +138,50 @@ class ComponentTests(unittest.TestCase):
     def test_suggest_variant_is_safe_without_gpu(self):
         self.assertIn(suggest_variant(), {'cpu', 'cuda'})
 
+    def test_import_from_local_folder_verifies_and_unpacks(self):
+        service = ComponentService(self.root, self.lock)
+        folder = self.root/'wheels'
+        folder.mkdir()
+        (folder/'fake-1.0.0-py3-none-any.whl').write_bytes(self.body)
+        service.import_folder(str(folder))
+        for _ in range(100):
+            if service.status()['state'] != 'running':
+                break
+            threading.Event().wait(.1)
+        self.assertEqual(service.status()['state'], 'completed', service.status()['error'])
+        self.assertTrue((self.root/'components'/'fakepkg'/'__init__.py').is_file())
+
+    def test_import_rejects_wrong_hash_without_unpacking(self):
+        service = ComponentService(self.root, self.lock)
+        folder = self.root/'bad'
+        folder.mkdir()
+        (folder/'fake-1.0.0-py3-none-any.whl').write_bytes(self.body + b'corrupted')
+        service.import_folder(str(folder))
+        for _ in range(100):
+            if service.status()['state'] != 'running':
+                break
+            threading.Event().wait(.1)
+        self.assertEqual(service.status()['state'], 'failed')
+        self.assertIn('哈希不符', service.status()['error'])
+        self.assertFalse((self.root/'components'/'fakepkg').exists())
+
+    def test_download_prefers_local_source_over_network(self):
+        # 本机已有正确文件时，即使所有镜像都不可达也应成功（零下载）
+        from studio_components import download_file
+        local = self.root/'already_have.whl'
+        local.write_bytes(self.body)
+        destination = self.root/'out'/'fake-1.0.0-py3-none-any.whl'
+        download_file(['http://127.0.0.1:1/fake.whl'], destination, sha256=self.good_hash,
+                      local_sources=[local], segments=1)
+        self.assertTrue(destination.is_file())
+        # 本机源内容错误时应忽略它，走网络并失败（不产出文件）
+        (local).write_bytes(self.body + b'corrupted')
+        destination.unlink()
+        with self.assertRaises(ConnectionError):
+            download_file(['http://127.0.0.1:1/fake.whl'], destination, sha256=self.good_hash,
+                          local_sources=[local], segments=1)
+        self.assertFalse(destination.exists())
+
 
 if __name__ == '__main__':
     unittest.main()

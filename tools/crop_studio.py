@@ -313,6 +313,8 @@ class StudioHandler(BaseHTTPRequestHandler):
             self.json(self.server.training.stop())
         elif path == '/api/components/install':
             self.json(self.server.components.install(body['variant']))
+        elif path == '/api/components/import':
+            self.json(self.server.components.import_folder(body['folder']))
         elif path == '/api/components/stop':
             self.json(self.server.components.stop())
         elif path == '/api/shutdown':

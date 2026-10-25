@@ -12,6 +12,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import shutil
 import subprocess
 import sys
 import threading
@@ -82,63 +83,162 @@ def load_lock(path):
     return lock
 
 
-def download_file(urls, destination, sha256=None, progress=None, cancelled=None):
-    """按镜像顺序下载到 destination（.part 续传），流式 sha256 校验。
+def _hash_file(path, cancelled=None, progress=None, total=None):
+    digest = hashlib.sha256()
+    size = Path(path).stat().st_size
+    done = 0
+    with Path(path).open('rb') as stream:
+        for chunk in iter(lambda: stream.read(CHUNK), b''):
+            if cancelled and cancelled():
+                raise InterruptedError('已取消')
+            digest.update(chunk)
+            done += len(chunk)
+            if progress:
+                progress(done, total if total is not None else size, '校验中')
+    return digest.hexdigest()
 
-    progress(done_bytes, total_bytes, stage_text) 在每块写入后回调；
-    cancelled() 返回 True 时中止（抛 InterruptedError）。
-    任何镜像的字节数或哈希不符都会删除 .part 并尝试下一个镜像。
+
+def download_file(urls, destination, sha256=None, progress=None, cancelled=None,
+                  segments=1, local_sources=()):
+    """获得 destination 文件。顺序：本机已有源 → 网络（多段并行）→ 单流兜底。
+
+    local_sources：本机已有的同内容文件，先 sha256 校验，通过直接复制（零下载）。
+    网络：支持 Range 且文件较大时按 segments 段并行（各段 .partN 可独立续传），
+    完成后按序拼接，整体 sha256 由本函数校验，不符即弃并尝试下一个镜像。
+    progress(done, total, stage)；cancelled() 返回 True 时中止（保留断点）。
     """
     destination = Path(destination)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    part = destination.with_suffix(destination.suffix+'.part')
-    errors = []
-    for index, url in enumerate(urls):
+    for source in local_sources:                     # 本机源：校验通过即复制
+        source = Path(source)
+        if not source.is_file() or source.resolve() == destination.resolve():
+            continue
         try:
-            done = 0
-            headers = {'User-Agent': 'DDH-Crop-Component-Installer'}
-            if part.exists():
-                done = part.stat().st_size
-                headers['Range'] = f'bytes={done}-'
-            request = Request(url, headers=headers)
-            with urlopen(request, timeout=TIMEOUT) as response:
-                length = response.headers.get('Content-Length')
-                length = int(length) if length else None
-                digest = hashlib.sha256()
-                if response.status == 206 and done:
-                    # 断点续传：已下载部分先读入哈希（写句柄打开前完成，避免同文件双开）
-                    with part.open('rb') as reuse:
-                        for chunk in iter(lambda: reuse.read(CHUNK), b''):
-                            digest.update(chunk)
-                    total = length+done if length is not None else None
-                else:
-                    done = 0                           # 服务器不支持续传：从头下
-                    total = length
+            if progress:
+                progress(0, source.stat().st_size, '发现本机已有组件，导入中')
+            if sha256 is None or _hash_file(source, cancelled, progress) == sha256:
                 if progress:
-                    progress(done, total, '下载中')
-                with part.open('ab' if done else 'wb') as stream:
-                    while True:
-                        if cancelled and cancelled():
-                            raise InterruptedError('下载已取消')
-                        chunk = response.read(CHUNK)
-                        if not chunk:
-                            break
-                        stream.write(chunk)
-                        digest.update(chunk)
-                        done += len(chunk)
-                        if progress:
-                            progress(done, total, '下载中')
-            if sha256 and digest.hexdigest() != sha256:
-                raise ValueError(f'校验失败（期望 {sha256[:12]}…，实际 {digest.hexdigest()[:12]}…）')
-            part.replace(destination)
+                    progress(1, 1, '从本机导入')
+                shutil.copyfile(source, destination)
+                return destination
+        except InterruptedError:
+            raise
+        except Exception:
+            continue                                 # 本机源坏了就走网络
+    errors = []
+    for url in urls:
+        try:
+            if segments > 1:
+                try:
+                    _download_segmented(url, destination, segments, progress, cancelled)
+                except _NoRangeSupport:
+                    _download_single(url, destination, progress, cancelled)
+            else:
+                _download_single(url, destination, progress, cancelled)
+            if sha256 and _hash_file(destination, cancelled, progress) != sha256:
+                raise ValueError(f'校验失败（期望 {sha256[:12]}…）')
             return destination
         except InterruptedError:
             raise
-        except Exception as error:                        # 镜像失败：换下一个
-            errors.append(f'{url.split("/")[2] if "/" in url else url}: {error}')
+        except Exception as error:                   # 镜像失败：换下一个
+            host = url.split('/')[2] if '/' in url else url
+            errors.append(f'{host}: {error}')
             if progress:
                 progress(0, None, f'镜像不可用，尝试下一个（{len(errors)}）')
     raise ConnectionError('所有下载源都失败了：'+'；'.join(errors))
+
+
+class _NoRangeSupport(Exception):
+    pass
+
+
+def _probe_total(url):
+    """Range: 0-0 探测总长；服务器不支持 Range 时抛 _NoRangeSupport。"""
+    request = Request(url, headers={'Range': 'bytes=0-0', 'User-Agent': 'DDH-Crop-Component-Installer'})
+    with urlopen(request, timeout=TIMEOUT) as response:
+        if response.status != 206:
+            raise _NoRangeSupport()
+        total = response.headers.get('Content-Range', '').rsplit('/', 1)[-1]
+        return int(total) if total.isdigit() else None
+
+
+def _download_segmented(url, destination, segments, progress, cancelled):
+    total = _probe_total(url)
+    if not total or total < CHUNK*16:                # 小文件单流即可
+        raise _NoRangeSupport()
+    bounds = [total*i//segments for i in range(segments+1)]
+    parts = [destination.with_suffix(destination.suffix+f'.part{i}') for i in range(segments)]
+    state = {'done': 0}
+    state_lock = threading.Lock()
+
+    def worker(index):
+        start, end = bounds[index], bounds[index+1]-1
+        part = parts[index]
+        have = part.stat().st_size if part.exists() else 0
+        request = Request(url, headers={'Range': f'bytes={start+have}-{end}',
+                                        'User-Agent': 'DDH-Crop-Component-Installer'})
+        with urlopen(request, timeout=TIMEOUT) as response:
+            with part.open('ab' if have else 'wb') as stream:
+                while True:
+                    if cancelled and cancelled():
+                        raise InterruptedError('下载已取消')
+                    chunk = response.read(CHUNK)
+                    if not chunk:
+                        break
+                    stream.write(chunk)
+                    with state_lock:
+                        state['done'] += len(chunk)
+                    if progress:
+                        progress(state['done'], total, f'下载中（{segments} 线程）')
+
+    threads = [threading.Thread(target=worker, args=(i,), daemon=True) for i in range(segments)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    if cancelled and cancelled():
+        raise InterruptedError('下载已取消')
+    if any(part.stat().st_size != bounds[i+1]-bounds[i] for i, part in enumerate(parts)):
+        raise ConnectionError('分段下载不完整')
+    with destination.open('wb') as output:           # 按序拼接，整体哈希由调用方校验
+        for part in parts:
+            with part.open('rb') as stream:
+                shutil.copyfileobj(stream, output, CHUNK)
+    for part in parts:
+        part.unlink()
+
+
+def _download_single(url, destination, progress, cancelled):
+    """单流下载（断点续传），供小文件与不支持 Range 的服务器。"""
+    part = destination.with_suffix(destination.suffix+'.part')
+    done = 0
+    headers = {'User-Agent': 'DDH-Crop-Component-Installer'}
+    if part.exists():
+        done = part.stat().st_size
+        headers['Range'] = f'bytes={done}-'
+    request = Request(url, headers=headers)
+    with urlopen(request, timeout=TIMEOUT) as response:
+        length = response.headers.get('Content-Length')
+        length = int(length) if length else None
+        if response.status == 206 and done:
+            total = length+done if length is not None else None
+        else:
+            done = 0
+            total = length
+        if progress:
+            progress(done, total, '下载中')
+        with part.open('ab' if done else 'wb') as stream:
+            while True:
+                if cancelled and cancelled():
+                    raise InterruptedError('下载已取消')
+                chunk = response.read(CHUNK)
+                if not chunk:
+                    break
+                stream.write(chunk)
+                done += len(chunk)
+                if progress:
+                    progress(done, total, '下载中')
+    part.replace(destination)
 
 
 def unpack_wheel(whl, destination):
@@ -221,6 +321,60 @@ class ComponentService:
         self.thread.start()
         return {'ok': True}
 
+    def import_folder(self, folder):
+        """从本机文件夹导入组件 wheel（逐个校验 sha256，零下载）。"""
+        if self.lock is None:
+            raise ValueError(self.lock_error or '组件清单缺失，无法导入')
+        folder = Path(folder)
+        if not folder.is_dir():
+            raise ValueError('文件夹不存在：'+str(folder))
+        if self.job['state'] == 'running':
+            raise ValueError('已有组件安装在进行')
+        catalog = {**self.lock.get('deps', {}), **{name: spec
+                   for variant in self.lock.get('wheels', {}).values()
+                   for name, spec in variant['wheels'].items()}}
+        found = {name: spec for name, spec in catalog.items() if (folder/name).is_file()}
+        if not found:
+            raise ValueError('该文件夹里没有清单所列的组件文件（torch/torchvision 等 .whl）')
+        self.cancel.clear()
+        self.job = {'state': 'running', 'lines': [], 'progress': None, 'error': None,
+                    'result': None, 'variant': 'import'}
+        self.thread = threading.Thread(target=self._import, args=(folder, found), daemon=True)
+        self.thread.start()
+        return {'ok': True}
+
+    def _import(self, folder, wheels):
+        try:
+            for filename, spec in wheels.items():
+                if self.installed().get(filename) == spec['sha256']:
+                    self._log(f'已安装，跳过 {filename}')
+                    continue
+                self.job['progress'] = {'file': filename, 'done': 0, 'total': spec['bytes'], 'stage': '导入中'}
+                self._log(f'从本机导入 {filename}（{spec["bytes"]/1e6:.0f} MB）')
+                source = Path(folder)/filename
+
+                def progress(done, total, stage, name=filename):
+                    self.job['progress'] = {'file': name, 'done': done, 'total': total, 'stage': stage}
+                if _hash_file(source, self.cancel.is_set, progress, spec['bytes']) != spec['sha256']:
+                    raise ValueError(f'{filename} 与清单哈希不符，已拒绝导入')
+                self.job['progress'] = {'file': filename, 'done': spec['bytes'],
+                                        'total': spec['bytes'], 'stage': '解包中'}
+                unpack_wheel(source, self.components)
+                self._record(filename, spec['sha256'])
+            self.job['state'] = 'completed'
+            self.job['progress'] = None
+            self.job['result'] = {'variant': 'import'}
+            self._log('本机组件导入完成，推理功能已就绪')
+        except InterruptedError:
+            self.job['state'] = 'cancelled'
+            self.job['progress'] = None
+            self._log('导入已取消')
+        except Exception as error:
+            self.job['state'] = 'failed'
+            self.job['progress'] = None
+            self.job['error'] = str(error)
+            self._log('导入失败：'+str(error))
+
     def _install(self, variant, wheels):
         cache = self.root/'data'/'components_cache'
         try:
@@ -233,7 +387,8 @@ class ComponentService:
                 self._log(f'下载 {filename}（{spec["bytes"]/1e6:.0f} MB）')
                 def progress(done, total, stage, name=filename):
                     self.job['progress'] = {'file': name, 'done': done, 'total': total, 'stage': stage}
-                download_file(urls, target, spec['sha256'], progress, self.cancel.is_set)
+                download_file(urls, target, spec['sha256'], progress, self.cancel.is_set,
+                              segments=4 if spec['bytes'] > CHUNK*16 else 1)
                 self.job['progress'] = {'file': filename, 'done': spec['bytes'],
                                         'total': spec['bytes'], 'stage': '解包中'}
                 self._log(f'校验通过，解包 {filename}')

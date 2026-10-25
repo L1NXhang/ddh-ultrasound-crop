@@ -248,8 +248,17 @@ $('componentsInstall').onclick=async()=>{
  $('componentsError').textContent='';
  const variant=document.querySelector('[name=componentVariant]:checked')?.value;
  if(!variant){$('componentsError').textContent='请先选择 CPU 或 CUDA 组件';return;}
- try{await api('/api/components/install',{variant});setComponentsView(true);toast('开始下载组件');}
+ try{await api('/api/components/install',{variant});pollComponents.lastRunning=false;setComponentsView(true);toast('开始下载组件');}
  catch(error){$('componentsError').textContent=error.message;}};
+$('componentsImport').onclick=async()=>{
+ $('componentsError').textContent='';
+ try{
+  const isDesktop=typeof desktopRequest==='function'&&window.chrome?.webview;
+  const result=isDesktop?await desktopRequest('pickFolder',{initial:''}):await api('/api/folder',{initial:''});
+  if(!result.path)return;
+  await api('/api/components/import',{folder:result.path});
+  pollComponents.lastRunning=false;setComponentsView(true);toast('开始从本机导入组件');
+ }catch(error){$('componentsError').textContent=error.message;}};
 document.addEventListener('keydown',event=>{
  if(/INPUT|SELECT|TEXTAREA/.test(event.target.tagName)||event.target.isContentEditable||!editable())return;
  const key=event.key.toLowerCase();

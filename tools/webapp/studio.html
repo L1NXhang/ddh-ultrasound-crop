@@ -152,6 +152,7 @@
     <label class="mode-option"><input type="radio" name="componentVariant" value="cpu"><span><b>CPU 组件 <small id="cpuSize" class="muted"></small></b><small>没有 NVIDIA 显卡时选择。推理速度取决于 CPU。</small></span></label>
     <label class="mode-option"><input type="radio" name="componentVariant" value="cuda"><span><b>CUDA 组件 <small id="cudaSize" class="muted"></small></b><small>有 NVIDIA 显卡时选择，推理与训练都用 GPU。</small></span></label>
    </fieldset>
+   <button id="componentsImport" class="quiet full" type="button">本机已有组件文件？从文件夹导入（无需下载）</button>
    <p id="componentsError" class="error" role="alert"></p>
   </div>
   <div id="componentsRunning" class="hidden">

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080A0F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>答辩计时器 · 5 分钟</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#080A0F}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;
+  color:#E9EEF5;user-select:none;overscroll-behavior:none;
+  background:
+    radial-gradient(120% 70% at 50% -12%, rgba(56,189,248,.16), transparent 62%),
+    radial-gradient(90% 55% at 110% 108%, rgba(45,212,191,.10), transparent 62%),
+    #080A0F;
+}
+.app{
+  position:relative;height:100vh;height:100dvh;max-width:560px;margin:0 auto;
+  display:flex;flex-direction:column;
+  padding:calc(12px + env(safe-area-inset-top)) 18px calc(14px + env(safe-area-inset-bottom));
+}
+/* 总进度 */
+.bar{display:flex;gap:3px;height:5px;width:94.3%;margin-bottom:14px}
+.seg{position:relative;flex:1 1 0;height:100%;border-radius:3px;background:rgba(255,255,255,.09);overflow:hidden}
+.seg i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:3px;
+  background:linear-gradient(90deg,#38BDF8,#2DD4BF);transition:width .12s linear}
+.seg.done i{width:100%;background:rgba(56,189,248,.45)}
+.seg.now{background:rgba(56,189,248,.22)}
+.seg.over i{background:linear-gradient(90deg,#FB7185,#F43F5E)}
+.seg.buf{background:rgba(255,255,255,.045)}
+.seg.buf i{background:linear-gradient(90deg,#FB7185,#F43F5E)}
+/* 顶部信息 */
+.headline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pos{display:flex;align-items:baseline;gap:5px;min-width:0}
+.pos b{font-size:19px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:#38BDF8}
+.pos span{font-size:12px;color:#7C8798;font-variant-numeric:tabular-nums}
+.pos em{font-size:11px;font-style:normal;color:#9AA7BA;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.07);padding:3px 8px;border-radius:20px;margin-left:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.right-tools{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.rembox{display:flex;align-items:baseline;gap:5px}
+.rembox i{font-style:normal;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:#DCE6F2}
+.rembox i.neg{color:#FB7185}
+.rembox span{font-size:10px;color:#6F7B8C}
+.icobtn{width:30px;height:30px;border-radius:9px;border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.045);color:#A9B6C8;display:flex;align-items:center;justify-content:center}
+/* 标题 */
+.title{font-size:clamp(19px,5.4vw,25px);font-weight:700;line-height:1.32;letter-spacing:.005em;
+  padding:14px 0 12px;color:#F2F6FB}
+.title span{color:#7DD3FC}
+/* 当前页计时 */
+.clockrow{display:flex;align-items:center;gap:14px;padding-bottom:14px}
+.clock{font-size:clamp(42px,13.5vw,60px);font-weight:800;line-height:.92;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;color:#EAF2FA;flex:0 0 auto;transition:color .2s}
+.clock.warn{color:#FBBF24}
+.clock.over{color:#FB7185;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.side{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:9px}
+.tgt{font-size:11.5px;color:#8B97AA;font-variant-numeric:tabular-nums}
+.tgt b{color:#C7D3E2;font-weight:600}
+.sbar{height:6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.sbar i{display:block;height:100%;width:0;border-radius:4px;
+  background:linear-gradient(90deg,#38BDF8,#2DD4BF);transition:width .12s linear}
+.sbar i.warn{background:linear-gradient(90deg,#FBBF24,#F59E0B)}
+.sbar i.over{background:linear-gradient(90deg,#FB7185,#F43F5E)}
+/* 提示卡 */
+.cues{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  display:flex;flex-direction:column;gap:8px;padding-bottom:4px}
+.cues::-webkit-scrollbar{display:none}
+.cue{position:relative;flex:0 0 auto;padding:11px 13px 11px 15px;border-radius:12px;
+  background:rgba(255,255,255,.038);border:1px solid rgba(255,255,255,.055);
+  font-size:clamp(14px,3.95vw,16.5px);line-height:1.5;color:#D5DEEB;letter-spacing:.005em}
+.cue::before{content:"";position:absolute;left:5px;top:12px;bottom:12px;width:2.5px;border-radius:2px;
+  background:rgba(56,189,248,.55)}
+.cue b{color:#8FE3FA;font-weight:600}
+.cues.dense{gap:6px}
+.cues.dense .cue{padding:9px 11px 9px 13px;font-size:clamp(13px,3.5vw,15px);line-height:1.45}
+.cues.dense .cue::before{top:10px;bottom:10px}
+/* 下一张 */
+.hint{font-size:11px;color:#67727F;padding:10px 2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 控制区 */
+.controls{display:flex;gap:8px;align-items:stretch;padding-top:10px}
+.btn{height:56px;border-radius:15px;border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.055);color:#DCE5F1;font-size:15px;font-weight:600;
+  font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;
+  touch-action:manipulation;transition:transform .1s,opacity .2s}
+.btn:active{transform:scale(.96)}
+.btn.icon{width:54px;flex:0 0 auto}
+.btn.primary{flex:1 1 auto;border:none;background:linear-gradient(180deg,#38BDF8,#0EA5E9);color:#04121E;
+  box-shadow:0 10px 26px rgba(56,189,248,.22);font-weight:700}
+.btn.ghost{flex:1 1 auto}
+/* 遮罩通用 */
+.overlay{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;
+  padding:24px;background:rgba(5,7,11,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.overlay.on{display:flex}
+.startcard{width:100%;max-width:400px;text-align:center}
+.startcard .kicker{font-size:11px;letter-spacing:.22em;color:#38BDF8;font-weight:700}
+.startcard h1{font-size:26px;font-weight:800;margin:12px 0 6px;letter-spacing:.01em}
+.startcard p{font-size:13px;line-height:1.7;color:#94A1B3}
+.startcard .stats{display:flex;justify-content:center;gap:18px;margin:22px 0 26px}
+.startcard .stats div{text-align:center}
+.startcard .stats b{display:block;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;color:#E9F2FA}
+.startcard .stats span{font-size:10.5px;color:#6F7B8C}
+.startbtn{width:100%;height:56px;border-radius:16px;border:none;font-family:inherit;font-size:16px;font-weight:700;
+  background:linear-gradient(180deg,#38BDF8,#0EA5E9);color:#04121E;box-shadow:0 12px 30px rgba(56,189,248,.26)}
+.startbtn:active{transform:scale(.98)}
+.startcard .tip{font-size:11px;color:#5F6B7A;margin-top:14px;line-height:1.6}
+/* 列表抽屉 */
+.sheet{position:fixed;inset:0;z-index:60;display:none}
+.sheet.on{display:block}
+.sheet .bd{position:absolute;inset:0;background:rgba(4,6,10,.66);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.panel{position:absolute;left:0;right:0;bottom:0;max-height:86vh;display:flex;flex-direction:column;
+  background:#10141C;border-radius:20px 20px 0 0;border-top:1px solid rgba(255,255,255,.08);
+  padding:10px 16px calc(16px + env(safe-area-inset-bottom));animation:up .26s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.grab{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.16);margin:0 auto 12px}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;
+  border-bottom:1px solid rgba(255,255,255,.055)}
+.setrow .lab{font-size:14px;color:#D7E0EC}
+.setrow .lab span{display:block;font-size:11px;color:#6F7B8C;margin-top:3px}
+.sw{width:46px;height:27px;border-radius:14px;background:rgba(255,255,255,.14);position:relative;
+  flex:0 0 auto;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;
+  background:#fff;transition:left .2s}
+.sw.on{background:#0EA5E9}
+.sw.on::after{left:22px}
+.slist{flex:1 1 auto;min-height:0;overflow-y:auto;margin:0 -6px;padding:0 6px;scrollbar-width:none}
+.slist::-webkit-scrollbar{display:none}
+.listtitle{font-size:12px;font-weight:600;color:#7C8798;letter-spacing:.06em;margin:14px 0 2px}
+.srow{display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:10px}
+.srow:active{background:rgba(255,255,255,.06)}
+.srow .n{width:20px;font-size:11px;color:#5F6B7A;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.srow .tt{flex:1 1 auto;min-width:0;font-size:13px;color:#C3CEDC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srow .ts{font-size:11px;color:#6F7B8C;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.srow.cur .tt{color:#7DD3FC;font-weight:600}
+.srow.cur .ts{color:#38BDF8}
+.srow.past .n,.srow.past .tt{color:#5A6675}
+.reset{width:100%;height:46px;margin-top:10px;border-radius:12px;border:1px solid rgba(251,113,133,.25);
+  background:rgba(251,113,133,.08);color:#FB7185;font-family:inherit;font-size:13px}
+/* 结束页 */
+.endcard{width:100%;max-width:400px;text-align:center}
+.endcard .lbl{font-size:11px;letter-spacing:.22em;color:#7C8798}
+.endcard .big{font-size:60px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.03em;margin:6px 0}
+.endcard .sub{font-size:13px;color:#94A1B3}
+.endlist{max-height:38vh;overflow-y:auto;margin:18px 0 18px;text-align:left;scrollbar-width:none}
+.endlist::-webkit-scrollbar{display:none}
+.endrow{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;color:#93A0B2;
+  border-bottom:1px solid rgba(255,255,255,.04)}
+.endrow b{font-variant-numeric:tabular-nums;color:#CBD6E4;font-weight:600}
+.endrow b.late{color:#FB7185}
+@media (max-width:359px){
+  .app{padding-left:14px;padding-right:14px}
+  .btn.icon{width:48px}
+  .icobtn{width:27px;height:27px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="bar" id="bar"></div>
+  <div class="headline">
+    <div class="pos">
+      <b id="posnum">01</b><span id="posall">/ 18</span>
+      <em id="sec">开场</em>
+    </div>
+    <div class="right-tools">
+      <div class="rembox"><i id="rem">05:00</i><span>总剩余</span></div>
+      <button class="icobtn" id="btnList" aria-label="页列表">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <button class="icobtn" id="btnFull" aria-label="全屏">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="title" id="title"></div>
+
+  <div class="clockrow">
+    <div class="clock" id="clock">00:12</div>
+    <div class="side">
+      <div class="tgt" id="tgt">目标 <b>12 s</b></div>
+      <div class="sbar"><i id="sbarfill"></i></div>
+    </div>
+  </div>
+
+  <div class="cues" id="cues"></div>
+  <div class="hint" id="hint"></div>
+
+  <div class="controls">
+    <button class="btn icon" id="btnPause" aria-label="暂停">
+      <svg id="icoPause" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6.6" y="4.6" width="4" height="14.8" rx="1.3"/><rect x="13.4" y="4.6" width="4" height="14.8" rx="1.3"/></svg>
+    </button>
+    <button class="btn ghost" id="btnPrev">上一页</button>
+    <button class="btn primary" id="btnNext">下一张
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- 开始 -->
+<div class="overlay on" id="start">
+  <div class="startcard">
+    <div class="kicker">智能医学创新应用赛</div>
+    <h1>答辩计时器</h1>
+    <p>DDH 超声图像智能裁剪与协作审核系统<br>18 页 · 5 分钟</p>
+    <div class="stats">
+      <div><b>283</b><span>页面预算 s</span></div>
+      <div><b>17</b><span>缓冲 s</span></div>
+      <div><b>300</b><span>总控 s</span></div>
+    </div>
+    <button class="startbtn" id="btnStart">开始答辩</button>
+    <div class="tip">到点自动翻页（右上角列表里可关）<br>开始后屏幕常亮（设备支持时）</div>
+  </div>
+</div>
+
+<!-- 结束 -->
+<div class="overlay" id="end">
+  <div class="endcard">
+    <div class="lbl">总用时</div>
+    <div class="big" id="endTime">05:00</div>
+    <div class="sub" id="endDelta"></div>
+    <div class="endlist" id="endList"></div>
+    <button class="startbtn" id="btnAgain">再来一遍</button>
+  </div>
+</div>
+
+<!-- 列表抽屉 -->
+<div class="sheet" id="sheet">
+  <div class="bd" id="sheetBd"></div>
+  <div class="panel">
+    <div class="grab"></div>
+    <div class="setrow">
+      <div class="lab">自动切换<span>到点后自动进入下一页</span></div>
+      <div class="sw on" id="swAuto"></div>
+    </div>
+    <div class="setrow">
+      <div class="lab">声音提示<span>剩 10 秒与到点时轻响</span></div>
+      <div class="sw on" id="swSound"></div>
+    </div>
+    <div class="setrow">
+      <div class="lab">震动反馈<span>到点时手机轻震</span></div>
+      <div class="sw on" id="swVib"></div>
+    </div>
+    <h2 class="listtitle">全部页</h2>
+    <div class="slist" id="slist"></div>
+    <button class="reset" id="btnReset">重置全部进度</button>
+  </div>
+</div>
+
+<script>
+const SLIDES = [
+ {sec:'开场', t:12, title:'封面｜一句话说清作品', cues:[
+   '开场两句：各位老师好，我们是<b>西华师范大学计算机学院</b>队，作品是 DDH 超声图像智能裁剪与协作审核系统。',
+   '一句话架构：<b>规则几何找窗口，CropNet 定边界</b>。',
+   '队员名单不念，直接翻页。'
+ ]},
+ {sec:'01 · 问题', t:20, title:'一张截图里，真正有用的只有中间那块', cues:[
+   '婴儿髋关节超声截图里，真正有用的只有中间的成像区。',
+   '四类干扰：设备参数栏、右侧深度标尺、左下肢位图、四周黑边。',
+   '<b>真正的痛点不是耗时，是口径漂移</b>——同一张图，不同人裁能差数十像素。'
+ ]},
+ {sec:'01 · 问题', t:22, title:'任务定义：两步，各解决一类问题', cues:[
+   'Graf 法要量 α、β 角，前提是先拿到干净的成像区。',
+   '输入<b>整屏截图</b>，输出<b>两条水平裁剪线</b>。',
+   '拆两步：找窗口是<b>几何问题</b>（规则算法，不用训练）；定边界是<b>语义问题</b>（CropNet）。',
+   '为什么拆：两类问题性质不同，混在一个网络里会互相干扰，出错也定位不了是谁的锅。'
+ ]},
+ {sec:'02 · 方案', t:18, title:'总体方案：规则 + 网络，各司其职', cues:[
+   '顺着图走一遍：截图 → 窗口定位 → 网络定边界 → 两条线 → 客户端与协作审核。',
+   '强调一句：<b>窗口错、边界错是两种完全不同的失败</b>；分开之后既可解释，也好定位。'
+ ]},
+ {sec:'03 · 成像窗口', t:20, title:'阶段一：判断「哪儿是纯黑」，而不是「哪儿更亮」', cues:[
+   '判据不是"哪儿更亮"，是<b>"哪儿不是纯黑"</b>：像素 &gt; 2/255 记非纯黑，4×4 块内占比 &gt; 5%。',
+   '顺序不能反：先像素级判定、再聚合成块——先缩放会把暗区斑点平均掉。',
+   '形态学顺序：<b>水平开运算在前、闭运算在后</b>；反了，标尺点会被先膨胀成桥。'
+ ]},
+ {sec:'03 · 成像窗口', t:12, title:'为什么不能用静态阈值：两个区间完全重叠', cues:[
+   '老设备窗口右缘渐隐带 <b>0.36–0.57</b>，TGC 条 <b>0.37–0.41</b>——区间完全重叠。',
+   '任何静态阈值都会切掉其中一个，所以改用<b>黑走廊</b>把内容和界面隔开。'
+ ]},
+ {sec:'04 · CropNet', t:16, title:'阶段二：只取 ResNet-18 的 layer3', cues:[
+   '任务本质是定位<b>"第几行"</b>。layer4 纵向只有 12 格，一格 32 px，边界会跳。',
+   'layer3 是 <b>24 格、一格 16 px</b>，语义也够——24×24 是折中点。'
+ ]},
+ {sec:'04 · CropNet', t:20, title:'创新 1：把宽度压掉，沿高度做一维卷积', cues:[
+   '判断第 j 行是不是边界，要看第 j−1 到 j+1 行；二维卷积会把宽度方向也混进来。',
+   '做法：宽度先压成<b>行向量</b>（mean + max），再沿高度做 <b>1D 卷积</b>。',
+   '两层后感受野 5 行，输出仍是 24 行，纵向分辨率一点没丢。'
+ ]},
+ {sec:'04 · CropNet', t:20, title:'创新 2：上下有序是数学性质，不是损失惩罚', cues:[
+   '直接回归两个数，训练早期很容易给出<b>上下颠倒</b>的非法框。',
+   '改成输出三段概率、softmax 后累加：<b>r_bot − r_top = p1 ≥ 0</b>。',
+   '一句话：顺序是<b>数学性质</b>保证的，不是靠损失函数惩罚出来的。'
+ ]},
+ {sec:'04 · CropNet', t:15, title:'创新 3：损失函数「偏心」，反映临床优先级', cues:[
+   '往里切会丢该保留的解剖结构、影响测角 → <b>重罚 2.0</b>。',
+   '往外放只是多留一圈组织、顶多不经济 → <b>轻罚 0.25</b>。',
+   'δ = 0.04 的容差必须大于人工标注分歧，否则是在学人类的随机性。'
+ ]},
+ {sec:'05 · 结果', t:22, title:'结果：17.5 px 上边界误差，IoU 0.908', cues:[
+   '88 张留出测试集、<b>零人工修正</b>：上边界平均误差 17.5 px，纵向 IoU 0.908。',
+   '窗口四边同时达标 94%（老设备 862 张）；CPU 单张全流程 267 ms。',
+   '三条要吸收：<b>修数据 &gt; 换模型</b>（89 → 17.5 px，结构没变）；layer3 优于 layer4（24.1 → 17.5）；非对称损失让"往里切"显著下降。'
+ ]},
+ {sec:'06 · 系统实现', t:12, title:'软件架构：四层分工', cues:[
+   '四层：算法层 / 服务层 / 界面层 / 协作层。',
+   '一句话：<b>算法不依赖界面，界面不碰模型细节</b>，才能分别测试、分别替换。'
+ ]},
+ {sec:'06 · 系统实现', t:13, title:'技术栈：每一项都有明确的取舍理由', cues:[
+   '不念清单，只讲取舍：NumPy + Pillow 让<b>任何机器都能复现</b>；离线 Windows 客户端让<b>图像不出本机</b>。'
+ ]},
+ {sec:'06 · 系统实现', t:13, title:'工程落地：离线客户端 + 数据闭环', cues:[
+   '两种模式：逐张确认 / 批量直出，按批次质量切换。',
+   '每条结果留痕：<b>SHA-256 + 裁剪坐标 + 模型版本</b>，可回溯。',
+   '三人交叉复核，争议样本回流训练候选；134 项测试全绿、62 MB 离线安装。'
+ ]},
+ {sec:'07 · 讨论', t:18, title:'临床反馈：一个真实的标准迭代', cues:[
+   '请教华西医院超声科严华林老师，得到一条标准修正：<b>上边界要保留大转子，不该收紧</b>。',
+   '老师还指出：真正关键是<b>下边界不能裁太高</b>，不能切过股骨头圆形区。',
+   '核查：模型与人工差别多在 ±20 px，偏紧的是标注本身。',
+   '下一步：重定下边界规则、加安全检查、补偏紧样本——<b>不改网络结构</b>。'
+ ]},
+ {sec:'05 · 结果', t:10, title:'真实数据上的裁剪成品', cues:[
+   '四例同批直接输出、未做人工修正。',
+   '尺寸 897×472 到 668×428 各不相同——说明输出的是<b>比例</b>，不是固定像素。'
+ ]},
+ {sec:'06 · 系统实现', t:8, title:'从数据到交付：十个环节的完整链路', cues:[
+   '研发五环节 + 交付五环节；虚线是人工修正回流，<b>只改数据和损失权重，不改结构</b>。'
+ ]},
+ {sec:'06 · 系统实现', t:12, title:'推理链路与「不可信」的处理', cues:[
+   '四步推理：窗口 78 ms → letterbox → MC Dropout ×4 → 向外取整。',
+   'MC Dropout 顺带给出<b>不确定度</b>；floor / ceil 是"宁可多留一像素也不丢"。',
+   '拒绝回答比答错好：面积异常、多窗口、贴边，一律<b>转人工</b>。'
+ ]}
+];
+
+const LIMIT = 300000; // 5:00 总控
+const SUM = SLIDES.reduce((a,s)=>a+s.t,0); // 283 s
+
+/* ---------- 状态 ---------- */
+let idx = 0;
+let started = false, paused = true, ended = false;
+let curBase = 0, t0 = 0;
+let over = false, warned = false;
+let done = SLIDES.map(()=>0);
+let autoOn = true, soundOn = true, vibOn = true;
+let ac = null, wl = null;
+
+/* ---------- DOM ---------- */
+const $ = id => document.getElementById(id);
+const bar=$('bar'), cues=$('cues'), clock=$('clock'), sbarfill=$('sbarfill');
+const remEl=$('rem'), posnum=$('posnum'), posall=$('posall'), secEl=$('sec');
+const titleEl=$('title'), tgtEl=$('tgt'), hintEl=$('hint');
+
+/* ---------- 工具 ---------- */
+function mmss(sec){
+  sec = Math.max(0, Math.floor(sec));
+  const m = Math.floor(sec/60), s = sec%60;
+  return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+}
+function fmtRemain(ms){ // 剩余，向上取整
+  if(ms >= 0){ return mmss(Math.ceil(ms/1000)); }
+  return '+' + mmss(-ms/1000);
+}
+function elapsedSlide(){
+  return curBase + (started && !paused ? performance.now()-t0 : 0);
+}
+function totalElapsed(){
+  return done.reduce((a,b)=>a+b,0) + elapsedSlide();
+}
+
+/* ---------- 声音 / 震动 ---------- */
+function initAudio(){
+  try{
+    if(!ac){ ac = new (window.AudioContext||window.webkitAudioContext)(); }
+    if(ac.state === 'suspended'){ ac.resume(); }
+  }catch(e){}
+}
+function beep(freq, dur, vol){
+  if(!soundOn || !ac) return;
+  try{
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    o.connect(g); g.connect(ac.destination);
+    const t = ac.currentTime;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t+0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    o.start(t); o.stop(t+dur+0.03);
+  }catch(e){}
+}
+function buzz(p){ if(vibOn && navigator.vibrate){ try{ navigator.vibrate(p); }catch(e){} } }
+
+/* ---------- 渲染 ---------- */
+function buildBar(){
+  bar.innerHTML = '';
+  SLIDES.forEach(s=>{
+    const seg = document.createElement('div');
+    seg.className = 'seg';
+    seg.style.flex = s.t + ' 1 0';
+    seg.innerHTML = '<i></i>';
+    bar.appendChild(seg);
+  });
+  const buf = document.createElement('div');
+  buf.className = 'seg buf';
+  buf.style.flex = (300 - SUM) + ' 1 0';
+  buf.innerHTML = '<i></i>';
+  bar.appendChild(buf);
+  bar.style.width = '100%';
+}
+
+function render(){
+  const s = SLIDES[idx];
+  posnum.textContent = String(idx+1).padStart(2,'0');
+  posall.textContent = '/ ' + SLIDES.length;
+  secEl.textContent = s.sec;
+  titleEl.textContent = s.title;
+  tgtEl.innerHTML = '目标 <b>'+s.t+' s</b>';
+  cues.innerHTML = s.cues.map(c=>'<div class="cue">'+c+'</div>').join('');
+  cues.classList.toggle('dense', s.cues.length >= 4);
+  cues.scrollTop = 0;
+  const nx = SLIDES[idx+1];
+  hintEl.textContent = nx ? ('下一张 '+nx.t+'s · '+nx.title) : '最后一张 · 讲完即结束';
+  paint();
+}
+
+function paint(){
+  const s = SLIDES[idx];
+  const target = s.t*1000;
+  const el = ended ? done[idx] : elapsedSlide();
+  const remain = target - el;
+
+  clock.textContent = fmtRemain(remain);
+  clock.className = 'clock' + (el>=target ? ' over' : (remain<=15000 ? ' warn' : ''));
+
+  const pct = Math.min(100, Math.max(0, el/target*100));
+  sbarfill.style.width = pct + '%';
+  sbarfill.className = (el>=target ? 'over' : (remain<=15000 ? 'warn' : ''));
+
+  // 总剩余
+  const te = ended ? done.reduce((a,b)=>a+b,0) : totalElapsed();
+  const tr = LIMIT - te;
+  remEl.textContent = fmtRemain(tr);
+  remEl.className = tr < 0 ? 'neg' : '';
+
+  // 总进度分段
+  const segs = bar.children;
+  for(let i=0;i<segs.length;i++){
+    const seg = segs[i];
+    const fill = seg.firstElementChild;
+    if(i === SLIDES.length){
+      // 末尾缓冲区：消耗完页面预算后才开始填
+      const o = Math.max(0, te - SUM*1000);
+      fill.style.width = Math.min(100, o/((300-SUM)*1000)*100) + '%';
+      continue;
+    }
+    seg.classList.toggle('done', i < idx || (ended && i <= idx));
+    seg.classList.toggle('now', i === idx && !ended);
+    seg.classList.toggle('over', i === idx && el >= target);
+    if(i < idx) fill.style.width = '100%';
+    else if(i > idx) fill.style.width = '0%';
+    else fill.style.width = pct + '%';
+  }
+}
+
+/* ---------- 主循环 ---------- */
+let lastPaint = 0;
+function loop(ts){
+  requestAnimationFrame(loop);
+  if(!started || ended) return;
+  if(paused){ return; }
+  const s = SLIDES[idx], target = s.t*1000;
+  const el = elapsedSlide();
+
+  if(!warned && el >= target - 10000 && el < target){
+    warned = true;
+    beep(1000, 0.07, 0.22);
+    buzz(18);
+  }
+  if(!over && el >= target){
+    over = true;
+    beep(700, 0.13, 0.42);
+    setTimeout(()=>beep(520, 0.18, 0.42), 140);
+    buzz([70, 50, 70]);
+  }
+  if(ts - lastPaint > 80){ lastPaint = ts; paint(); }
+  if(over && autoOn){ goNext(true); }
+}
+
+/* ---------- 翻页 ---------- */
+function goNext(fromAuto){
+  if(ended) return;
+  const s = SLIDES[idx];
+  const el = Math.min(elapsedSlide(), s.t*1000 + (fromAuto ? 30 : 0));
+  done[idx] = el;
+  if(idx >= SLIDES.length-1){ finish(); return; }
+  idx++; curBase = 0; t0 = performance.now();
+  over = false; warned = false;
+  render();
+}
+function goPrev(){
+  if(idx === 0 || ended) return;
+  idx--; done[idx] = 0; curBase = 0; t0 = performance.now();
+  over = false; warned = false;
+  render();
+}
+function jumpTo(j){
+  if(ended) return;
+  for(let i=0;i<SLIDES.length;i++){
+    if(i < j) done[i] = done[i] || SLIDES[i].t*1000;
+    else done[i] = 0;
+  }
+  idx = j; curBase = 0; t0 = performance.now();
+  over = false; warned = false;
+  render();
+  closeSheet();
+}
+
+function finish(){
+  done[idx] = elapsedSlide();
+  ended = true; started = false;
+  const total = done.reduce((a,b)=>a+b,0);
+  $('endTime').textContent = mmss(total/1000);
+  const diff = LIMIT - total;
+  const sub = $('endDelta');
+  if(diff >= 0){ sub.innerHTML = '在 5:00 之内，余 <b style="color:#4ADE80">'+Math.round(diff/1000)+'</b> 秒'; }
+  else { sub.innerHTML = '超时 <b style="color:#FB7185">'+Math.round(-diff/1000)+'</b> 秒'; }
+  let html = '';
+  SLIDES.forEach((s,i)=>{
+    const used = done[i];
+    const late = used > s.t*1000 + 500;
+    html += '<div class="endrow"><span>'+String(i+1).padStart(2,'0')+' · '+s.title.slice(0,16)+
+            '</span><b class="'+(late?'late':'')+'">'+Math.round(used/1000)+'s / '+s.t+'s</b></div>';
+  });
+  $('endList').innerHTML = html;
+  $('end').classList.add('on');
+  buzz([90,60,90,60,160]);
+  beep(620, 0.25, 0.35); setTimeout(()=>beep(880, 0.3, 0.35), 260);
+}
+
+/* ---------- 开始 / 重置 ---------- */
+async function startRun(){
+  started = true; ended = false; paused = false; curBase = 0; t0 = performance.now();
+  over = false; warned = false;
+  $('start').classList.remove('on');
+  $('end').classList.remove('on');
+  initAudio();
+  beep(880, 0.06, 0.2);
+  keepAwake();
+  render();
+}
+function resetAll(){
+  idx = 0; done = SLIDES.map(()=>0); ended = false; over = false; warned = false;
+  $('end').classList.remove('on');
+  closeSheet();
+  startRun();
+}
+async function keepAwake(){
+  try{ if('wakeLock' in navigator){ wl = await navigator.wakeLock.request('screen'); } }catch(e){}
+}
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible' && started && !ended) keepAwake();
+});
+
+/* ---------- 抽屉 ---------- */
+function buildList(){
+  const wrap = $('slist');
+  wrap.innerHTML = '';
+  SLIDES.forEach((s,i)=>{
+    const row = document.createElement('div');
+    row.className = 'srow';
+    row.dataset.i = i;
+    row.innerHTML = '<span class="n">'+String(i+1).padStart(2,'0')+'</span>'+
+                    '<span class="tt">'+s.sec+' · '+s.title+'</span>'+
+                    '<span class="ts">'+s.t+'s</span>';
+    row.addEventListener('click', ()=>jumpTo(i));
+    wrap.appendChild(row);
+  });
+}
+function openSheet(){
+  const wrap = $('slist');
+  [...wrap.children].forEach((r,i)=>{
+    r.classList.toggle('cur', i === idx);
+    r.classList.toggle('past', i < idx);
+  });
+  $('sheet').classList.add('on');
+}
+function closeSheet(){ $('sheet').classList.remove('on'); }
+
+/* ---------- 事件 ---------- */
+$('btnStart').addEventListener('click', startRun);
+$('btnAgain').addEventListener('click', resetAll);
+$('btnNext').addEventListener('click', ()=>{ if(started){ over=false; goNext(false);} });
+$('btnPrev').addEventListener('click', goPrev);
+$('btnPause').addEventListener('click', ()=>{
+  if(!started) return;
+  if(paused){ t0 = performance.now(); paused = false; }
+  else { curBase = elapsedSlide(); paused = true; }
+  render(); updatePauseIcon();
+});
+function updatePauseIcon(){
+  $('icoPause').innerHTML = paused
+    ? '<path d="M7.6 4.8 18.6 12 7.6 19.2z"/>'
+    : '<rect x="6.6" y="4.6" width="4" height="14.8" rx="1.3"/><rect x="13.4" y="4.6" width="4" height="14.8" rx="1.3"/>';
+}
+$('btnList').addEventListener('click', openSheet);
+$('sheetBd').addEventListener('click', closeSheet);
+$('btnReset').addEventListener('click', resetAll);
+
+function bindSw(id, get, set){
+  const el = $(id);
+  el.addEventListener('click', ()=>{
+    const v = !get();
+    set(v);
+    el.classList.toggle('on', v);
+    if(id === 'swSound' && v){ initAudio(); beep(900, .07, .2); }
+  });
+}
+bindSw('swAuto', ()=>autoOn, v=>autoOn=v);
+bindSw('swSound', ()=>soundOn, v=>soundOn=v);
+bindSw('swVib', ()=>vibOn, v=>vibOn=v);
+
+$('btnFull').addEventListener('click', async ()=>{
+  try{
+    if(!document.fullscreenElement && document.documentElement.requestFullscreen){
+      await document.documentElement.requestFullscreen();
+    } else if(document.exitFullscreen){ await document.exitFullscreen(); }
+  }catch(e){}
+});
+
+document.addEventListener('keydown', e=>{
+  if(e.key === ' '){ e.preventDefault(); $('btnPause').click(); }
+  if(e.key === 'ArrowRight'){ if(started){ over=false; goNext(false); } }
+  if(e.key === 'ArrowLeft'){ goPrev(); }
+});
+
+/* ---------- 初始化 ---------- */
+buildBar();
+buildList();
+render();
+if(!document.documentElement.requestFullscreen) $('btnFull').style.display = 'none';
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

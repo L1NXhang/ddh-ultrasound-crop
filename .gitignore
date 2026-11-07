@@ -44,3 +44,18 @@ desktop.ini
 # output/ 整目录为本地验收截图与自动化日志（含医学图像），不入仓库
 output/
 desktop/runtime/
+
+# LaTeX 编译中间产物（保留 .tex/.bib/.pdf 源与成品）
+*.aux
+*.blg
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+main.bbl
+main.bbl.bak
+
+# 本地备份文件（不入库）
+*.bak
+*.backup

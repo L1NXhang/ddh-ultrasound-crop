@@ -1,0 +1,76 @@
+% ============================================================
+%  figstyle.tex —— 所有图共用样式（论文级：细线、低饱和、统一字号）
+%  用法：\documentclass[border=3pt]{standalone}
+%        \input{../figstyle}
+% ============================================================
+\usepackage[UTF8,fontset=windows]{ctex}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,shapes.misc,fit,backgrounds,calc,patterns,decorations.pathreplacing,decorations.markings,matrix}
+
+% ---------- 配色（印刷友好：白底、深色线、浅色填充） ----------
+\definecolor{ink}{HTML}{1A1A1A}        % 主文字
+\definecolor{ink2}{HTML}{4D4D4D}       % 次文字
+\definecolor{navy}{HTML}{1F3864}       % 主线：规则/结构
+\definecolor{navyf}{HTML}{DEEAF6}      % 浅蓝填充
+\definecolor{teal}{HTML}{1F5C4D}       % 学习/网络
+\definecolor{tealf}{HTML}{DDEDE7}      % 浅绿填充
+\definecolor{rust}{HTML}{A33A14}       % 强调（重罚/风险）
+\definecolor{rustf}{HTML}{F7E1D8}      % 浅橙填充
+\definecolor{gold}{HTML}{8A6A12}       % 次强调
+\definecolor{lightf}{HTML}{F5F6F8}     % 极浅灰底
+\definecolor{midgray}{HTML}{9AA0A6}
+
+% ---------- 带圈数字 ① ② … 归入 CJK 字体（否则西文字体缺字形） ----------
+\xeCJKDeclareCharClass{CJK}{"2460 -> "2473}
+
+% ---------- 全局字号 ----------
+\newcommand{\figfont}{\fontsize{7.6pt}{9.6pt}\selectfont}
+\newcommand{\figfontS}{\fontsize{7pt}{8.6pt}\selectfont}
+\newcommand{\figfontXS}{\fontsize{6.4pt}{7.6pt}\selectfont}
+
+% ---------- 基本样式 ----------
+\tikzset{
+  base/.style={font=\figfont, text=ink, align=center},
+  % 流程节点
+  proc/.style={base, rectangle, rounded corners=1.6pt, draw=navy, line width=0.55pt,
+               fill=white, inner xsep=2.2mm, inner ysep=1.4mm, minimum height=7mm},
+  % 数据节点（平行四边形）—— 输入/输出
+  data/.style={base, trapezium, trapezium left angle=74, trapezium right angle=106,
+               draw=navy, line width=0.55pt, fill=navyf, inner xsep=2.2mm,
+               inner ysep=1.2mm, minimum height=7mm, trapezium stretches=true},
+  % 判定节点
+  dec/.style={base, diamond, aspect=1.7, draw=rust, line width=0.55pt, fill=rustf,
+              inner xsep=0.6mm, inner ysep=0.4mm, minimum height=8mm},
+  % 强调节点
+  hot/.style={base, rectangle, rounded corners=1.6pt, draw=rust, line width=0.7pt,
+              fill=rustf, inner xsep=2.2mm, inner ysep=1.4mm, minimum height=7mm},
+  % 阶段容器
+  stage/.style={base, rectangle, rounded corners=3pt, draw=navy, line width=0.7pt,
+                fill=navyf!55, inner sep=2.6mm, align=left},
+  stageT/.style={stage, draw=teal, fill=tealf!55},
+  % 张量块
+  tensor/.style={base, rectangle, draw=ink2, line width=0.4pt, fill=white,
+                 inner sep=1.2mm, minimum height=5.5mm},
+  % 连线
+  arr/.style={-{Stealth[length=1.9mm,width=1.3mm]}, line width=0.6pt, draw=ink2,
+              shorten >=0.6pt, shorten <=0.6pt},
+  arrN/.style={-{Stealth[length=1.9mm,width=1.3mm]}, line width=0.65pt, draw=navy},
+  arrR/.style={-{Stealth[length=1.9mm,width=1.3mm]}, line width=0.7pt, draw=rust},
+  dasharr/.style={-{Stealth[length=1.9mm,width=1.3mm]}, line width=0.55pt,
+                  draw=midgray, dashed},
+  % 标签（边上文字）
+  lbl/.style={base, font=\figfontS, text=ink2, inner sep=1.1pt,
+              fill=white, fill opacity=0.92, text opacity=1},
+  lblN/.style={lbl, text=navy},
+  lblR/.style={lbl, text=rust},
+  % 注释/说明
+  note/.style={base, font=\figfontS, text=ink2, align=left, inner sep=0pt},
+  % 徽标（“无需训练”之类）
+  badge/.style={base, font=\figfontXS, rectangle, rounded corners=4pt,
+                draw=midgray, line width=0.35pt, fill=white, inner xsep=1.4mm,
+                inner ysep=0.35mm, text=ink2},
+  badgeN/.style={badge, draw=navy, text=navy},
+  badgeR/.style={badge, draw=rust, text=rust},
+}
